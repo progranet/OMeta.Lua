@@ -99,8 +99,9 @@ Since this Grammar doesn't have any [semantic action](#semantic-actions), it doe
 
 ### Rule features 
 Below, there is an overview of the basic means used to build a Rule.
+
 |Construct|Syntax|Notes|
-|:---:|---:|---|
+|:-------:|-----:|-----|
 |Rule structure|`a | b | c`<br>`a b c`<br>`a ( b | d ) c`|an ordered Choice - a sequence of alternatives<br>a Sequence of Nodes<br>a Node can be an ordered Choice again|
 |Lookahead|<br>`&a`<br>`~a`|to parse without consuming input:<br>- And Predicate<br>- Not Predicate|
 |Modifiers|`a?`<br>`a*`<br>`a+`<br>`a**min`, `a**min..max`<br>`a/num`|optional<br>zero to many<br>one to many<br>*min* to *max* (or many)<br>repeat *num* times|
