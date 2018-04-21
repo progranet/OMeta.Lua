@@ -1,0 +1,150 @@
+
+local tostring, tonumber, select, type, getmetatable, setmetatable, rawget
+    = tostring, tonumber, select, type, getmetatable, setmetatable, rawget
+
+local Types = require 'types'
+local Any, Array = Types.Any, Types.Array
+local OMeta = require 'ometa'
+
+local utils = require 'utils'
+
+local asc = require 'abstractsyntax_commons'
+local Literal, NilLiteral, BooleanLiteral, NumberLiteral, IntegerLiteral, RealLiteral, StringLiteral, Name, Keyword, Special,
+      Node, Statement, Expression, Control, Iterative, Invocation
+    = asc.Literal, asc.NilLiteral, asc.BooleanLiteral, asc.NumberLiteral, asc.IntegerLiteral, asc.RealLiteral, asc.StringLiteral, asc.Name, asc.Keyword, asc.Special,
+      asc.Node, asc.Statement, asc.Expression, asc.Control, asc.Iterative, asc.Invocation
+
+local las = require 'lua_abstractsyntax'
+local Get, Set, Group, Block, Chunk, Do, While, Repeat, If, ElseIf, 
+      For, ForIn, Function, MethodStatement, FunctionStatement, FunctionExpression, 
+      Return, Break, LastStatement, Call, Send, BinaryOperation, UnaryOperation, 
+      GetProperty, VariableArguments, TableConstructor, SetProperty, Goto, Label
+    = las.Get, las.Set, las.Group, las.Block, las.Chunk, las.Do, las.While, las.Repeat, las.If, las.ElseIf, 
+      las.For, las.ForIn, las.Function, las.MethodStatement, las.FunctionStatement, las.FunctionExpression, 
+      las.Return, las.Break, las.LastStatement, las.Call, las.Send, las.BinaryOperation, las.UnaryOperation, 
+      las.GetProperty, las.VariableArguments, las.TableConstructor, las.SetProperty, las.lua52.Goto, las.lua52.Label
+
+local Commons = require 'grammar_commons'
+
+local ometa LuaGrammar {
+
+  special       = [[...]] | [[..]] 
+                | [[==]]  | [[~=]] 
+                | [[>=]]  | [[<=]]  |'>'    |'<'
+                | '='     | '.'
+                | '('     | ')'  
+                | '{'     | '}'  
+                | '['     | ']'  
+                | ','     | ';'     |':'  
+                | '+'     | '-'     |'*'
+                | '/'     | '%'    
+                | '^'     | '#'
+                ,
+  keyword       = 'nil'     | 'false'   | 'true'
+                | 'and'     | 'or'      | 'not'
+                | 'if'      | 'then'    | 'else'  | 'elseif'| 'end' 
+                | 'repeat'  | 'until'   | 'while' | 'do'    | 'break'
+                | 'for'     | 'in'
+                | 'function'| 'return'  | 'local'
+                ,
+  chunk         = stats:(s:stat ";"? [s])* last:(s:laststat ";"? [s])?          [Chunk {statements = stats:append(last)}]
+                ,
+  block         = chunk
+                ,
+  stat          = "do" body:block "end"                                         [Do {block = body}]
+                | "while" cond:exp "do" body:block "end"                        [While {expression = cond, block = body}]
+                | "repeat" body:block "until" cond:exp                          [Repeat {block = body, expression = cond}]
+                | "if" ifCond:exp "then" thenBody:block 
+                     elseIfs:( "elseif" elseIfCond:exp "then" elseIfBody:block  [ElseIf {expression = elseIfCond, block = elseIfBody}] )*
+                    elseBody:( "else" block 
+                             | empty [Chunk {statements = Array {}}] 
+                             ) 
+                  "end"                                                         [If {expression = ifCond, block = thenBody, elseIfs = elseIfs, elseBlock = elseBody}]
+                | "for" var:name "=" startExp:exp 
+                                 ","  stopExp:exp 
+                                      stepExp:( "," exp 
+                                              | empty [RealLiteral {1}]
+                                              )
+                  "do" body:block "end"                                         [For {name = var, startExpression = startExp, stopExpression = stopExp, stepExpression = stepExp, block = body}]
+                | "for" vars:namelist "in" exps:explist 
+                  "do" body:block "end"                                         [ForIn {names = vars, expressions = exps, block = body}]
+                | "function" ns:list(name, ".", [1]) ":" mn:name body:funcbody  [MethodStatement {context = ns, name = mn, arguments = body[1][1], variableArguments = body[1][2], block = body[2]}]
+                | "function" ns:list(name, ".", [1]) body:funcbody              [FunctionStatement {isLocal = false, context = ns, arguments = body[1][1], variableArguments = body[1][2], block = body[2]}]
+                | "local" "function" n:name body:funcbody                       [FunctionStatement {isLocal = true,  name = n,  arguments = body[1][1], variableArguments = body[1][2], block = body[2]}]
+                | "local" names:namelist exps:("=" explist | empty [Array {}])  [Set {isLocal = true, names = names, expressions = exps}]
+                | names:list(prefixexp, ",", [1]) "=" exps:explist              [Set {isLocal = false, names = names, expressions = exps}]
+                | prefixexp
+                ,
+  laststat      = "return" exps:(explist | empty [Array {}])                    [Return {expressions = exps}]
+                | "break"                                                       [Break {}]
+                ,
+  exp           = orexp
+                ,
+  orexp         = l:orexp op:"or" r:andexp                                      [BinaryOperation {context = l, name = op, arguments = Array {r}}]
+                | andexp
+                ,
+  andexp        = l:andexp op:"and" r:eqexp                                     [BinaryOperation {context = l, name = op, arguments = Array {r}}]
+                | eqexp
+                ,
+  eqexp         = l:eqexp op:("=="|"~=") r:relexp                               [BinaryOperation {context = l, name = op, arguments = Array {r}}]
+                | relexp
+                ,
+  relexp        = l:relexp op:(">="|">"|"<="|"<") r:addexp                      [BinaryOperation {context = l, name = op, arguments = Array {r}}]
+                | addexp
+                ,
+  addexp        = l:addexp op:("+"|"-") r:mulexp                                [BinaryOperation {context = l, name = op, arguments = Array {r}}]
+                | mulexp
+                ,
+  mulexp        = l:mulexp op:("*"|"/"|"^"|"%"|"..") r:unary                    [BinaryOperation {context = l, name = op, arguments = Array {r}}]
+                | unary
+                ,
+  unary         = op:"-"   c:primexp                                            [UnaryOperation {context = c, name = op}]
+                | op:"not" c:unary                                              [UnaryOperation {context = c, name = op}]
+                | op:"#"   c:primexp                                            [UnaryOperation {context = c, name = op}]
+                | primexp
+                ,
+  primexp       = ws* ( nillit 
+                      | boollit 
+                      | reallit | hexlit  | intlit 
+                      | strlitA | strlitQ | strlitL
+                      )
+                | "..."                                                         [VariableArguments {}]
+                | "function" body:funcbody                                      [FunctionExpression {arguments = body[1][1], variableArguments = body[1][2], block = body[2]}]
+                | prefixexp
+                | tableconstr
+                , 
+  prefixexp     = ctx:prefixexp suffixexp(ctx)
+                | v:name                                                        [Get {name = v}]
+                | "(" e:exp ")"                                                 [Group {expression = e}]
+                ,
+  suffixexp(ctx) =           as:args                                            [Call         {context = ctx,           arguments = as}]
+                | ":" n:name as:args                                            [Send         {context = ctx, name = n, arguments = as}]
+                | "[" i:exp "]"                                                 [GetProperty  {context = ctx, index = i}]
+                | "." i:name                                                    [GetProperty  {context = ctx, index = i}]
+                ,
+  args          = "(" as:(explist | empty [Array {}] ) ")"                      [as]
+                | a:tableconstr                                                 [Array {a}]
+                | ws* a:(strlitA | strlitQ | strlitL)                           [Array {a}]
+                ,
+  funcbody      = "(" params:parlist ")" body:block "end"                       [{params, body}]
+                ,
+  parlist       = names:namelist va:("," "...")?                                [{names,    va ~= nil}]
+                | "..."                                                         [{Array {}, true}]
+                | empty                                                         [{Array {}, false}]
+                ,
+  namelist      = list(name, ",", [1])
+                ,
+  explist       = list(exp, ",", [1])
+                ,
+  tableconstr   = "{" fields:fieldlist "}"                                      [TableConstructor {properties = fields}]
+                ,
+  fieldlist     = fields:list(field, "," | ";", [1]) ("," | ";")?               [fields]
+                | empty                                                         [Array {}]
+                ,
+  field         = "[" i:exp "]" "=" v:exp                                       [SetProperty {index = i, expression = v}]
+                |     i:name    "=" v:exp                                       [SetProperty {index = i, expression = v}]
+                |                   v:exp                                       [SetProperty {           expression = v}]
+}
+LuaGrammar:merge(Commons)
+
+return LuaGrammar

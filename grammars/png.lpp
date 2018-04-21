@@ -1,0 +1,83 @@
+--[[
+
+Example is inspired by Josh Marinacci and his blog post:
+https://joshondesign.com/2013/03/18/ConciseComputing
+I strongly encourage you to read
+
+This Grammar relly on binary input stream,
+so remeber to set the appropriate switch.
+eg. PngGrammar.image:matchFile('image.png', true)
+
+Only basic chunk types are implemented, all others are parsed by 'generic' Rule.
+If you have interest in extending this Grammar simply add needed Rules 
+or merge this Grammar into new one with new / channged Rules.
+Name of the Rule should be equal to name of the chunk type in parsed stream - that's all.
+
+]]
+
+local Types = require 'types'
+local class = Types.class
+local Any, Array = Types.Any, Types.Array
+local OMeta = require 'ometa'
+local Commons = require 'binary_commons'
+local Aux = require 'auxiliary'
+local utils = require 'utils'
+
+local Png = class {name = 'Png', super = {Any}}
+local Chunk = class {name = 'Chunk', super = {Any}}
+
+local ometa PngGrammar {
+
+  image     = 137 80 78 71 13 10 26 10 -- PNG header
+              chunks:chunk+ 
+              bytes:byte*                               [Png {chunks = chunks, rest = bytes}],
+              
+  chunk     = len:int32 
+              type:varchar([4])                         [!  print(type, len)  ]
+              data:Aux.apply([type], generic, [len])    [!  data.length = len 
+                                                            data.type = type  ]
+              crc:byte/4                                [Chunk(data)],
+              
+  generic   = d:byte/number                             [{name = "Generic chunk", data = d}],             -- generic chunk rule used as fallback
+  ---------------------------------------------------------------------------------------------------------- 4.1.   Critical chunks
+  IHDR(len) = w:int32 h:int32 dep:byte                                                                    -- 4.1.1. IHDR Image header
+              ctype:byte comp:byte fltr:byte il:byte    [{name = "Image header", 
+                                                          data = {width = w, height = h, bitdepth = dep, 
+                                                                  colortype = ctype, compression = comp, 
+                                                                  filter = fltr, interlace = il}}],
+  PLTE(len) = palette:(
+                r:byte g:byte b:byte                    [{red = r, green = g, blue = b}]
+              )/[len/3]                                 [{name = "Palette", palette = palette}],          -- 4.1.2. PLTE Palette
+  IDAT      = d:byte/number                             [{name = "Image data"}],                          -- 4.1.3. IDAT Image data
+  IEND      = d:byte/number                             [{name = "Image trailer"}],                       -- 4.1.4. IEND Image trailer
+  ---------------------------------------------------------------------------------------------------------- 4.2.   Ancillary chunks
+  bKGD      = d:byte/number                             [{name = "Background color", data = d}],          -- 4.2.1. bKGD Background color
+  cHRM(len) = wx:int32 wy:int32                                                                           -- 4.2.2. cHRM Primary chromaticities and white point
+              rx:int32 ry:int32 
+              gx:int32 gy:int32 
+              bx:int32 by:int32                         [{name = "Primary chromaticities and white point",
+                                                          ['white x'] = wx, ['white y'] = wy,
+                                                          ['red x']   = rx, ['red y']   = ry,
+                                                          ['green x'] = gx, ['green y'] = gy,
+                                                          ['blue x']  = bx, ['blue y']  = by}],
+  gAMA(len) = g:int32                                   [{name = "Image gamma", value = g}],              -- 4.2.3. gAMA Image gamma
+  hIST(len) = d:int16/[len/2]                           [{name = "Image histogram", data = d}],           -- 4.2.4. hIST Image histogram
+  pHYs(len) = x:int32 y:int32 unit:byte	                [{name = "Physical pixel dimensions",             -- 4.2.5. pHYs Physical pixel dimensions
+                                                          x = x, y = y, 
+                                                          unit = init == 1 and 'meter' or 'unknown'}],
+  sBIT      = d:byte/number                             [{name = "Significant bits", data = d}],          -- 4.2.6. sBIT Significant bits
+  tEXt      = d:(b:byte [string.char(b)])/number                                                          -- 4.2.7. tEXt Textual data
+              str:[d:concat()] 
+              tpos:[str:find('\0', 1, true)]            [{name = "Textual data", 
+                                                          keyword = str:sub(1, tpos - 1), 
+                                                          text = str:sub(tpos + 1)}],
+  tIME(len) = year:int16 month:byte day:byte                                                              -- 4.2.8. tIME Image last-modification time
+              hour:byte minute:byte second:byte         [{name = "Image last-modification time", 
+                                                          year = year, month = month, day = day, 
+                                                          hour = hour, minute = minute, second = second}],
+  tRNS      = d:byte/number                             [{name = "Transparency", data = d}],              -- 4.2.9. tRNS Transparency
+  zTXt      = d:byte/number                             [{name = "Compressed textual data", data = d}]    -- 4.2.10. zTXt Compressed textual data
+}
+PngGrammar:merge(Commons)
+
+return PngGrammar

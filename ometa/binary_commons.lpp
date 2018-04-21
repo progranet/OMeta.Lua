@@ -1,0 +1,28 @@
+local tostring, tonumber, select, type, getmetatable, setmetatable, rawget
+    = tostring, tonumber, select, type, getmetatable, setmetatable, rawget
+
+local bit = require 'bit'
+local band, bor, lshift = bit.band, bit.bor, bit.lshift
+
+local Types = require 'types'
+local Any, Array = Types.Any, Types.Array
+local OMeta = require 'ometa'
+
+local utils = require 'utils'
+
+local Commons = require 'commons'
+
+local ometa BinaryCommons {
+
+  byte    = [? type(input.stream._head) == "number" 
+              and band(input.stream._head, 0xFF) == input.stream._head] .
+          ,
+  int16   = a:byte b:byte                                               [bor(lshift(a, 8), b)]
+          ,
+  int32   = a:int16 b:int16                                             [bor(lshift(a, 16), b)]
+          ,
+  varchar = str:(b:byte [string.char(b)])/number                        [str:concat()]
+}
+BinaryCommons:merge(Commons)
+
+return BinaryCommons

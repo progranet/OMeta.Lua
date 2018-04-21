@@ -1,0 +1,185 @@
+
+local tostring, tonumber, select, type, getmetatable, setmetatable, rawget
+    = tostring, tonumber, select, type, getmetatable, setmetatable, rawget
+
+local Types = require 'types'
+local Any, Array = Types.Any, Types.Array
+
+local utils = require 'utils'
+
+local asc = require 'abstractsyntax_commons'
+local Literal, NilLiteral, BooleanLiteral, NumberLiteral, IntegerLiteral, RealLiteral, StringLiteral, Name, Keyword, Special,
+      Node, Statement, Expression, Control, Iterative, Invocation
+    = asc.Literal, asc.NilLiteral, asc.BooleanLiteral, asc.NumberLiteral, asc.IntegerLiteral, asc.RealLiteral, asc.StringLiteral, asc.Name, asc.Keyword, asc.Special,
+      asc.Node, asc.Statement, asc.Expression, asc.Control, asc.Iterative, asc.Invocation
+
+local las = require 'lua_abstractsyntax'
+local Get, Set, Group, Block, Chunk, Do, While, Repeat, If, ElseIf, 
+      For, ForIn, Function, MethodStatement, FunctionStatement, FunctionExpression, 
+      Return, Break, LastStatement, Call, Send, BinaryOperation, UnaryOperation, 
+      GetProperty, VariableArguments, TableConstructor, SetProperty, Goto, Label
+    = las.Get, las.Set, las.Group, las.Block, las.Chunk, las.Do, las.While, las.Repeat, las.If, las.ElseIf, 
+      las.For, las.ForIn, las.Function, las.MethodStatement, las.FunctionStatement, las.FunctionExpression, 
+      las.Return, las.Break, las.LastStatement, las.Call, las.Send, las.BinaryOperation, las.UnaryOperation, 
+      las.GetProperty, las.VariableArguments, las.TableConstructor, las.SetProperty, las.lua52.Goto, las.lua52.Label
+
+local omas = require 'ometa_abstractsyntax'
+local Binding, Application, Choice, Sequence, Lookahead,
+      Exactly, Token, Subsequence, NotPredicate, AndPredicate, Optional, Many, Consumed, Loop, Anything,
+      HostNode, HostPredicate, HostStatement, HostExpression, RuleApplication, Object, Key, 
+      Rule, RuleExpression, RuleStatement, Grammar, GrammarExpression, GrammarStatement
+    = omas.Binding, omas.Application, omas.Choice, omas.Sequence, omas.Lookahead,
+      omas.Exactly, omas.Token, omas.Subsequence, omas.NotPredicate, omas.AndPredicate, omas.Optional, omas.Many, omas.Consumed, omas.Loop, omas.Anything,
+      omas.HostNode, omas.HostPredicate, omas.HostStatement, omas.HostExpression, omas.RuleApplication, omas.Object, omas.Key, 
+      omas.Rule, omas.RuleExpression, omas.RuleStatement, omas.Grammar, omas.GrammarExpression, omas.GrammarStatement
+      
+local OMeta = require 'ometa'
+local OMetaGrammar = require 'ometa_grammar'
+local OMetaInLuaGrammar
+
+local ometa LuaInOMetaGrammar {
+
+  special       = OMetaGrammar.special
+                | [[[?]] | [[[!]] | '[' | ']'
+                ,
+  keyword       = 'end'
+                ,
+  node          = OMetaGrammar.node
+                | "[?" exp:OMetaInLuaGrammar.exp@OMetaInLuaGrammar "]"                  [HostPredicate {value = exp}]
+                | "[!" exp:OMetaInLuaGrammar.stat@OMetaInLuaGrammar* "]"                [HostStatement {value = exp}]
+                ,
+  primexp       = OMetaGrammar.primexp
+                | "[" exp:OMetaInLuaGrammar.exp@OMetaInLuaGrammar "]"                   [HostExpression {value = exp}]
+}
+LuaInOMetaGrammar:merge(OMetaGrammar)
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+local LuaGrammar = require 'lua52_grammar'
+local OMetaInLuaMixedGrammar
+
+local function exp(...)
+  return OMetaInLuaMixedGrammar.exp:matchMixed(...)
+end
+
+ometa OMetaInLuaGrammar {
+  
+  keyword       = LuaGrammar.keyword
+                | 'ometa'
+                | 'rule'
+                ,
+  stat          = "local" "ometa" n:name body:grammarBody                               [GrammarStatement {isLocal = true, name = Array {n}, rules = body}]
+                | "ometa" ns:list(name, ".", [1]) body:grammarBody                      [GrammarStatement {isLocal = false, name = ns, rules = body}]
+                | "rule" ns:list(name, ".", [1]) ":" n:name body:ruleBody               [RuleStatement {
+                                                                                          namespace = ns, name = n, 
+                                                                                          arguments = body[1][1], variableArguments = body[1][2], 
+                                                                                          block = body[2]}]
+                | LuaGrammar.stat 
+                ,
+  primexp       = LuaGrammar.primexp 
+                | ws* literal:strlitB                                                   [exp`string.interpolate(${literal})`]
+                ,
+  args          = LuaGrammar.args
+                | ws* strlitB
+                ,
+  ruleBody      = "(" params:parlist ")" 
+                    body:LuaInOMetaGrammar.choiceDef@LuaInOMetaGrammar
+                  "end"                                                                 [{params, body}]
+                ,
+  grammarBody   = "{" rules:list(innerRuleBody, "," | ";") ("," | ";")? "}"             [rules]
+                ,
+  innerRuleBody = index:(name | "[" e:exp "]" [e]) 
+                  params:( "(" params:parlist ")" [params] 
+                         | [{Array {}, false}]
+                         ) 
+                  "=" body:LuaInOMetaGrammar.choiceDef@LuaInOMetaGrammar                [RuleExpression {
+                                                                                          name = index, 
+                                                                                          arguments = params[1], variableArguments = params[2], 
+                                                                                          block = body}]
+                ,
+  strlitB       = '`' slices:(s:slice '$' "{" e:exp "}" [Array {s, e}])* last:slice '`' [slices:flatten():append(last)]
+                ,
+  slice         = str:<(escchar | ~'`' ~'$' char)*>                                     [StringLiteral {str, ldelim = '[[', rdelim = ']]'}]
+}
+OMetaInLuaGrammar:merge(LuaGrammar)
+
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+ometa OMetaInLuaMixedGrammar {
+  
+  --mix(object, element, delim, minimum)
+                      --= col:(object | e:element delim [e])* last:(object | element)
+                        --[? (#col + 1) >= (minimum or 0)]              [col:append(last)]
+                      --| [? not minimum or minimum == 0]               [Array {}]
+                      --,
+
+  name        = OMetaInLuaGrammar.name
+              | Name
+              ,
+  token(str)  = OMetaInLuaGrammar.token(str)
+              | token:(Keyword | Special)                           [? token[1] == str] [token]
+              ,
+  chunk       = -- Order of alternatives is important:
+                -- - LuaGrammar.chunk always returns truthy result and rules out any subsequent check
+                Chunk
+              --| &Array {stats:stat*}                                                    [Chunk            {statements = stats}]
+              | stats:Array                                                             [Chunk            {statements = stats}]
+              | OMetaInLuaGrammar.chunk
+              ,
+  stat        = OMetaInLuaGrammar.stat 
+              | Do | While | Repeat | If | ElseIf | For | ForIn 
+              | MethodStatement | FunctionStatement | Set | Goto
+              ,
+  label       = OMetaInLuaGrammar.label
+              | Label
+              ,
+  laststat    = OMetaInLuaGrammar.laststat 
+              | Return | Break
+              ,
+  namelist    = OMetaInLuaGrammar.namelist
+              --| &Array {name+}
+              | Array
+              --| mix(Name, name, ",", [1])
+              ,
+  explist     = OMetaInLuaGrammar.explist
+              --| &Array {exp+}
+              | Array
+              ,
+  mulexp      = OMetaInLuaGrammar.mulexp 
+              | BinaryOperation
+              ,
+  unary       = OMetaInLuaGrammar.unary
+              | UnaryOperation
+              ,
+  primexp     = OMetaInLuaGrammar.primexp 
+              | NilLiteral | BooleanLiteral | RealLiteral | StringLiteral 
+              | VariableArguments | FunctionExpression
+              ,
+  prefixexp   = ctx:prefixexp suffixexp(ctx)
+              | Call | Send | GetProperty | Get | Group
+              | OMetaInLuaGrammar.prefixexp
+              ,
+  args        = OMetaInLuaGrammar.args
+              --| &Array {exp*}
+              | Array
+              | a:TableConstructor                                                      [Array {a}]
+              | a:StringLiteral                                                         [Array {a}]
+              ,
+  tableconstr = OMetaInLuaGrammar.tableconstr                                            
+              | TableConstructor
+              ,
+  fieldlist   = OMetaInLuaGrammar.fieldlist
+              --| &Array {field*}
+              | Array
+              ,
+  field       = OMetaInLuaGrammar.field
+              | SetProperty
+}
+OMetaInLuaMixedGrammar:merge(OMetaInLuaGrammar)
+
+return {
+  LuaInOMetaGrammar = LuaInOMetaGrammar;
+  OMetaInLuaGrammar = OMetaInLuaGrammar;
+  OMetaInLuaMixedGrammar = OMetaInLuaMixedGrammar;
+}

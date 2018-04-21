@@ -1,0 +1,86 @@
+
+local tostring, tonumber, select, type, getmetatable, setmetatable, rawget
+    = tostring, tonumber, select, type, getmetatable, setmetatable, rawget
+
+local Types = require 'types'
+local Any, Array = Types.Any, Types.Array
+local OMeta = require 'ometa'
+
+local utils = require 'utils'
+
+local asc = require 'abstractsyntax_commons'
+local Literal, NilLiteral, BooleanLiteral, NumberLiteral, IntegerLiteral, RealLiteral, StringLiteral, Name, Keyword, Special,
+      Node, Statement, Expression, Control, Iterative, Invocation
+    = asc.Literal, asc.NilLiteral, asc.BooleanLiteral, asc.NumberLiteral, asc.IntegerLiteral, asc.RealLiteral, asc.StringLiteral, asc.Name, asc.Keyword, asc.Special,
+      asc.Node, asc.Statement, asc.Expression, asc.Control, asc.Iterative, asc.Invocation
+
+local las = require 'lua_abstractsyntax'
+local Get, Set, Group, Block, Chunk, Do, While, Repeat, If, ElseIf, 
+      For, ForIn, Function, MethodStatement, FunctionStatement, FunctionExpression, 
+      Return, Break, LastStatement, Call, Send, BinaryOperation, UnaryOperation, 
+      GetProperty, VariableArguments, TableConstructor, SetProperty, Goto, Label
+    = las.Get, las.Set, las.Group, las.Block, las.Chunk, las.Do, las.While, las.Repeat, las.If, las.ElseIf, 
+      las.For, las.ForIn, las.Function, las.MethodStatement, las.FunctionStatement, las.FunctionExpression, 
+      las.Return, las.Break, las.LastStatement, las.Call, las.Send, las.BinaryOperation, las.UnaryOperation, 
+      las.GetProperty, las.VariableArguments, las.TableConstructor, las.SetProperty, las.lua52.Goto, las.lua52.Label
+
+local Commons = require 'commons'
+local Streams = require 'streams'
+local Aux     = require 'auxiliary'
+
+local lsep, esep = '\n', ', '
+
+local ometa LuaAstToSourceTranslator {
+
+  trans                 = node:&.                                                                 Aux.apply([getmetatable(node).type], unexpected),
+  unexpected            = node:.                                                                  [? error('unexpected node: ' .. tostring(node))],
+  
+  [NilLiteral]          = .                                                                       ['nil'],
+  [BooleanLiteral]      = {value:.}                                                               [`${value}`],
+  [RealLiteral]         = {value:.}                                                               [`${value}`],
+  [IntegerLiteral]      = {value:.}                                                               [`${value}`],
+  [Name]                = {value:.}                                                               [value],
+  [Keyword]             = {value:.}                                                               [value],
+  [Special]             = {value:.}                                                               [value],
+  [StringLiteral]       = {value:.; ldelim:=.?, rdelim:=.?}                                       [`${ldelim or "'"}${value}${rdelim or "'"}`],
+  
+  [Get]                 = {; name:=trans}                                                         [name],
+  [Set]                 = {; isLocal=true, names:=trans+, expressions:=trans+}                    [`local ${names:concat(esep)} = ${expressions:concat(esep)}`]
+                        | {; isLocal=true, names:=trans+}                                         [`local ${names:concat(esep)}`]
+                        | {;               names:=trans+, expressions:=trans+}                    [      `${names:concat(esep)} = ${expressions:concat(esep)}`],
+  [Chunk]               = {; statements:=trans*}                                                  [statements:append(''):concat(lsep)],
+  [Group]               = {; expression:=trans}                                                   [`(${expression})`],
+  [Do]                  = {; block:=trans}                                                        [`do${lsep}${block}end`],
+  [While]               = {; block:=trans, expression:=trans}                                     [`while ${expression} do${lsep}${block}end`],
+  [Repeat]              = {; block:=trans, expression:=trans}                                     [`repeat${lsep}${block}until ${expression}`],
+  [If]                  = {; expression:=trans, block:=trans, elseIfs:=trans*, elseBlock:=trans}  [`if ${expression} then${lsep}${block}${elseIfs:concat()}${(#elseBlock ~= 0 and (`else${lsep}${elseBlock}`) or ``)}end`],
+  [ElseIf]              = {; expression:=trans, block:=trans}                                     [`elseif ${expression} then${lsep}${block}`],
+  [For]                 = {; name:=trans, block:=trans, startExpression:=trans, 
+                                                        stopExpression:=trans, 
+                                                        stepExpression:=trans}                    [`for ${name} = ${startExpression}${esep}${stopExpression}${(stepExpression == '1' and `` or `${esep}${stepExpression}`)} do${lsep}${block}end`],
+  [ForIn]               = {; names:=trans*, block:=trans, expressions:=trans*}                    [`for ${names:concat(esep)} in ${expressions:concat(esep)} do${lsep}${block}end`],
+  [MethodStatement]     = {; context:=trans*, name:=trans, 
+                             arguments:=trans*, variableArguments:=., block:=trans}               [`function ${context:concat('.')}:${name}(${(variableArguments and arguments:append('...') or arguments):concat(esep)})${lsep}${block}end`],
+  [FunctionStatement]   = {; isLocal=true, name:=trans, 
+                             arguments:=trans*, variableArguments:=., block:=trans}               [                 `local function ${name}(${(variableArguments and arguments:append('...') or arguments):concat(esep)})${lsep}${block}end`]
+                        | {; context:=trans*, 
+                             arguments:=trans*, variableArguments:=., block:=trans}               [        `function ${context:concat('.')}(${(variableArguments and arguments:append('...') or arguments):concat(esep)})${lsep}${block}end`],
+  [FunctionExpression]  = {; arguments:=trans*, variableArguments:=., block:=trans}               [                              `function (${(variableArguments and arguments:append('...') or arguments):concat(esep)})${lsep}${block}end`],
+  [GetProperty]         = {; index:=&Name trans, context:=trans}                                  [`${context}.${index}`]
+                        | {; index:=trans,       context:=trans}                                  [`${context}[${index}]`],
+  [BinaryOperation]     = {; name:=trans,  context:=trans, arguments=argument:trans}              [`${context} ${name} ${argument}`],
+  [UnaryOperation]      = {; name={'not'}, context:=trans}                                        [   `not ${context}`]
+                        | {; name:=trans,  context:=trans}                                        [`${name}${context}`],
+  [Call]                = {;               context:=trans, arguments:=trans*}                     [        `${context}(${arguments:concat(esep)})`],
+  [Send]                = {; name:=trans,  context:=trans, arguments:=trans*}                     [`${context}:${name}(${arguments:concat(esep)})`],
+  [TableConstructor]    = {; properties:=trans*}                                                  [`{${properties:concat(esep)}}`],
+  [SetProperty]         = {; index:=&Name trans, expression:=trans}                               [  `${index} = ${expression}`]
+                        | {; index =eos,         expression:=trans}                               [             `${expression}`]
+                        | {; index:=trans,       expression:=trans}                               [`[${index}] = ${expression}`],
+  [Return]              = {; expressions:=trans*}                                                 [`return ${expressions:concat(esep)}`],
+  [Break]               = .                                                                       [`break`],
+  [VariableArguments]   = .                                                                       [`...`]
+}
+LuaAstToSourceTranslator:merge(Commons)
+
+return LuaAstToSourceTranslator

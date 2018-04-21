@@ -1,0 +1,93 @@
+
+local tostring, tonumber, select, type, getmetatable, setmetatable, rawget
+    = tostring, tonumber, select, type, getmetatable, setmetatable, rawget
+
+local Types = require 'types'
+local Any, Array = Types.Any, Types.Array
+local OMeta = require 'ometa'
+
+local utils = require 'utils'
+
+local asc = require 'abstractsyntax_commons'
+local Literal, NilLiteral, BooleanLiteral, NumberLiteral, IntegerLiteral, RealLiteral, StringLiteral, Name, Keyword, Special,
+      Node, Statement, Expression, Control, Iterative, Invocation
+    = asc.Literal, asc.NilLiteral, asc.BooleanLiteral, asc.NumberLiteral, asc.IntegerLiteral, asc.RealLiteral, asc.StringLiteral, asc.Name, asc.Keyword, asc.Special,
+      asc.Node, asc.Statement, asc.Expression, asc.Control, asc.Iterative, asc.Invocation
+
+local omas = require 'ometa_abstractsyntax'
+local Binding, Application, Choice, Sequence, Lookahead,
+      Exactly, Token, Subsequence, NotPredicate, AndPredicate, Optional, Many, Consumed, Loop, Anything,
+      HostNode, HostPredicate, HostStatement, HostExpression, RuleApplication, Object, Key, Rule, RuleExpression, RuleStatement
+    = omas.Binding, omas.Application, omas.Choice, omas.Sequence, omas.Lookahead,
+      omas.Exactly, omas.Token, omas.Subsequence, omas.NotPredicate, omas.AndPredicate, omas.Optional, omas.Many, omas.Consumed, omas.Loop, omas.Anything,
+      omas.HostNode, omas.HostPredicate, omas.HostStatement, omas.HostExpression, omas.RuleApplication, omas.Object, omas.Key, omas.Rule, omas.RuleExpression, omas.RuleStatement
+
+local Commons = require 'grammar_commons'   
+
+local ometa OMetaGrammar {
+
+              --------------------------------------- structure ----------------------------------------------------------------------------
+  choiceDef     = nodes:list(sequenceDef, "|", [1])                 [Choice           {nodes = nodes}]
+                ,
+  sequenceDef   = nodes:node+                                       [Sequence         {nodes = nodes}]
+                ,
+  node          = name:name ":" exp:prefixexp                       [Binding          {expression = exp, name = name}]
+                |                   prefixexp
+                ,
+              --------------------------------------- lookahead ----------------------------------------------------------------------------
+  prefixexp     =             "~" exp:suffixexp                     [NotPredicate     {expression = exp}]
+                |             "&" exp:suffixexp                     [AndPredicate     {expression = exp}]
+                |                     suffixexp
+                ,
+              --------------------------------------- modifiers ----------------------------------------------------------------------------
+  suffixexp     = exp:primexp "/" num:(intlit | primexp)            [Loop             {expression = exp, times = num}]
+                | exp:primexp "**" min:intlit (".." max:intlit)?    [Many             {expression = exp, minimum = min, maximum = max}]
+                | exp:primexp "*"                                   [Many             {expression = exp}]
+                | exp:primexp "+"                                   [Many             {expression = exp, minimum = RealLiteral {1}}]
+                | exp:primexp "?"                                   [Optional         {expression = exp}]
+              ------------------------------------------------------------------------------------------------------------------------------
+                |     primexp
+                ,
+              --------------------------------------- grouping -----------------------------------------------------------------------------
+  primexp       = "(" exp:choiceDef ")"         [!exp.scope = true] [exp]
+                | "<" exp:choiceDef ">"                             [Consumed         {expression = exp}]
+                | "{" props:props "}"                               [Object           {array = props[1], map = props[2]}]
+              --------------------------------------- literals -----------------------------------------------------------------------------
+                | ws* literal:strlitQ                               [Token            {expression = literal}]
+                | ws* literal:strlitL                               [Subsequence      {expression = literal}]
+                | ws* literal:( strlitA | intlit | hexlit 
+                              | boollit | nillit )                  [Exactly          {expression = literal}]
+              -------------------------------------- application ---------------------------------------------------------------------------
+                | "."                                               [Anything         {}]
+                | name:path target:("@" path)? args:args?           [RuleApplication  {name = name, target = target, 
+                                                                                       arguments = args or Array {}}]
+                ,
+              ------------------------------------ building blocks -------------------------------------------------------------------------
+  path          = list(name, '.', [1])
+                ,
+  args          = '(' args:list(choiceDef, ",") ")"                 [args]
+                ,
+  props         = array:choiceDef ";"  map:list(prop, ",", [1])     [{array,          Choice      {nodes = Array {Sequence {nodes = map}}}}]
+                | array:choiceDef ";"?                              [{array,          NilLiteral  {}}]
+                |                 ";"? map:list(prop, ",", [1])     [{NilLiteral {},  Choice      {nodes = Array {Sequence {nodes = map}}}}]
+                |                 ";"?                              [{NilLiteral {},  NilLiteral  {}}]
+                ,
+  prop          = name:name ":=" exp:choiceDef                  exp:[Binding          {expression = exp, name = name}]
+                                                                    [Key              {expression = exp, name = name}]
+                | name:name  "=" exp:choiceDef                      [Key              {expression = exp, name = name}]
+                ,
+              ---------------------------------------- tokens ------------------------------------------------------------------------------
+  special       = [[..]]  | [[**]]
+                | [[:=]]  | ':'     | '='
+                | '('     | ')'     | '|'    
+                | '{'     | '}'
+                | '<'     | '>'  
+                | ','     | '.'     | ';'     
+                | '*'     | '+'     | '?'     | '/'
+                | '~'     | '&'     | '@'     
+                ,
+  keyword       = ''
+}
+OMetaGrammar:merge(Commons)
+
+return OMetaGrammar
