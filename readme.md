@@ -200,7 +200,7 @@ return TableTreeCalc
 This Grammar is now able to build a simple parse tree (Lua tables hierarchy) from the expressions provided as strings, eg.:
 ```lua
 local OMeta = require 'ometa'
-local Calc = OMeta.doFile('calc.lpp') -- a name of a file containing the Calc package
+local Calc = OMeta.doFile('calc.lpp') -- a name of a file containing the TableTreeCalc package
 local tree = Calc.exp:matchString('2*(5+6)')
 ```
 
@@ -296,7 +296,7 @@ parseTable = { number* ; kind=string, length=number }
 ```
 The above rule parses any number of Lua numbers in the array part of table again. Then it expects the EOS (the end of array part). Next, it freely switches between indicated properties (by name): *kind*, which must be a string value and a *length* of number value.
 
-In the case of parsing map part of a table, there is no expectation of a number of properties in a table. %%Properties in a table may be any number%% but at least all indicated by the Rule must be present. This approach allows an easy parsing of different "objects" implemented as the Lua tables.
+In the case of parsing map part of a table, there is no expectation of a number of properties in a table. There may be many properties in a table but at least all indicated by the Rule must be present. This approach allows an easy parsing of different "objects" implemented as the Lua tables.
 
 The last unique thing related to table parsing is a shorthand for combined property parsing and binding:
 ```lua
