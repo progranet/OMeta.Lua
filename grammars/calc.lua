@@ -1,7 +1,7 @@
 local Types = require('types')
 local class, Any, Array = Types.class, Types.Any, Types.Array
 local OMeta = require('ometa')
-local ParseCalc = OMeta.Grammar({_grammarName = 'ParseCalc', exp = OMeta.Rule({behavior = function (input)
+local Calc = OMeta.Grammar({_grammarName = 'Calc', exp = OMeta.Rule({behavior = function (input)
 local _pass
 return input:applyWithArgs(input.grammar.choice, input.grammar.addexp)
 end, arity = 0, grammar = nil, name = 'exp'}), addexp = OMeta.Rule({behavior = function (input)
@@ -69,7 +69,7 @@ end
 return input:applyWithArgs(input.grammar.many, input.grammar.digit, 1)
 end)
 end, arity = 0, grammar = nil, name = 'numstr'})})
-ParseCalc:merge(require('grammar_commons'))
+Calc:merge(require('grammar_commons'))
 local EvalCalc = OMeta.Grammar({_grammarName = 'EvalCalc', exp = OMeta.Rule({behavior = function (input)
 local _pass
 return input:applyWithArgs(input.grammar.choice, input.grammar.addexp)
@@ -826,4 +826,4 @@ return error('unexpected operation kind: ' .. tostring(opr))
 end)
 end, arity = 0, grammar = nil, name = 'unknown'})})
 MixedAstCalc:merge(AstCalc)
-return {ParseCalc = ParseCalc, EvalCalc = EvalCalc, TableTreeCalc = TableTreeCalc, BinOp = BinOp, OpTreeCalc = OpTreeCalc, MixedOTCalc = MixedOTCalc, AddOp = AddOp, SubOp = SubOp, MulOp = MulOp, DivOp = DivOp, AstCalc = AstCalc, MixedAstCalc = MixedAstCalc}
+return {Calc = Calc, EvalCalc = EvalCalc, TableTreeCalc = TableTreeCalc, BinOp = BinOp, OpTreeCalc = OpTreeCalc, MixedOTCalc = MixedOTCalc, AddOp = AddOp, SubOp = SubOp, MulOp = MulOp, DivOp = DivOp, AstCalc = AstCalc, MixedAstCalc = MixedAstCalc}

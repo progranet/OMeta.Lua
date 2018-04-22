@@ -33,20 +33,21 @@ OMeta = {
     return om
   end;
   
-  doFile = function(path, trans)
-    local oast = require 'ometa_lua_grammar'.OMetaInLuaGrammar.block:matchFile(path)
+  _do = function(oast, trans)
     local last = require('ometa_ast2lua_ast_' .. (trans or 'reference')).toLuaAst(oast)
     local lsrc = require 'lua_ast2source'.trans:matchMixed(last)
     local gmod = loadstring(lsrc)
     return gmod()
   end;
   
+  doFile = function(path, trans)
+    local oast = require 'ometa_lua_grammar'.OMetaInLuaGrammar.block:matchFile(path)
+    return OMeta._do(oast, trans)
+  end;
+  
   doString = function(str, trans)
     local oast = require 'ometa_lua_grammar'.OMetaInLuaGrammar.block:matchString(str)
-    local last = require('ometa_ast2lua_ast_' .. (trans or 'reference')).toLuaAst(oast)
-    local lsrc = require 'lua_ast2source'.trans:matchMixed(last)
-    local gmod = loadstring(lsrc)
-    return gmod()
+    return OMeta._do(oast, trans)
   end;
 }
 

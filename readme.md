@@ -109,7 +109,7 @@ Below, there is an overview of the basic means used to build a Rule.
 |Literals|`"keyword"`, `"("`, `")"`<br>`[[abc]]`<br>`'abc'`<br>`5`, `0xFF`, `-1.2e3`<br>`false`, `true`<br>`nil`<br>|[tokens](#tokens)<br>a sequence of characters (`'a' 'b' 'c'`)<br>a string literal<br>number literals<br>boolean literals<br>a nil literal|
 |Rule application|`.`<br>`number`<br>`list(exp, ",")`<br>`LuaGrammar.exp`<br>`Grammar.stat@Grammar`|Anything - a single element of any kind<br>matches a named Rule *number*<br>an [application with arguments](#parametrized-rules)<br>a [foreign application](#foreign-rules)<br>a foreign application with a context switch|
 |[Host Nodes](#semantic-actions)|`[string.rep('.', n)]`<br>`[! print('hello')]`<br>`[? #str == 5]`|[Host Expressions](#host-expression) - pass and return a value<br>[Host Statement](#host-statement) - pass without a value<br>[Host Predicate](#host-predicate) - no value but can fail|
-|[Binding](#binding)|`variable:a`<br>`num:[10]`<br>`{; prop:=string }`|to bind a result of *a* to the *variable*<br>to bind `10` (Host Expression) to the *num*<br>a binding combined with a parsing property|
+|[Binding](#binding)|`variable:a`<br>`num:[10]`<br>`{; prop:=string }`|to bind a result of *a* to the *variable*<br>to bind `10` (Host Expression) to the *num*<br>a binding combined with parsing property|
 
 ### Semantic Actions
 The PEG's *semantic actions* in OMeta/Lua are generalized to the **Host Nodes**.
@@ -205,15 +205,17 @@ local tree = Calc.exp:matchString('2*(5+6)')
 ```
 
 ### Tokens
-The Token is built in a syntax construct in OMeta, however its semantics is not determined in advance.
+The Token is built in syntax construct in OMeta (denoted by quotation marks - `"`), however its semantics is not determined in advance.
 
 Lua and OMeta Grammars in OMeta implementation use the Tokens to conveniently parse the Keywords and the Special characters in language syntaxes (see *lua_grammar.lpp*, *lua52_grammar.lpp* - new keywords in Lua 5.2, *ometa_grammar.lpp*). The Token firstly skips any number of white-spaces, then tries to match the sequence of characters that was passed to it as an argument.
 
 If you want to use the Tokens the same way in your language Grammar, then simply merge the GrammarCommons package and provide sets of Keywords and Special characters from your language. After that, you can simply use the Token syntax in the Rules:
 ```lua
 local ometa SomeLanguage {
+  -- definition of Tokens
   keyword = 'fn' | 'ret', -- only string literals
   special = [[=>]] | '(' | ')' | '{' | '}' | ',', -- single characters and sequences ([[...]])
+  -- following Rules use defined Tokens
   stat    = "fn" name "(" list(name, ",") ")" "=>" exp -- "arrow" fn
           | "fn" name "(" list(name, ",") ")" "{"
               ... -- grammar of fn body
