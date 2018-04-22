@@ -18,7 +18,7 @@ _pass, node = input:applyWithArgs(input.grammar.andPredicate, input.grammar.anyt
 if not (_pass) then
 return false
 end
-return input:applyWithArgs(Aux.apply, getmetatable(node).type, input.grammar.unexpected)
+return input:applyWithArgs(Aux.apply, getType(node), input.grammar.unexpected)
 end)
 end, arity = 0, grammar = nil, name = 'trans'}), unexpected = OMeta.Rule({behavior = function (input)
 local _pass, node

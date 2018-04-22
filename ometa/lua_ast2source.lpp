@@ -32,7 +32,7 @@ local lsep, esep = '\n', ', '
 
 local ometa LuaAstToSourceTranslator {
 
-  trans                 = node:&.                                                                 Aux.apply([getmetatable(node).type], unexpected),
+  trans                 = node:&.                                                                 Aux.apply([getType(node)], unexpected),
   unexpected            = node:.                                                                  [? error('unexpected node: ' .. tostring(node))],
   
   [NilLiteral]          = .                                                                       ['nil'],

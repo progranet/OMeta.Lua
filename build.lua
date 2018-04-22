@@ -8,7 +8,7 @@ local OMeta = require 'ometa'
 local Model = require 'ometa_abstractsyntax'
 local Grammar = require 'ometa_lua_grammar'.OMetaInLuaGrammar
 
-local alt = {'reference', 'nesting'}
+local alt = {'reference'}
 
 local OMetaToLuaTranslator = require('ometa_ast2lua_ast_' .. alt[1])
 local ToSourceTranslator = require 'lua_ast2source'
@@ -61,7 +61,7 @@ local function compileFile(name)
   print('============================')
 end
 
-local libs = {'commons','grammar_commons','binary_commons','auxiliary','lua_grammar','lua52_grammar','ometa_grammar','ometa_lua_grammar','ometa_ast2lua_ast_' .. alt[1], 'ometa_ast2lua_ast_' .. alt[2],'lua_ast2source'}
+local libs = {'commons','grammar_commons','binary_commons','auxiliary','lua_grammar','lua52_grammar','ometa_grammar','ometa_lua_grammar','ometa_ast2lua_ast_' .. alt[1],'lua_ast2source'}
 
 return {
   parseFile = parseFile,
