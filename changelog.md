@@ -1,4 +1,4 @@
-1.0beta 2018-04-22
+1.0.0-beta 2018-04-22
 
 Features implemented:
 - OMeta engine
