@@ -27,6 +27,9 @@ OMeta is implemented in OMeta itself and works as an extension to Lua syntax. Th
 ### Requirements
 Project requires Lua 5.1 or newer.
 
+### Version
+See [changelog](./changelog.md)
+
 ### Using OMeta/Lua
 Compiled Grammar packages are normal Lua modules that can be required.
 ```lua

@@ -1,0 +1,71 @@
+1.0beta 2018-04-22
+
+Features implemented:
+- OMeta engine
+  - application with arguments
+    - prepending extra arguments to input stream
+  - application of standard Lua functions
+  - "application" of *Types::Any* subtype - type inclusion test (*instanceOf*)
+  - foreign application
+    - single Rule from "foreign" Grammar (namespace) within current parsing context
+    - switching parsing contexts - embedding whole Grammars
+  - memoization
+    - prepended arguments memoization - default
+    - direct arguments (forwarded to Lua function) memoization on demand
+  - left recursion
+- Streams
+  - list streams
+    - character stream
+    - table (array) stream
+    - binary (byte) stream
+  - prepending streams
+  - property stream (matching named table properties)
+- Input
+  - string - create character stream
+  - file
+    - create character stream - text mode, default
+    - create binary (byte) stream - binary mode
+  - table
+    - create table (array) stream
+    - create property streams - "random access"
+- Grammar class
+  - merge Rules - cloning Rules from existing Grammars into "derived" one
+- Rule class
+  - defining packages of Rules (Grammars)
+  - defining standalone Rule
+  - direct Rule application
+    - match string
+    - match table (array)
+    - match sequence of mixed elements
+    - match file
+      - match text file
+      - match binary file
+- Writing sources
+  - syntax extension for writing Grammars - new Keyword (*ometa*)
+  - syntax extension for writing standalone Rules - new Keyword (*rule*)
+  - syntax extension for string interpolation - new Special character (*backtick*)
+- Type system
+  - Literal data types
+  - AST classes for Lua abstract syntax
+  - AST classes for OMeta abstract syntax
+  - Array type for convenient manipulation of Node sequences
+  - multiple inheritance with C3 method resolution order
+  - *getType* global function to get instance type
+  - `type::isInstance(instance : any) : boolean` - method for type inclusion testing
+- Grammars implemented
+  - standalone Lua 5.1 Grammar
+  - standalone Lua 5.2 Grammar - as 5.1 extension
+  - standalone OMeta Grammar
+  - Lua embedded in OMeta Grammar for Host Nodes
+  - complete OMeta embedded in Lua Grammar - for source text
+  - OMeta in Lua mixed content Grammar - for heterogeneous streams
+- Translation
+  - reference OMeta abstract syntax into Lua abstract syntax translator
+  - Lua abstract syntax into Lua source translator
+    - implemented as OMeta Grammar
+    - implemented as feature of Lua abstract syntax Node types (*toLuaSource* method)
+
+Non-functional "features":
+- OMeta/Lua Grammar is not exactly the same as OMeta/JS Grammar. There are some differences resulting from adaptation to Lua specifics and from slightly different assumptions.
+- Current optimization is poor. Reference OMeta AST to Lua AST translator produces a simple but inefficient code. A new version of translator producing more "linear" (optimizable better) Lua source code will be available "soon".
+- The Naming convention for types and features is deliberately non-Luaish. This is due to the fact that the project is part of a larger effort based on such a specifications as Unified Modeling Language or Meta-Object Facility and the convention was adopted in accordance with those specifications.

@@ -153,17 +153,12 @@ local ometa MixedAstCalc {
 MixedAstCalc:merge(AstCalc)
 
 return {
-  
   Calc          = Calc;
-  
   EvalCalc      = EvalCalc;
-  
   TableTreeCalc = TableTreeCalc,
-  
   BinOp         = BinOp,
   OpTreeCalc    = OpTreeCalc,
   MixedOTCalc   = MixedOTCalc;
-  
   AddOp         = AddOp,
   SubOp         = SubOp,
   MulOp         = MulOp,
