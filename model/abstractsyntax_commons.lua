@@ -6,38 +6,6 @@ local Types = require('types')
 local primitive, dataType, class = Types.primitive, Types.dataType, Types.class
 local Any, Array = Types.Any, Types.Array
 
-local Boolean = primitive {
-  name = 'Boolean';
-  
-  properties = {
-    'bool';
-  };
-}
-
-local Real = primitive {
-  name = 'Real';
-  
-  properties = {
-    'double';
-  };
-}
-
-local Integer = primitive {
-  name = 'Integer';
-  
-  properties = {
-    'int';
-  };
-}
-
-local String = primitive {
-  name = 'String';
-  
-  properties = {
-    'char *';
-  };
-}
-
 local Literal = dataType {
   abstract = true,
 	name = 'Literal',
@@ -51,19 +19,11 @@ local Literal = dataType {
 local NilLiteral = dataType {
 	name = 'NilLiteral',
 	super = {Literal};
-  
-  properties = {
-    
-  };
 }
 
 local BooleanLiteral = dataType {
 	name = 'BooleanLiteral',
 	super = {Literal};
-  
-  properties = {
-    Boolean;
-  };
 }
 
 local NumberLiteral = dataType {
@@ -75,39 +35,22 @@ local NumberLiteral = dataType {
 local RealLiteral = dataType {
 	name = 'RealLiteral',
 	super = {NumberLiteral};
-  
-  properties = {
-    Real;
-  };
 }
 
 local IntegerLiteral = dataType {
 	name = 'IntegerLiteral',
 	super = {NumberLiteral};
-  
-  properties = {
-    Integer;
-  };
 }
 
 local CharSequenceLiteral = dataType {
   abstract = true,
   name = 'CharSequenceLiteral',
   super = {Literal};
-  
-  properties = {
-    String;
-  };
 }
 
 local StringLiteral = dataType {
 	name = 'StringLiteral',
 	super = {CharSequenceLiteral};
-  
-  properties = {
-    ldelim = String;
-    rdelim = String;
-  };
   
   constructor = function(class, init)
     if init.ldelim == nil then
@@ -150,10 +93,6 @@ local Special = dataType {
 local Comment = dataType {
 	name = 'Comment',
 	super = {Literal};
-  
-  properties = {
-    String;
-  };
 
   toLuaSource = function(self)
     return ''
@@ -163,10 +102,6 @@ local Comment = dataType {
 local Space = dataType {
 	name = 'Space',
 	super = {Literal};
-  
-  properties = {
-    String;
-  };
 }
 
 

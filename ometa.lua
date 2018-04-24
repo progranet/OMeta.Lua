@@ -18,7 +18,7 @@ local Record = dataType {
   super = {};
 }
 
-local _idn = 0
+local depth = 0
 local cache = {}
 local OMeta
 
@@ -60,22 +60,22 @@ OMeta.Input = class {
   
   apply = function(self, ruleImpl)
     
-    _idn = _idn + 1
+    depth = depth + 1
     local entryState = self.stream
     
     if type(ruleImpl) == 'function' then
-      --print(self.stream._index, _idn, 'native fn' .. string.rep(' ', 16), self.stream._head)
+      --print(self.stream._index, depth, 'native fn' .. string.rep(' ', 16), self.stream._head)
       local pass, result = ruleImpl(self)
       if not pass then self.stream = entryState end
-      _idn = _idn - 1
+      depth = depth - 1
       return pass, result
     end
     
     local behavior = ruleImpl.behavior
     if not behavior then
       -- "plain" type as a rule
-      --print(self.stream._index, _idn, ruleImpl.name .. string.rep(' ', 25 - #ruleImpl.name), self.stream._head)
-      _idn = _idn - 1
+      --print(self.stream._index, depth, ruleImpl.name .. string.rep(' ', 25 - #ruleImpl.name), self.stream._head)
+      depth = depth - 1
       if ruleImpl:isInstance(self.stream._head) then 
         return self:next()
       end
@@ -87,29 +87,29 @@ OMeta.Input = class {
   
   applyWithArgs = function(self, ruleImpl, ...)
 
-    _idn = _idn + 1
+    depth = depth + 1
     local entryState = self.stream
     
     if type(ruleImpl) == 'function' then
-      --print(self.stream._index, _idn, 'native fn' .. string.rep(' ', 16), self.stream._head, 'args:', ...)
+      --print(self.stream._index, depth, 'native fn' .. string.rep(' ', 16), self.stream._head, 'args:', ...)
       local pass, result = ruleImpl(self, ...)
       if not pass then self.stream = entryState end
-      _idn = _idn - 1
+      depth = depth - 1
       return pass, result
     end
     
     local behavior = ruleImpl.behavior
     if not behavior then
       -- expected behavior not yet specified
-      --print(self.stream._index, _idn, ruleImpl.name .. string.rep(' ', 25 - #ruleImpl.name), self.stream._head, 'args:', ...)
+      --print(self.stream._index, depth, ruleImpl.name .. string.rep(' ', 25 - #ruleImpl.name), self.stream._head, 'args:', ...)
       print('warning:', 'object does not implement rule behavior', ruleImpl)
-      _idn = _idn - 1
+      depth = depth - 1
       return false
     end
 
     local argsn = select('#', ...)
     local fnarity = ruleImpl.arity and ruleImpl.arity ~= -1 and ruleImpl.arity or argsn
-    --print(self.stream._index, _idn, ruleImpl.name .. string.rep(' ', 25 - #ruleImpl.name), self.stream._head, 'args (' .. tostring(fnarity) .. '/' .. tostring(argsn) .. '):', ...)
+    --print(self.stream._index, depth, ruleImpl.name .. string.rep(' ', 25 - #ruleImpl.name), self.stream._head, 'args (' .. tostring(fnarity) .. '/' .. tostring(argsn) .. '):', ...)
     if fnarity < argsn then
       self.stream = self.stream:prepend(argsn - fnarity, select(fnarity + 1, ...))
     end
@@ -117,7 +117,7 @@ OMeta.Input = class {
     if fnarity ~= 0 and not self.memoizeParameters then
       local pass, result = behavior(self, ...)
       if not pass then self.stream = entryState end
-      _idn = _idn - 1
+      depth = depth - 1
       return pass, result
     end
 
@@ -138,7 +138,7 @@ OMeta.Input = class {
       local pass, result = ruleImpl.behavior(self, ...)
       if not pass then 
         self.stream = entryState
-        _idn = _idn - 1
+        depth = depth - 1
         return false, result 
       end
       record.pass       = pass
@@ -163,13 +163,13 @@ OMeta.Input = class {
       ruleImpl.hits = ruleImpl.hits + 1
       if record.failer then
         record.failerUsed = true
-        _idn = _idn - 1
+        depth = depth - 1
         return false
       end
       ruleImpl.cache = ruleImpl.cache + 1
     end
     self.stream = record.nextState
-    _idn = _idn - 1
+    depth = depth - 1
     return record.pass, record.result
   end,
 
@@ -211,7 +211,7 @@ OMeta.Input = class {
   
   match = function(self, ruleImpl, ...)
     local pass, result
-    if select('#', ...) == 0 then
+    if not ... then
       pass, result = self:apply(ruleImpl)
     else
       pass, result = self:applyWithArgs(ruleImpl, ...)
