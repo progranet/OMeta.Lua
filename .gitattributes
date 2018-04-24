@@ -1,3 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 *.lpp linguist-language=lua
+grammars/*.lua linguist-generated=true
+ometa/*.lua linguist-generated=true
+ometa/ometa_stdlib.lua linguist-generated=false
