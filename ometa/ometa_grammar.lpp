@@ -1,3 +1,4 @@
+-- vim: syntax=lua
 
 local tostring, tonumber, select, type, getmetatable, setmetatable, rawget
     = tostring, tonumber, select, type, getmetatable, setmetatable, rawget
