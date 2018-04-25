@@ -6,7 +6,7 @@ Citing [OMeta Homepage](http://www.tinlizzie.org/ometa/):
 > OMeta is a new object-oriented language for pattern matching. It is based on a variant of Parsing Expression Grammars (PEGs) which we have extended to handle arbitrary data types. 
 OMeta's general-purpose pattern matching facilities provide a natural and convenient way for programmers to implement tokenizers, parsers, visitors, and tree transformers, all of which can be extended in interesting ways using familiar object-oriented mechanisms.
 
-Most of the features of the original OMeta and in particular OMeta/JS implementation also apply to OMeta/Lua. [Ph.D. dissertation](http://www.vpri.org/pdf/tr2008003_experimenting.pdf) of Alessandro Warth, author of OMeta is the best source of information in the subject.
+Most of the features of the original [OMeta](http://www.tinlizzie.org/ometa/) and in particular [OMeta/JS](../../../../alexwarth/ometa-js) implementation also apply to OMeta/Lua. [Ph.D. dissertation](http://www.vpri.org/pdf/tr2008003_experimenting.pdf) of Alessandro Warth, author of OMeta is the best source of information in the subject.
 
 If you want to better feel the ideas behind OMeta see this [presentation](http://www.tinlizzie.org/ometa/sts08-slides.pdf). In large part, these are ideas that guide OMeta/Lua implementation also.
 
