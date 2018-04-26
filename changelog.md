@@ -1,11 +1,13 @@
 **1.0.1-beta 2018-04-26**
 
 Bug fixed:
-Application of Rule with name which is Lua Keyword is properly generated now.
+
+- Application of Rule with name which is Lua Keyword is properly generated now.
 
 New example:
-Factorial Grammar - OMeta/JS example with pseudo-polymorphic Rule translated to OMeta/Lua.
 
+- Factorial Grammar - OMeta/JS example with pseudo-polymorphic Rule translated to OMeta/Lua.
+___
 **1.0.0-beta 2018-04-22**
 
 Features implemented:
