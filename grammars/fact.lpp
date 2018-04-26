@@ -1,0 +1,16 @@
+--[[
+    translated example form OMeta/JS distribution
+    how to make "polymorphic" Rule in OMeta/Lua
+]]
+
+local OMeta = require'ometa' 
+
+local ometa Factorial {
+  fact  = 0                                   [1]
+        | n:number [? n > 0] m:fact([n - 1])  [n * m]
+}
+Factorial:merge(require 'commons')
+
+print(Factorial.fact:matchMixed(5))
+
+return Factorial
