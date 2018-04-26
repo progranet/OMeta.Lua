@@ -199,7 +199,7 @@ The scope of a variable is lexical. For the Rule parameters this is a whole Rule
 - or the end of current ordered Choice alternative;
 ```lua
 embedded = outer:(inner:applySomething [inner]) [outer],
-alts     = v1:alt1 | v2:alt2 | v3:[v1 or v2] -- v1 and v2 are unbound (out of its scope), so v3 is always nil
+alts     = v1:alt1 | v2:alt2 | v3:[v1 or v2] -- v1 and v2 are unbound here (out of their scope), so v3 is always nil
 ```
 In OMeta/Lua variables can contain Rules and those Rules can be applied directly by a variable name:
 ```lua
