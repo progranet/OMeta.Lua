@@ -11,7 +11,13 @@ end
 local success, res = input:collect(#r - (drop or 0))
 return success, (res:concat())
 end, apply = function (input, ruleRef, fallback, ...)
-ruleRef = input.grammar[ruleRef] or (type(fallback) == 'string' and input.grammar[fallback] or fallback)
+ruleRef = input.grammar[ruleRef]
+if not ruleRef then
+if not fallback then
+return false
+end
+ruleRef = type(fallback) == 'string' and input.grammar[fallback] or fallback
+end
 if ... then
 return input:applyWithArgs(ruleRef, ...)
 else

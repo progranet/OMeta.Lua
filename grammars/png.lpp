@@ -63,7 +63,7 @@ local ometa PngGrammar {
                                                           ['blue x']  = bx, ['blue y']  = by}],
   gAMA(len) = g:int32                                   [{name = "Image gamma", value = g}],              -- 4.2.3. gAMA Image gamma
   hIST(len) = d:int16/[len/2]                           [{name = "Image histogram", data = d}],           -- 4.2.4. hIST Image histogram
-  pHYs(len) = x:int32 y:int32 unit:byte	                [{name = "Physical pixel dimensions",             -- 4.2.5. pHYs Physical pixel dimensions
+  pHYs(len) = x:int32 y:int32 unit:byte                 [{name = "Physical pixel dimensions",             -- 4.2.5. pHYs Physical pixel dimensions
                                                           x = x, y = y, 
                                                           unit = init == 1 and 'meter' or 'unknown'}],
   sBIT      = d:byte/number                             [{name = "Significant bits", data = d}],          -- 4.2.6. sBIT Significant bits

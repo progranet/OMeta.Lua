@@ -8,8 +8,8 @@ local Any, Array = Types.Any, Types.Array
 
 local Literal = dataType {
   abstract = true,
-	name = 'Literal',
-	super = {Any};
+  name = 'Literal',
+  super = {Any};
 
   toLuaSource = function(self)
     return tostring(self[1])
@@ -17,29 +17,29 @@ local Literal = dataType {
 }
 
 local NilLiteral = dataType {
-	name = 'NilLiteral',
-	super = {Literal};
+  name = 'NilLiteral',
+  super = {Literal};
 }
 
 local BooleanLiteral = dataType {
-	name = 'BooleanLiteral',
-	super = {Literal};
+  name = 'BooleanLiteral',
+  super = {Literal};
 }
 
 local NumberLiteral = dataType {
   abstract = true,
-	name = 'NumberLiteral',
-	super = {Literal};
+  name = 'NumberLiteral',
+  super = {Literal};
 }
 
 local RealLiteral = dataType {
-	name = 'RealLiteral',
-	super = {NumberLiteral};
+  name = 'RealLiteral',
+  super = {NumberLiteral};
 }
 
 local IntegerLiteral = dataType {
-	name = 'IntegerLiteral',
-	super = {NumberLiteral};
+  name = 'IntegerLiteral',
+  super = {NumberLiteral};
 }
 
 local CharSequenceLiteral = dataType {
@@ -49,8 +49,8 @@ local CharSequenceLiteral = dataType {
 }
 
 local StringLiteral = dataType {
-	name = 'StringLiteral',
-	super = {CharSequenceLiteral};
+  name = 'StringLiteral',
+  super = {CharSequenceLiteral};
   
   constructor = function(class, init)
     if init.ldelim == nil then
@@ -71,28 +71,28 @@ local StringLiteral = dataType {
 }
 
 local Sequence = dataType {
-	name = 'Sequence',
-	super = {CharSequenceLiteral};
+  name = 'Sequence',
+  super = {CharSequenceLiteral};
 }
 
 local Name = dataType {
-	name = 'Name',
-	super = {CharSequenceLiteral};
+  name = 'Name',
+  super = {CharSequenceLiteral};
 }
 
 local Keyword = dataType {
-	name = 'Keyword',
-	super = {CharSequenceLiteral};
+  name = 'Keyword',
+  super = {CharSequenceLiteral};
 }
 
 local Special = dataType {
-	name = 'Special',
-	super = {CharSequenceLiteral};
+  name = 'Special',
+  super = {CharSequenceLiteral};
 }
 
 local Comment = dataType {
-	name = 'Comment',
-	super = {Literal};
+  name = 'Comment',
+  super = {Literal};
 
   toLuaSource = function(self)
     return ''
@@ -100,8 +100,8 @@ local Comment = dataType {
 }
 
 local Space = dataType {
-	name = 'Space',
-	super = {Literal};
+  name = 'Space',
+  super = {Literal};
 }
 
 
