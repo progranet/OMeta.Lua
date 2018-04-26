@@ -35,6 +35,7 @@ local Binding, Application, Choice, Sequence, Lookahead,
 local toLuaAst
 local rno = 0
 
+local OMeta = require 'ometa'
 local Grammar = require 'ometa_lua_grammar'.OMetaInLuaMixedGrammar
 
 local function exp(...)
@@ -55,6 +56,11 @@ local function laststat(...)
   return ast
 end
 
+local luaContext = OMeta.use(Grammar):forString('')
+local function isLuaKeyword(str)
+  return luaContext:applyWithArgs(Grammar.keyword, str)
+end
+
 local function name2ast(name, context)
   local ast = Get {name = name[1]}
   if context and #name == 1 then
@@ -65,9 +71,17 @@ local function name2ast(name, context)
     if l1 >= 'A' and l1 <= 'Z' then
       return ast
     end
-    return exp`input.grammar.${name[1]}`
+    if isLuaKeyword(name[1][1]) then
+      return exp`input.grammar[${StringLiteral {name[1][1]}}]`
+    else
+      return exp`input.grammar.${name[1]}`
+    end
   end
   for i = 2, #name do
+    local n = name[i]
+    if isLuaKeyword(n[1]) then
+      n = StringLiteral {n[1]}
+    end
     ast = GetProperty {
       context = ast,
       index = name[i]

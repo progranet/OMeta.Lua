@@ -25,6 +25,8 @@ local ometa Commons {
                       ,
   table               = [? type(input.stream._head) == 'table']       .
                       ,
+  ['function']        = [? type(input.stream._head) == 'function']    .
+                      ,
   notLast(element)    = prev:element &element                         [prev]
                       ,
   list(element, delim, minimum)

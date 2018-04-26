@@ -10,6 +10,7 @@ local omas = require('ometa_abstractsyntax')
 local Binding, Application, Choice, Sequence, Lookahead, Exactly, Token, Subsequence, NotPredicate, AndPredicate, Optional, Many, Consumed, Loop, Anything, HostNode, HostPredicate, HostStatement, HostExpression, RuleApplication, Object, Key, Rule, RuleExpression, RuleStatement, Grammar, GrammarExpression, GrammarStatement = omas.Binding, omas.Application, omas.Choice, omas.Sequence, omas.Lookahead, omas.Exactly, omas.Token, omas.Subsequence, omas.NotPredicate, omas.AndPredicate, omas.Optional, omas.Many, omas.Consumed, omas.Loop, omas.Anything, omas.HostNode, omas.HostPredicate, omas.HostStatement, omas.HostExpression, omas.RuleApplication, omas.Object, omas.Key, omas.Rule, omas.RuleExpression, omas.RuleStatement, omas.Grammar, omas.GrammarExpression, omas.GrammarStatement
 local toLuaAst
 local rno = 0
+local OMeta = require('ometa')
 local Grammar = require('ometa_lua_grammar').OMetaInLuaMixedGrammar
 local function exp(...)
 local ast = Grammar.exp:matchMixed(...)
@@ -23,6 +24,10 @@ local function laststat(...)
 local ast = Grammar.laststat:matchMixed(...)
 return ast
 end
+local luaContext = OMeta.use(Grammar):forString('')
+local function isLuaKeyword(str)
+return luaContext:applyWithArgs(Grammar.keyword, str)
+end
 local function name2ast(name, context)
 local ast = Get({name = name[1]})
 if context and #name == 1 then
@@ -33,9 +38,17 @@ local l1 = name[1][1]:sub(1, 1)
 if l1 >= 'A' and l1 <= 'Z' then
 return ast
 end
+if isLuaKeyword(name[1][1]) then
+return exp([[input.grammar[]], StringLiteral({name[1][1]}), [=[]]=])
+else
 return exp([[input.grammar.]], name[1], [[]])
 end
+end
 for i = 2, #name do
+local n = name[i]
+if isLuaKeyword(n[1]) then
+n = StringLiteral({n[1]})
+end
 ast = GetProperty({context = ast, index = name[i]})
 end
 return ast

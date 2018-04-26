@@ -54,7 +54,15 @@ return false
 end
 return input:apply(input.grammar.anything)
 end)
-end, arity = 0, grammar = nil, name = 'table'}), notLast = OMeta.Rule({behavior = function (input, element)
+end, arity = 0, grammar = nil, name = 'table'}), ['function'] = OMeta.Rule({behavior = function (input)
+local _pass
+return input:applyWithArgs(input.grammar.choice, function (input)
+if not (type(input.stream._head) == 'function') then
+return false
+end
+return input:apply(input.grammar.anything)
+end)
+end, arity = 0, grammar = nil, name = 'function'}), notLast = OMeta.Rule({behavior = function (input, element)
 local _pass, prev
 return input:applyWithArgs(input.grammar.choice, function (input)
 _pass, prev = input:apply(element)
