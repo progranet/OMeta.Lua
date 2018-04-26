@@ -199,7 +199,7 @@ The scope of a variable is lexical. For the Rule parameters this is a whole Rule
 - or the end of current ordered Choice alternative;
 ```lua
 embedded = outer:(inner:applySomething [inner]) [outer],
-alts     = val1:alt1 | val2:alt2 | [val1 or val2] -- val1 and val2 are unbound (out of scope)
+alts     = v1:alt1 | v2:alt2 | v3:[v1 or v2] -- v1 and v2 are unbound (out of its scope), so v3 is always nil
 ```
 In OMeta/Lua variables can contain Rules and those Rules can be applied directly by a variable name:
 ```lua
@@ -292,7 +292,8 @@ where:
 For example:
 - `list(exp, ',')` - any number of *exp*s separated by commas (as a single char) - it is not the same as...
 - `list(exp, ",")` - ...where commas are tokens;
-- `list(number | boolean | string, ";" | ",", [num or 1])` - matches at least *num* (or `1` if *num* is "falsy") primitive Lua values delimited by semicolons or commas.
+- `list(number | boolean | string, ";" | ",", [num or 1])` - matches at least *num* (or `1` if *num* is "falsy") primitive Lua values delimited by semicolons or commas;
+- `list(.,.)` - note that even such an expression is valid - any number of anything separated by anything;
 
 A higher order Rule may be user defined, e.g.:
 ```lua
@@ -338,7 +339,7 @@ In the case of parsing map part of a table, there is no expectation of a number 
 
 The last unique thing related to table parsing is a shorthand for combined property parsing and binding:
 ```lua
-parseAndBind = {.* ; kind:=string, length:=number}
+parseAndBind = { .* ; kind:=string, length:=number }
 ```
 This form automatically binds a result value to the same name as a property name. In the other words: `length:=number` has the same effect as `length=length:number`.
 
@@ -441,7 +442,7 @@ interpolated = `${interpolated}!!!`
 ```
 The embedded expression can be a string interpolation itself:
 ```lua
-str = `${`${'str'}`}`
+str = `${`${`str`}`}`
 ```
 #### Function call with interpolated string
 When a string interpolation is used as the only argument to a function call / method send, the function receives sequence of "slices" of the string interwoven with (results of) the expressions. This means that:
