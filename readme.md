@@ -293,6 +293,7 @@ For example:
 - `list(exp, ',')` - any number of *exp*s separated by commas (as a single char) - it is not the same as...
 - `list(exp, ",")` - ...where commas are tokens;
 - `list(number | boolean | string, ";" | ",", [num or 1])` - matches at least *num* (or `1` if *num* is "falsy") primitive Lua values delimited by semicolons or commas;
+- `list(list(<(~(','|'\n') .)*>, ','), '\n')` - "one-liner" for parsing multi-line comma-separated values (returns two-dimensional array);
 - `list(.,.)` - note that even such an expression is valid - any number of anything separated by anything;
 
 A higher order Rule may be user defined, e.g.:
