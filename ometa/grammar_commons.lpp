@@ -37,7 +37,7 @@ local ometa CharacterPatterns {
               ,
   nameRest    = any:string [? any:match('^[%w_]$')]  [any]
               ,
-  nameString  = Aux.pattern(['[%a_][%w_]*']);
+  nameString  = Aux.pattern('[%a_][%w_]*');
 }
 
 

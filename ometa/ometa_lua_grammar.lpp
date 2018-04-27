@@ -69,8 +69,8 @@ ometa OMetaInLuaGrammar {
                 | 'rule'
                 ,
   stat          = "local" "ometa" n:name body:grammarBody                               [GrammarStatement {isLocal = true, name = Array {n}, rules = body}]
-                | "ometa" ns:list(name, ".", [1]) body:grammarBody                      [GrammarStatement {isLocal = false, name = ns, rules = body}]
-                | "rule" ns:list(name, ".", [1]) ":" n:name body:ruleBody               [RuleStatement {
+                | "ometa" ns:list(name, ".", 1) body:grammarBody                        [GrammarStatement {isLocal = false, name = ns, rules = body}]
+                | "rule" ns:list(name, ".", 1) ":" n:name body:ruleBody                 [RuleStatement {
                                                                                           namespace = ns, name = n, 
                                                                                           arguments = body[1][1], variableArguments = body[1][2], 
                                                                                           block = body[2]}]

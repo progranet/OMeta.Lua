@@ -62,8 +62,9 @@ OMeta.Input = class {
     
     depth = depth + 1
     local entryState = self.stream
+    local ruleType = type(ruleImpl)
     
-    if type(ruleImpl) == 'function' then
+    if ruleType == 'function' then
       --print(self.stream._index, depth, 'native fn' .. string.rep(' ', 16), self.stream._head)
       local pass, result = ruleImpl(self)
       if not pass then self.stream = entryState end
@@ -76,9 +77,12 @@ OMeta.Input = class {
       -- "plain" type as a rule
       --print(self.stream._index, depth, ruleImpl.name .. string.rep(' ', 25 - #ruleImpl.name), self.stream._head)
       depth = depth - 1
-      if ruleImpl:isInstance(self.stream._head) then 
-        return self:next()
+      if ruleType == 'table' then 
+        if ruleImpl:isInstance(self.stream._head) then return self:next() end
+      else
+        return self:applyWithArgs(self.grammar.exactly, ruleImpl)
       end
+      
       return false, self.stream._head
     end
     

@@ -214,6 +214,9 @@ end
 if Sequence:isInstance(orig) and #orig.nodes == 1 then
 orig = orig.nodes[1]
 end
+if Exactly:isInstance(orig) and Literal:isInstance(orig.expression) and not generic then
+orig = orig.expression
+end
 if Application:isInstance(orig) and not Choice:isInstance(orig) then
 orig = orig:toRuleApplication()
 end

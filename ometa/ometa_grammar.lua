@@ -246,9 +246,7 @@ end)
 end, arity = 0, grammar = nil, name = 'primexp'}), path = OMeta.Rule({behavior = function (input)
 local _pass
 return input:applyWithArgs(input.grammar.choice, function (input)
-return input:applyWithArgs(input.grammar.list, input.grammar.name, function (input)
-return input:applyWithArgs(input.grammar.exactly, '.')
-end, 1)
+return input:applyWithArgs(input.grammar.list, input.grammar.name, '.', 1)
 end)
 end, arity = 0, grammar = nil, name = 'path'}), args = OMeta.Rule({behavior = function (input)
 local _pass, args

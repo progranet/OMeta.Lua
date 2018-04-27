@@ -317,14 +317,10 @@ _pass, str = input:applyWithArgs(input.grammar.consumed, function (input)
 return input:applyWithArgs(input.grammar.many, function (input)
 return input:applyWithArgs(input.grammar.choice, input.grammar.escchar, function (input)
 local _pass
-if not (input:applyWithArgs(input.grammar.notPredicate, function (input)
-return input:applyWithArgs(input.grammar.exactly, '`')
-end)) then
+if not (input:applyWithArgs(input.grammar.notPredicate, '`')) then
 return false
 end
-if not (input:applyWithArgs(input.grammar.notPredicate, function (input)
-return input:applyWithArgs(input.grammar.exactly, '$')
-end)) then
+if not (input:applyWithArgs(input.grammar.notPredicate, '$')) then
 return false
 end
 return input:apply(input.grammar.char)

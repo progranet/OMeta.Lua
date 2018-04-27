@@ -28,7 +28,7 @@ local Commons = require 'grammar_commons'
 local ometa OMetaGrammar {
 
               --------------------------------------- structure ----------------------------------------------------------------------------
-  choiceDef     = nodes:list(sequenceDef, "|", [1])                 [Choice           {nodes = nodes}]
+  choiceDef     = nodes:list(sequenceDef, "|", 1)                   [Choice           {nodes = nodes}]
                 ,
   sequenceDef   = nodes:node+                                       [Sequence         {nodes = nodes}]
                 ,
@@ -64,13 +64,13 @@ local ometa OMetaGrammar {
                                                                                        arguments = args or Array {}}]
                 ,
               ------------------------------------ building blocks -------------------------------------------------------------------------
-  path          = list(name, '.', [1])
+  path          = list(name, '.', 1)
                 ,
   args          = '(' args:list(choiceDef, ",") ")"                 [args]
                 ,
-  props         = array:choiceDef ";"  map:list(prop, ",", [1])     [{array,          Choice      {nodes = Array {Sequence {nodes = map}}}}]
+  props         = array:choiceDef ";"  map:list(prop, ",", 1)       [{array,          Choice      {nodes = Array {Sequence {nodes = map}}}}]
                 | array:choiceDef ";"?                              [{array,          NilLiteral  {}}]
-                |                 ";"? map:list(prop, ",", [1])     [{NilLiteral {},  Choice      {nodes = Array {Sequence {nodes = map}}}}]
+                |                 ";"? map:list(prop, ",", 1)       [{NilLiteral {},  Choice      {nodes = Array {Sequence {nodes = map}}}}]
                 |                 ";"?                              [{NilLiteral {},  NilLiteral  {}}]
                 ,
   prop          = name:name ":=" exp:choiceDef                  exp:[Binding          {expression = exp, name = name}]

@@ -271,7 +271,7 @@ The Rules in OMeta can have parameters. The Rule declares formal parameters and 
 Example:
 ```lua
 ometa Spec {
-  somecode = varchar([5]) '-' varchar([5]) '-' varchar([10]),
+  somecode = varchar(5) '-' varchar(5) '-' varchar(10),
   varchar  = char/number --repeats char number of times
 }
 ```

@@ -724,9 +724,7 @@ return input:applyWithArgs(input.grammar.choice, function (input)
 local _state = input.stream
 input.stream = input.stream:property('name')
 _pass = input:applyWithArgs(input.grammar.choice, function (input)
-return input:applyWithArgs(input.grammar.object, function (input)
-return input:applyWithArgs(input.grammar.exactly, 'not')
-end, nil)
+return input:applyWithArgs(input.grammar.object, 'not', nil)
 end)
 input.stream = _state
 if not (_pass) then

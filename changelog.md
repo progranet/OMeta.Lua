@@ -1,11 +1,14 @@
+**1.0.2-beta 2018-04-27**
+
+Improvement:
+- primitive values (strings, booleans, numbers) can be passed as a Rule application arguments directly (without using Host Expresions). E.g.: `varchar([5])` can be simplified to `varchar(5)`
+___
 **1.0.1-beta 2018-04-26**
 
 Bug fixed:
-
 - Application of Rule with name which is Lua Keyword is properly generated now.
 
 New example:
-
 - Factorial Grammar - OMeta/JS example with pseudo-polymorphic Rule translated to OMeta/Lua.
 ___
 **1.0.0-beta 2018-04-22**

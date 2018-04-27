@@ -68,11 +68,11 @@ local ometa LuaGrammar {
                   "do" body:block "end"                                         [For {name = var, startExpression = startExp, stopExpression = stopExp, stepExpression = stepExp, block = body}]
                 | "for" vars:namelist "in" exps:explist 
                   "do" body:block "end"                                         [ForIn {names = vars, expressions = exps, block = body}]
-                | "function" ns:list(name, ".", [1]) ":" mn:name body:funcbody  [MethodStatement {context = ns, name = mn, arguments = body[1][1], variableArguments = body[1][2], block = body[2]}]
-                | "function" ns:list(name, ".", [1]) body:funcbody              [FunctionStatement {isLocal = false, context = ns, arguments = body[1][1], variableArguments = body[1][2], block = body[2]}]
+                | "function" ns:list(name, ".", 1) ":" mn:name body:funcbody    [MethodStatement {context = ns, name = mn, arguments = body[1][1], variableArguments = body[1][2], block = body[2]}]
+                | "function" ns:list(name, ".", 1) body:funcbody                [FunctionStatement {isLocal = false, context = ns, arguments = body[1][1], variableArguments = body[1][2], block = body[2]}]
                 | "local" "function" n:name body:funcbody                       [FunctionStatement {isLocal = true,  name = n,  arguments = body[1][1], variableArguments = body[1][2], block = body[2]}]
                 | "local" names:namelist exps:("=" explist | empty [Array {}])  [Set {isLocal = true, names = names, expressions = exps}]
-                | names:list(prefixexp, ",", [1]) "=" exps:explist              [Set {isLocal = false, names = names, expressions = exps}]
+                | names:list(prefixexp, ",", 1) "=" exps:explist                [Set {isLocal = false, names = names, expressions = exps}]
                 | prefixexp
                 ,
   laststat      = "return" exps:(explist | empty [Array {}])                    [Return {expressions = exps}]
@@ -132,13 +132,13 @@ local ometa LuaGrammar {
                 | "..."                                                         [{Array {}, true}]
                 | empty                                                         [{Array {}, false}]
                 ,
-  namelist      = list(name, ",", [1])
+  namelist      = list(name, ",", 1)
                 ,
-  explist       = list(exp, ",", [1])
+  explist       = list(exp, ",", 1)
                 ,
   tableconstr   = "{" fields:fieldlist "}"                                      [TableConstructor {properties = fields}]
                 ,
-  fieldlist     = fields:list(field, "," | ";", [1]) ("," | ";")?               [fields]
+  fieldlist     = fields:list(field, "," | ";", 1) ("," | ";")?                 [fields]
                 | empty                                                         [Array {}]
                 ,
   field         = "[" i:exp "]" "=" v:exp                                       [SetProperty {index = i, expression = v}]
