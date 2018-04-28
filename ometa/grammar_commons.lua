@@ -232,7 +232,15 @@ end)
 end, arity = 0, grammar = nil, name = 'comment'}), ws = OMeta.Rule({behavior = function (input)
 local _pass
 return input:applyWithArgs(input.grammar.choice, input.grammar.space, input.grammar.comment)
-end, arity = 0, grammar = nil, name = 'ws'}), name = OMeta.Rule({behavior = function (input)
+end, arity = 0, grammar = nil, name = 'ws'}), char = OMeta.Rule({behavior = function (input)
+local _pass
+return input:applyWithArgs(input.grammar.choice, function (input)
+if not (type(input.stream._head) == 'string' and #input.stream._head == 1) then
+return false
+end
+return input:apply(input.grammar.anything)
+end)
+end, arity = 0, grammar = nil, name = 'char'}), name = OMeta.Rule({behavior = function (input)
 local _pass, ns
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.many, input.grammar.ws)) then

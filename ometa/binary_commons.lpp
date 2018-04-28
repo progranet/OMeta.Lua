@@ -21,7 +21,7 @@ local ometa BinaryCommons {
           ,
   int32   = a:int16 b:int16                                             [bor(lshift(a, 16), b)]
           ,
-  varchar = str:(b:byte [string.char(b)])/number                        [str:concat()]
+  char(n) = str:(b:byte [string.char(b)])/[n or 1]                      [str:concat()]
 }
 BinaryCommons:merge(Commons)
 

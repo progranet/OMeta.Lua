@@ -19,9 +19,6 @@ local ometa Commons {
                       ,
   string              = [? type(input.stream._head) == 'string']      .
                       ,
-  char                = [? type(input.stream._head) == 'string' 
-                           and #input.stream._head == 1]              .
-                      ,
   number              = [? type(input.stream._head) == 'number']      .
                       ,
   boolean             = [? type(input.stream._head) == 'boolean']     .

@@ -271,11 +271,11 @@ The Rules in OMeta can have parameters. The Rule declares formal parameters and 
 Example:
 ```lua
 ometa Spec {
-  somecode = varchar(5) '-' varchar(5) '-' varchar(10),
-  varchar  = char/number --repeats char number of times
+  somecode = chars(5) '-' chars(5) '-' chars(10),
+  chars  = char/number -- repeat char number of times
 }
 ```
-The Rule *varchar* is applied three times with the number of characters to parse. But there is no suitable formal parameter in the Rule *varchar*. Instead of, the Rule uses predefined Rule *number* to match Lua number prepended to the input stream by the preceding Rule application. The same effect can be achieved directly by: `varchar(num) = char/[num]`.
+The Rule *chars* is applied three times with the number of characters to parse. But there is no suitable formal parameter in the Rule *chars*. Instead of, the Rule uses predefined Rule *number* to match Lua number prepended to the input stream by the preceding Rule application. The same effect can be achieved directly by changing definition to: `chars(num) = char/[num]`.
 
 ### Higher-order Rules
 A specific case of parametrized Rule is higher-order Rule - the Rule that accepts other Rules (actually any kind of OMeta expressions) as parameters.

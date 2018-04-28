@@ -34,7 +34,7 @@ local ometa PngGrammar {
               bytes:byte*                               [Png {chunks = chunks, rest = bytes}],
               
   chunk     = len:int32 
-              type:varchar(4)                           [!  print(type, len)  ]
+              type:char(4)                              [!  print(type, len)  ]
               data:Aux.apply([type], generic, [len])    [!  data.length = len 
                                                             data.type = type  ]
               crc:byte/4                                [Chunk(data)],

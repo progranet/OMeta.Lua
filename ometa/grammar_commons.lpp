@@ -79,6 +79,9 @@ local ometa GrammarCommons {
   ws          = space 
               | comment
               ,
+  char        = [? type(input.stream._head) == 'string' 
+                   and #input.stream._head == 1]                    .
+              ,
   name        = ws* ns:nameString ~keyword([ns])                    [Name {ns}]
               ,
   token(str)  = ws* ( s:special     [? str == s]                    [Special {s}]

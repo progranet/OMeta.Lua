@@ -40,7 +40,7 @@ return false
 end
 return true, bor(lshift(a, 16), b)
 end)
-end, arity = 0, grammar = nil, name = 'int32'}), varchar = OMeta.Rule({behavior = function (input)
+end, arity = 0, grammar = nil, name = 'int32'}), char = OMeta.Rule({behavior = function (input, n)
 local _pass, str
 return input:applyWithArgs(input.grammar.choice, function (input)
 _pass, str = input:applyWithArgs(input.grammar.loop, function (input)
@@ -52,12 +52,12 @@ return false
 end
 return true, string.char(b)
 end)
-end, input.grammar.number)
+end, n or 1)
 if not (_pass) then
 return false
 end
 return true, str:concat()
 end)
-end, arity = 0, grammar = nil, name = 'varchar'})})
+end, arity = 1, grammar = nil, name = 'char'})})
 BinaryCommons:merge(Commons)
 return BinaryCommons

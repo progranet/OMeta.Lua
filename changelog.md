@@ -1,7 +1,12 @@
+**1.0.3-beta 2018-04-28**
+
+Issue fixed:
+- rearrangement and disambiguation of *char*/*varchar* Rules (to *char*/*char(n)*) independently for text and binary Grammars ('grammar_commons'/'binary_commons')
+___
 **1.0.2-beta 2018-04-27**
 
 Improvement:
-- primitive values (strings, booleans, numbers) can be passed as a Rule application arguments directly (without using Host Expresions). E.g.: `varchar([5])` can be simplified to `varchar(5)`
+- primitive values (strings, booleans, numbers) can be passed as a Rule application arguments directly (without using Host Expresions). E.g.: `char([5])` can be simplified to `char(5)`
 ___
 **1.0.1-beta 2018-04-26**
 
