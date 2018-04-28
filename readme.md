@@ -140,7 +140,7 @@ Below, there is an overview of the basic means used to build a Rule.
 |:-------:|-----:|-----|
 |Rule structure|`a \| b \| c`<br>`a b c`<br>`a ( b \| d ) c`|an ordered Choice - a sequence of alternatives<br>a Sequence of Nodes<br>a Node can be an ordered Choice again|
 |Lookahead|<br>`&a`<br>`~a`|to parse without consuming input:<br>- And Predicate<br>- Not Predicate|
-|Modifiers|`a?`<br>`a*`<br>`a+`<br>`a**min`, `a**min..max`<br>`a/num`|optional<br>zero to many<br>one to many<br>*min* to *max* (or many)<br>repeat *num* times|
+|Quantifiers|`a?`<br>`a*`<br>`a+`<br>`a**min`, `a**min..max`<br>`a/num`|optional<br>zero to many<br>one to many<br>*min* to *max* (or many)<br>repeat *num* times|
 |Grouping|`( a \| b c )`<br>`< a b c >`<br>`{ a b ; prop=c }`|to group nodes and create scope<br>consumed input stream<br>an object - [matches complex structures](#parsing-complex-data)|
 |Literals|`"keyword"`, `"("`, `")"`<br>`[[abc]]`<br>`'abc'`<br>`5`, `0xFF`, `-1.2e3`<br>`false`, `true`<br>`nil`<br>|[tokens](#tokens)<br>a sequence of characters (`'a' 'b' 'c'`)<br>a string literal<br>number literals<br>boolean literals<br>a nil literal|
 |Rule application|`.`<br>`number`<br>`list(exp, ",")`<br>`LuaGrammar.exp`<br>`Grammar.stat@Grammar`|Anything - a single element of any kind<br>matches a named Rule *number*<br>an [application with arguments](#parametrized-rules)<br>a [foreign application](#foreign-rules)<br>a foreign application with a context switch|
