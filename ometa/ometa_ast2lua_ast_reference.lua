@@ -257,7 +257,7 @@ return Array({}), exp([[input:]], fname, [[(]], arguments, [[)]])
 end
 function Key:toLuaAst(context)
 local body, res = self.expression:toLuaAst(context)
-body:prependAll(Array({stat([[local _state = input.stream]]), stat([[input.stream = input.stream:property(]], StringLiteral({self.name[1]}), [[)]])}))
+body:prependAll(Array({stat([[local _state = input.stream]]), stat([[input.stream = input.stream:property(]], self.index, [[)]])}))
 if not Binding:isInstance(self.expression) then
 body:append(stat([[_pass = ]], res, [[]]))
 res = Array({exp([[_pass]])})

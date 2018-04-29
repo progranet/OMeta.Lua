@@ -13,22 +13,14 @@ local StdLib = require 'ometa_stdlib'
 
 local ometa Commons {
 
-  eos                 =                                               ~.
-                      ,
-  empty               = [? true]                                      -- nothing to return
-                      ,
-  string              = [? type(input.stream._head) == 'string']      .
-                      ,
-  number              = [? type(input.stream._head) == 'number']      .
-                      ,
-  boolean             = [? type(input.stream._head) == 'boolean']     .
-                      ,
-  table               = [? type(input.stream._head) == 'table']       .
-                      ,
-  ['function']        = [? type(input.stream._head) == 'function']    .
-                      ,
-  notLast(element)    = prev:element &element                         [prev]
-                      ,
+  eos                 =                                               ~.,
+  empty               = [? true]                                      , -- nothing to return
+  string              = [? type(input.stream._head) == 'string']      .,
+  number              = [? type(input.stream._head) == 'number']      .,
+  boolean             = [? type(input.stream._head) == 'boolean']     .,
+  table               = [? type(input.stream._head) == 'table']       .,
+  ['function']        = [? type(input.stream._head) == 'function']    .,
+  notLast(element)    = prev:element &element                         [prev],
   list(element, delim, minimum)
                       = first:element rest:(delim element)* 
                         [? (#rest + 1) >= (minimum or 0)]             [rest:prepend(first)]

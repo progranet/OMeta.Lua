@@ -74,7 +74,37 @@ return false
 end
 return true, HostExpression({value = exp})
 end)
-end, arity = 0, grammar = nil, name = 'primexp'})})
+end, arity = 0, grammar = nil, name = 'primexp'}), prop = OMeta.Rule({behavior = function (input)
+local _pass
+return input:applyWithArgs(input.grammar.choice, OMetaGrammar.prop, function (input)
+local _pass, exp, index
+_pass, index = input:applyWithArgs(input.grammar.choice, function (input)
+local _pass, e
+if not (input:applyWithArgs(input.grammar.token, "[")) then
+return false
+end
+_pass, e = input:applyForeign(OMetaInLuaGrammar, OMetaInLuaGrammar.exp)
+if not (_pass) then
+return false
+end
+if not (input:applyWithArgs(input.grammar.token, "]")) then
+return false
+end
+return true, e
+end)
+if not (_pass) then
+return false
+end
+if not (input:applyWithArgs(input.grammar.token, "=")) then
+return false
+end
+_pass, exp = input:apply(input.grammar.choiceDef)
+if not (_pass) then
+return false
+end
+return true, Key({expression = exp, index = index})
+end)
+end, arity = 0, grammar = nil, name = 'prop'})})
 LuaInOMetaGrammar:merge(OMetaGrammar)
 local LuaGrammar = require('lua52_grammar')
 local OMetaInLuaMixedGrammar

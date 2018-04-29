@@ -321,8 +321,8 @@ end)
 end, arity = 0, grammar = nil, name = 'props'}), prop = OMeta.Rule({behavior = function (input)
 local _pass
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _pass, name, exp
-_pass, name = input:apply(input.grammar.name)
+local _pass, exp, index
+_pass, index = input:apply(input.grammar.name)
 if not (_pass) then
 return false
 end
@@ -333,14 +333,14 @@ _pass, exp = input:apply(input.grammar.choiceDef)
 if not (_pass) then
 return false
 end
-_pass, exp = true, Binding({expression = exp, name = name})
+_pass, exp = true, Binding({expression = exp, name = index})
 if not (_pass) then
 return false
 end
-return true, Key({expression = exp, name = name})
+return true, Key({expression = exp, index = StringLiteral({index[1]})})
 end, function (input)
-local _pass, name, exp
-_pass, name = input:apply(input.grammar.name)
+local _pass, exp, index
+_pass, index = input:apply(input.grammar.name)
 if not (_pass) then
 return false
 end
@@ -351,7 +351,7 @@ _pass, exp = input:apply(input.grammar.choiceDef)
 if not (_pass) then
 return false
 end
-return true, Key({expression = exp, name = name})
+return true, Key({expression = exp, index = StringLiteral({index[1]})})
 end)
 end, arity = 0, grammar = nil, name = 'prop'}), special = OMeta.Rule({behavior = function (input)
 local _pass

@@ -18,98 +18,61 @@ local Commons = require 'commons'
 local Aux = require 'auxiliary'
 
 local ometa CharacterPatterns {
-
-  space       = any:string [? any:match('^%s$')]     [any]
-              ,
-  digit       = any:string [? any:match('^%d$')]     [any]
-              ,
-  hexdigit    = any:string [? any:match('^%x$')]     [any]
-              ,
-  lower       = any:string [? any:match('^%l$')]     [any]
-              ,
-  upper       = any:string [? any:match('^%u$')]     [any]
-              ,
-  letter      = any:string [? any:match('^%a$')]     [any]
-              ,
-  alphanum    = any:string [? any:match('^%w$')]     [any]
-              ,
-  nameFirst   = any:string [? any:match('^[%a_]$')]  [any]
-              ,
-  nameRest    = any:string [? any:match('^[%w_]$')]  [any]
-              ,
+  space       = any:string [? any:match('^%s$')]     [any],
+  digit       = any:string [? any:match('^%d$')]     [any],
+  hexdigit    = any:string [? any:match('^%x$')]     [any],
+  lower       = any:string [? any:match('^%l$')]     [any],
+  upper       = any:string [? any:match('^%u$')]     [any],
+  letter      = any:string [? any:match('^%a$')]     [any],
+  alphanum    = any:string [? any:match('^%w$')]     [any],
+  nameFirst   = any:string [? any:match('^[%a_]$')]  [any],
+  nameRest    = any:string [? any:match('^[%w_]$')]  [any],
   nameString  = Aux.pattern('[%a_][%w_]*');
 }
 
-
 local ometa CharacterSets {
-
-  space         = char:char       [? char:byte() <= 32]             [char]
-                ,
-  digit         = char:char       [? char >= '0' and char <= '9']   [char]
-                ,
+  space         = char:char       [? char:byte() <= 32]             [char],
+  digit         = char:char       [? char >= '0' and char <= '9']   [char],
   hexdigit      = digit 
                 | char:char       [? char >= 'a' and char <= 'f' 
                                   or char >= 'A' and char <= 'F']   [char]
                 ,
-  lower         = char:char       [? char >= 'a' and char <= 'z']   [char]
-                ,
-  upper         = char:char       [? char >= 'A' and char <= 'Z']   [char]
-                ,
-  letter        = lower 
-                | upper
-                ,
-  alphanum      = letter 
-                | digit
-                ,
-  nameFirst     = letter 
-                | '_'
-                ,
-  nameRest      = nameFirst 
-                | digit
-                ,
+  lower         = char:char       [? char >= 'a' and char <= 'z']   [char],
+  upper         = char:char       [? char >= 'A' and char <= 'Z']   [char],
+  letter        = lower | upper,
+  alphanum      = letter | digit,
+  nameFirst     = letter | '_',
+  nameRest      = nameFirst | digit,
   nameString    = < nameFirst nameRest* >
 }
 
-
 local ometa GrammarCommons {
-  
   comment     = < [[--]] strlitL >
               | range([[--]], '\n' | eos)
               ,
-  ws          = space 
-              | comment
-              ,
+  ws          = space | comment,
   char        = [? type(input.stream._head) == 'string' 
-                   and #input.stream._head == 1]                    .
-              ,
-  name        = ws* ns:nameString ~keyword([ns])                    [Name {ns}]
-              ,
+                   and #input.stream._head == 1]                    .,
+  name        = ws* ns:nameString ~keyword([ns])                    [Name {ns}],
   token(str)  = ws* ( s:special     [? str == s]                    [Special {s}]
                     | ns:nameString [? str == ns] keyword([ns])     [Keyword {ns}]
                     )
               ,
-  escchar     = <'\\' (digit+ | char)>
-              ,
-  strlitA     = '\'' str:<(escchar | ~'\'' char)*> '\''             [StringLiteral {str}]
-              ,
-  strlitQ     = '\"' str:<(escchar | ~'\"' char)*> '\"'             [StringLiteral {str, ldelim = '"', rdelim = '"'}]
-              ,
-  strlitB     = '`'  str:<(escchar | ~'`'  char)*> '`'              [StringLiteral {str, ldelim = '`', rdelim = '`'}]
-              ,
+  escchar     = <'\\' (digit+ | char)>,
+  strlitA     = '\'' str:<(escchar | ~'\'' char)*> '\''             [StringLiteral {str}],
+  strlitQ     = '\"' str:<(escchar | ~'\"' char)*> '\"'             [StringLiteral {str, ldelim = '"', rdelim = '"'}],
+  strlitB     = '`'  str:<(escchar | ~'`'  char)*> '`'              [StringLiteral {str, ldelim = '`', rdelim = '`'}],
   strlitL     = '[' '[' str:<(~(']' ']') char)*> ']' ']'            [StringLiteral {str, ldelim = '[[', rdelim = ']]'}]
               | '[' eqs:<'='+> '['                             back:[']' .. eqs .. ']'] 
                    str:<(~subsequence([back]) char)*> 
                           subsequence([back])                       [StringLiteral {str, ldelim = '[' .. eqs .. '[', rdelim = ']' .. eqs .. ']'}]
               ,
-  intlit      = number:<digit+>                                     [IntegerLiteral {tonumber(number)}]
-              ,
+  intlit      = number:<digit+>                                     [IntegerLiteral {tonumber(number)}],
   reallit     = number:<(digit+ '.' digit* | '.' digit+) 
                          (('e' | 'E') ('+' | '-')? digit+)?>        [RealLiteral {tonumber(number)}]
               ,
-  hexlit      = number:<'0' ('x' | 'X') hexdigit+>                  [IntegerLiteral {tonumber(number)}]
-              ,
-  boollit     = str:nameString [? str == 'true' or str == 'false']  [BooleanLiteral {str == 'true'}]
-              ,
+  hexlit      = number:<'0' ('x' | 'X') hexdigit+>                  [IntegerLiteral {tonumber(number)}],
+  boollit     = str:nameString [? str == 'true' or str == 'false']  [BooleanLiteral {str == 'true'}],
   nillit      = str:nameString [? str == 'nil']                     [NilLiteral {}]
 }
 GrammarCommons:merge(Commons)

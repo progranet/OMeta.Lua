@@ -1,3 +1,10 @@
+**1.0.4-beta 2018-04-29**
+
+Improvement:
+- table property may be indicated by any Lua expression now (not only by static name), e.g.: `{ ; a:=string, [a]=string, [a .. '2']=. }`
+
+Cleaning
+___
 **1.0.3-beta 2018-04-28**
 
 Issue fixed:

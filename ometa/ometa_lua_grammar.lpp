@@ -50,6 +50,10 @@ local ometa LuaInOMetaGrammar {
                 ,
   primexp       = OMetaGrammar.primexp
                 | "[" exp:OMetaInLuaGrammar.exp@OMetaInLuaGrammar "]"                   [HostExpression {value = exp}]
+                ,
+  prop          = OMetaGrammar.prop
+                | index:("[" e:OMetaInLuaGrammar.exp@OMetaInLuaGrammar "]" [e]) 
+                  "=" exp:choiceDef                                                     [Key            {expression = exp, index = index}]
 }
 LuaInOMetaGrammar:merge(OMetaGrammar)
 

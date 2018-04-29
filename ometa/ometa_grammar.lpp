@@ -27,43 +27,39 @@ local Commons = require 'grammar_commons'
 
 local ometa OMetaGrammar {
 
-              --------------------------------------- structure ----------------------------------------------------------------------------
+                ------------------------------------- structure ----------------------------------------------------------------------------
   choiceDef     = nodes:list(sequenceDef, "|", 1)                   [Choice           {nodes = nodes}]
                 ,
   sequenceDef   = nodes:node+                                       [Sequence         {nodes = nodes}]
                 ,
   node          = name:name ":" exp:prefixexp                       [Binding          {expression = exp, name = name}]
                 |                   prefixexp
-                ,
-              --------------------------------------- lookahead ----------------------------------------------------------------------------
+                ,------------------------------------ lookahead ----------------------------------------------------------------------------
   prefixexp     =             "~" exp:suffixexp                     [NotPredicate     {expression = exp}]
                 |             "&" exp:suffixexp                     [AndPredicate     {expression = exp}]
                 |                     suffixexp
-                ,
-              --------------------------------------- modifiers ----------------------------------------------------------------------------
+                ,----------------------------------- quantifiers ---------------------------------------------------------------------------
   suffixexp     = exp:primexp "/" num:(intlit | primexp)            [Loop             {expression = exp, times = num}]
                 | exp:primexp "**" min:intlit (".." max:intlit)?    [Many             {expression = exp, minimum = min, maximum = max}]
                 | exp:primexp "*"                                   [Many             {expression = exp}]
                 | exp:primexp "+"                                   [Many             {expression = exp, minimum = RealLiteral {1}}]
                 | exp:primexp "?"                                   [Optional         {expression = exp}]
-              ------------------------------------------------------------------------------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------------------------
                 |     primexp
-                ,
-              --------------------------------------- grouping -----------------------------------------------------------------------------
+                ,------------------------------------ grouping -----------------------------------------------------------------------------
   primexp       = "(" exp:choiceDef ")"         [!exp.scope = true] [exp]
                 | "<" exp:choiceDef ">"                             [Consumed         {expression = exp}]
                 | "{" props:props "}"                               [Object           {array = props[1], map = props[2]}]
-              --------------------------------------- literals -----------------------------------------------------------------------------
+                ------------------------------------- literals -----------------------------------------------------------------------------
                 | ws* literal:strlitQ                               [Token            {expression = literal}]
                 | ws* literal:strlitL                               [Subsequence      {expression = literal}]
                 | ws* literal:( strlitA | intlit | hexlit 
                               | boollit | nillit )                  [Exactly          {expression = literal}]
-              -------------------------------------- application ---------------------------------------------------------------------------
+                ------------------------------------ application ---------------------------------------------------------------------------
                 | "."                                               [Anything         {}]
                 | name:path target:("@" path)? args:args?           [RuleApplication  {name = name, target = target, 
                                                                                        arguments = args or Array {}}]
-                ,
-              ------------------------------------ building blocks -------------------------------------------------------------------------
+                ,--------------------------------- building blocks -------------------------------------------------------------------------
   path          = list(name, '.', 1)
                 ,
   args          = '(' args:list(choiceDef, ",") ")"                 [args]
@@ -73,11 +69,10 @@ local ometa OMetaGrammar {
                 |                 ";"? map:list(prop, ",", 1)       [{NilLiteral {},  Choice      {nodes = Array {Sequence {nodes = map}}}}]
                 |                 ";"?                              [{NilLiteral {},  NilLiteral  {}}]
                 ,
-  prop          = name:name ":=" exp:choiceDef                  exp:[Binding          {expression = exp, name = name}]
-                                                                    [Key              {expression = exp, name = name}]
-                | name:name  "=" exp:choiceDef                      [Key              {expression = exp, name = name}]
-                ,
-              ---------------------------------------- tokens ------------------------------------------------------------------------------
+  prop          = index:name ":=" exp:choiceDef                 exp:[Binding          {expression = exp, name = index}]
+                                                                    [Key              {expression = exp, index = StringLiteral {index[1]}}]
+                | index:name  "=" exp:choiceDef                     [Key              {expression = exp, index = StringLiteral {index[1]}}]
+                ,------------------------------------- tokens ------------------------------------------------------------------------------
   special       = [[..]]  | [[**]]
                 | [[:=]]  | ':'     | '='
                 | '('     | ')'     | '|'    
