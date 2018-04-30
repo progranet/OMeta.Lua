@@ -47,7 +47,7 @@ local ometa LuaGrammar {
                 | 'for'     | 'in'
                 | 'function'| 'return'  | 'local'
                 ,
-  chunk         = stats:(s:stat ";"? [s])* last:(s:laststat ";"? [s])?          [Chunk {statements = stats:append(last)}]
+  chunk         = stats:(^:stat ";"?)* last:(^:laststat ";"?)?                  [Chunk {statements = stats:append(last)}]
                 ,
   block         = chunk
                 ,

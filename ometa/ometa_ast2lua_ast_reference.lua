@@ -97,7 +97,7 @@ end
 return nodetype(clone)
 end
 local function declareLocals(context)
-local locals = Array({Name({'_pass'})})
+local locals = Array({Name({'__pass__'})})
 for name in pairs(context.locals) do
 locals[#locals + 1] = Name({name})
 end
@@ -157,7 +157,7 @@ context.scope = #self.nodes ~= 1 or self.scope == true
 return Application.toLuaAst(self, context)
 end
 function Sequence:toLuaAst(context)
-local stats = Array({})
+local stats, result = Array({})
 local scope = context.scope
 if scope then
 context = context:newScope({})
@@ -167,7 +167,7 @@ local first, last, node = e == 1, e == #self.nodes, self.nodes[e]
 local body, res = node:toLuaAst(context)
 local fail = Array({laststat([[return false]])})
 stats:appendAll(body)
-if not last then
+if not last or rawget(context.locals, '__result__') then
 if Array:isInstance(res) then
 if res[2] then
 if Statement:isInstance(res[2]) then
@@ -181,22 +181,33 @@ stats:append(stat([[if not (]], res[1], [[) then ]], fail, [[ end]]))
 elseif res[1][1] ~= true then
 stats:append(fail)
 end
-else
-stats:append(stat([[if not (]], res, [[) then ]], fail, [[ end]]))
+if last then
+result = Array({res[1], Get({name = Name({'__result__'})})})
 end
 else
+stats:append(stat([[if not (]], res, [[) then ]], fail, [[ end]]))
+if last then
+result = Array({BooleanLiteral({true}), Get({name = Name({'__result__'})})})
+end
+end
+else
+result = res
+end
+end
 if scope then
 stats:prepend(declareLocals(context))
 end
-return stats, res
-end
-end
+return stats, result
 end
 function Binding:toLuaAst(context)
 local body, res = self.expression:toLuaAst(context)
-body:append(stat([[_pass, ]], self.name, [[ = ]], res, [[]]))
-context.locals[self.name[1]] = true
-return body, Array({exp([[_pass]]), exp([[]], self.name, [[]])})
+local name = self.name
+if name[1] == '^' then
+name = Name({'__result__'})
+end
+body:append(stat([[__pass__, ]], name, [[ = ]], res, [[]]))
+context.locals[name[1]] = true
+return body, Array({exp([[__pass__]]), exp([[]], name, [[]])})
 end
 function HostStatement:toLuaAst(context)
 return self.value, Array({BooleanLiteral({true}), nil})

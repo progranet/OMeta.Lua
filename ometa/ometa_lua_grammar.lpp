@@ -92,10 +92,8 @@ ometa OMetaInLuaGrammar {
                 ,
   grammarBody   = "{" rules:list(innerRuleBody, "," | ";") ("," | ";")? "}"             [rules]
                 ,
-  innerRuleBody = index:(name | "[" e:exp "]" [e]) 
-                  params:( "(" params:parlist ")" [params] 
-                         | [{Array {}, false}]
-                         ) 
+  innerRuleBody = index:(name | "[" ^:exp "]") 
+                  params:( "(" ^:parlist ")" | empty [{Array {}, false}] ) 
                   "=" body:LuaInOMetaGrammar.choiceDef@LuaInOMetaGrammar                [RuleExpression {
                                                                                           name = index, 
                                                                                           arguments = params[1], variableArguments = params[2], 

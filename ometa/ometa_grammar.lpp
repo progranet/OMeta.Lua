@@ -31,8 +31,9 @@ local ometa OMetaGrammar {
   choiceDef     = nodes:list(sequenceDef, "|", 1)                   [Choice           {nodes = nodes}]
                 ,
   sequenceDef   = nodes:node+                                       [Sequence         {nodes = nodes}]
-                ,
+                ,------------------------------------- binding -----------------------------------------------------------------------------
   node          = name:name ":" exp:prefixexp                       [Binding          {expression = exp, name = name}]
+                | name:"^"  ":" exp:prefixexp                       [Binding          {expression = exp, name = name}]
                 |                   prefixexp
                 ,------------------------------------ lookahead ----------------------------------------------------------------------------
   prefixexp     =             "~" exp:suffixexp                     [NotPredicate     {expression = exp}]
@@ -74,7 +75,7 @@ local ometa OMetaGrammar {
                 | index:name  "=" exp:choiceDef                     [Property         {expression = exp,  index = StringLiteral {index[1]}}]
                 ,------------------------------------- tokens ------------------------------------------------------------------------------
   special       = [[..]]  | [[**]]
-                | [[:=]]  | ':'     | '='
+                | [[:=]]  | ':'     | '='     | '^'
                 | '('     | ')'     | '|'    
                 | '{'     | '}'
                 | '<'     | '>'  

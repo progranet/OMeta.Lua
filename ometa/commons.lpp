@@ -20,7 +20,7 @@ local ometa Commons {
   boolean             = [? type(input.stream._head) == 'boolean']     .,
   table               = [? type(input.stream._head) == 'table']       .,
   ['function']        = [? type(input.stream._head) == 'function']    .,
-  notLast(element)    = prev:element &element                         [prev],
+  notLast(element)    = ^:element &element,
   list(element, delim, minimum)
                       = first:element rest:(delim element)* 
                         [? (#rest + 1) >= (minimum or 0)]             [rest:prepend(first)]

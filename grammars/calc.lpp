@@ -30,7 +30,7 @@ local ometa EvalCalc {
           | l:mulexp '/' r:primexp  [l / r]
           | primexp
           , 
-  primexp = '(' exp:exp ')'         [exp] 
+  primexp = '(' ^:exp ')'
           | numstr
           , 
   numstr  = digits:<'-'? digit+>    [tonumber(digits)]
@@ -49,7 +49,7 @@ local ometa TableTreeCalc {
           | l:mulexp '/' r:primexp  [{'/', l, r}] 
           | primexp
           , 
-  primexp = '(' exp:exp ')'         [exp] 
+  primexp = '(' ^:exp ')'
           | numstr
           , 
   numstr  = digits:<'-'? digit+>    [tonumber(digits)]
@@ -70,7 +70,7 @@ local ometa OpTreeCalc {
             | l:mulexp "/" r:primexp      [BinOp {operator = 'div', left = l, right = r}] 
             | primexp
             , 
-  primexp   = "(" exp:exp ")"             [exp] 
+  primexp   = "(" ^:exp ")"
             | numstr
             , 
   numstr    = ws* digits:<"-"? digit+>    [tonumber(digits)],
@@ -89,7 +89,7 @@ local ometa MixedOTCalc {
             | OpTreeCalc.numstr  -- "super" apply
             ,
   eval      = opr:&BinOp                  Aux.apply([opr.operator], unknown)
-            | num:number                  [num]
+            | number
             | any:.                       [? error('unexpected expression: ' .. tostring(any))]
             , 
   add       = {; left:=eval, right:=eval} [! print('+', left, right)] [left + right],
@@ -100,6 +100,8 @@ local ometa MixedOTCalc {
 } 
 MixedOTCalc:merge(OpTreeCalc)
 
+-- example of the standalone Rule definition
+-- overriding of the existing Rule 'primexp'
 rule MixedOTCalc:primexp()
       &BinOp {; operator = 'add' | 'sub' | 'mul' | 'div' }
   | opr:BinOp [? opr.operator and error('unexpected operator: ' .. opr.operator) or error('operator expected')]
@@ -124,7 +126,7 @@ local ometa AstCalc {
             | l:mulexp "/" r:primexp      [DivOp {left = l, right = r}] 
             | primexp
             , 
-  primexp   = "(" exp:exp ")"             [exp] 
+  primexp   = "(" ^:exp ")"
             | numstr
             , 
   numstr    = ws* digits:<"-"? digit+>    [tonumber(digits)],
@@ -141,7 +143,7 @@ local ometa MixedAstCalc {
             | AstCalc.numstr  -- "super" apply
             ,
   eval      = opr:&BinOp                  Aux.apply([getType(opr)], unknown)
-            | num:number                  [num]
+            | number
             | any:.                       [? error('unexpected expression: ' .. tostring(any))]
             , 
   [AddOp]   = {; left:=eval, right:=eval} [! print('+', left, right)] [left + right],
