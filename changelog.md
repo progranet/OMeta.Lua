@@ -2,7 +2,10 @@
 
 Feature:
 - "result binding" - default Rule behavior can be changed in a way that value returned from the application is arbitrary changed by the caret character (`^`) bound to the expected Node.
-E.g.: `res:a b c [res]` amy be writen now: `^:a b c`, `"(" e:exp ")" [e]` == `"(" ^:exp ")"`, etc.
+
+E.g.: 
+- `res:a b c [res]` may be writen now: `^:a b c`
+- `"(" e:exp ")" [e]` == `"(" ^:exp ")"`
 ___
 **1.0.5-beta 2018-04-30**
 
