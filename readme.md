@@ -536,7 +536,7 @@ The Rule implementation provided as an argument *ruleImpl* can be one of followi
 - the Rule class instance - an instance of standard OMeta/Lua type (*OMeta::Rule*), such as an effect of compiling OMeta source Grammar;
 - the Lua function fulfilling the [Rule::behavior API](#rule-api);
 - the type specializing OMeta/Lua base type *Types::Any*. In this case, instead of the Rule application, a behavior consists of a type inclusion test - the input stream head is tested against the provided type (in pseudocode: `head instaneOf type`);
-- (in the case of *apply* and *applyForeign*) the primitive Lua type (*boolean*, *string* or *number*). In this case, rule *exactly* from current context is used - by default it means that stream head must be (exactly) equal to applied value.
+- (in the case of *apply* and *applyForeign*) primitive Lua value (*boolean*, *string* or *number*). In this case, the Rule *exactly* from current context is used - by default it means that stream head must be (exactly) equal to applied value.
 
 As a result, methods return two values - a boolean indicator of success and a value returned by the Rule behavior (Lua function) of any type (possibly `nil`).
 ___
