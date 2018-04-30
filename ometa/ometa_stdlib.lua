@@ -168,6 +168,18 @@ local StandardLibrary = OMeta.Grammar {
     end;
     arity = 2,
   };
+  
+  property = OMeta.Rule {
+    name = 'property';
+    behavior = function(input, index, expression)
+      local state = input.stream
+      input:property(index)
+      local pass, res = input:apply(expression)
+      input.stream = state
+      return pass, res
+    end;
+    arity = 2;
+  };
 }
 
 return StandardLibrary

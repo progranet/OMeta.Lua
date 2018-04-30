@@ -26,11 +26,11 @@ local Get, Set, Group, Block, Chunk, Do, While, Repeat, If, ElseIf,
 local omas = require 'ometa_abstractsyntax'
 local Binding, Application, Choice, Sequence, Lookahead,
       Exactly, Token, Subsequence, NotPredicate, AndPredicate, Optional, Many, Consumed, Loop, Anything,
-      HostNode, HostPredicate, HostStatement, HostExpression, RuleApplication, Object, Key, 
+      HostNode, HostPredicate, HostStatement, HostExpression, RuleApplication, Object, Property, 
       Rule, RuleExpression, RuleStatement, Grammar, GrammarExpression, GrammarStatement
     = omas.Binding, omas.Application, omas.Choice, omas.Sequence, omas.Lookahead,
       omas.Exactly, omas.Token, omas.Subsequence, omas.NotPredicate, omas.AndPredicate, omas.Optional, omas.Many, omas.Consumed, omas.Loop, omas.Anything,
-      omas.HostNode, omas.HostPredicate, omas.HostStatement, omas.HostExpression, omas.RuleApplication, omas.Object, omas.Key, 
+      omas.HostNode, omas.HostPredicate, omas.HostStatement, omas.HostExpression, omas.RuleApplication, omas.Object, omas.Property, 
       omas.Rule, omas.RuleExpression, omas.RuleStatement, omas.Grammar, omas.GrammarExpression, omas.GrammarStatement
       
 local OMeta = require 'ometa'
@@ -53,7 +53,7 @@ local ometa LuaInOMetaGrammar {
                 ,
   prop          = OMetaGrammar.prop
                 | index:("[" e:OMetaInLuaGrammar.exp@OMetaInLuaGrammar "]" [e]) 
-                  "=" exp:choiceDef                                                     [Key            {expression = exp, index = index}]
+                  "=" exp:choiceDef                                                     [Property       {expression = exp, index = index}]
 }
 LuaInOMetaGrammar:merge(OMetaGrammar)
 

@@ -111,21 +111,15 @@ _pass, value = input:apply(input.grammar.anything)
 return _pass, value
 end, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('ldelim')
-_pass, ldelim = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, ldelim = input:applyWithArgs(input.grammar.property, 'ldelim', function (input)
 return input:applyWithArgs(input.grammar.optional, input.grammar.anything)
 end)
-input.stream = _state
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('rdelim')
-_pass, rdelim = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, rdelim = input:applyWithArgs(input.grammar.property, 'rdelim', function (input)
 return input:applyWithArgs(input.grammar.optional, input.grammar.anything)
 end)
-input.stream = _state
 return _pass, rdelim
 end)
 end)) then
@@ -137,10 +131,7 @@ end, arity = 0, grammar = nil, name = 'StringLiteral'}), [Get] = OMeta.Rule({beh
 local _pass, name
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
-local _state = input.stream
-input.stream = input.stream:property('name')
-_pass, name = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, name = input:applyWithArgs(input.grammar.property, 'name', input.grammar.trans)
 return _pass, name
 end)) then
 return false
@@ -153,30 +144,18 @@ return input:applyWithArgs(input.grammar.choice, function (input)
 local _pass, names, expressions
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('isLocal')
-_pass = input:applyWithArgs(input.grammar.choice, function (input)
-return input:applyWithArgs(input.grammar.exactly, true)
+if not (input:applyWithArgs(input.grammar.property, 'isLocal', true)) then
+return false
+end
+_pass, names = input:applyWithArgs(input.grammar.property, 'names', function (input)
+return input:applyWithArgs(input.grammar.many, input.grammar.trans, 1)
 end)
-input.stream = _state
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('names')
-_pass, names = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, expressions = input:applyWithArgs(input.grammar.property, 'expressions', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans, 1)
 end)
-input.stream = _state
-if not (_pass) then
-return false
-end
-local _state = input.stream
-input.stream = input.stream:property('expressions')
-_pass, expressions = input:applyWithArgs(input.grammar.choice, function (input)
-return input:applyWithArgs(input.grammar.many, input.grammar.trans, 1)
-end)
-input.stream = _state
 return _pass, expressions
 end)
 end)) then
@@ -187,21 +166,12 @@ end, function (input)
 local _pass, names
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('isLocal')
-_pass = input:applyWithArgs(input.grammar.choice, function (input)
-return input:applyWithArgs(input.grammar.exactly, true)
-end)
-input.stream = _state
-if not (_pass) then
+if not (input:applyWithArgs(input.grammar.property, 'isLocal', true)) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('names')
-_pass, names = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, names = input:applyWithArgs(input.grammar.property, 'names', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans, 1)
 end)
-input.stream = _state
 return _pass, names
 end)
 end)) then
@@ -212,21 +182,15 @@ end, function (input)
 local _pass, names, expressions
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('names')
-_pass, names = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, names = input:applyWithArgs(input.grammar.property, 'names', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans, 1)
 end)
-input.stream = _state
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('expressions')
-_pass, expressions = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, expressions = input:applyWithArgs(input.grammar.property, 'expressions', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans, 1)
 end)
-input.stream = _state
 return _pass, expressions
 end)
 end)) then
@@ -238,12 +202,9 @@ end, arity = 0, grammar = nil, name = 'Set'}), [Chunk] = OMeta.Rule({behavior = 
 local _pass, statements
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
-local _state = input.stream
-input.stream = input.stream:property('statements')
-_pass, statements = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, statements = input:applyWithArgs(input.grammar.property, 'statements', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans)
 end)
-input.stream = _state
 return _pass, statements
 end)) then
 return false
@@ -254,10 +215,7 @@ end, arity = 0, grammar = nil, name = 'Chunk'}), [Group] = OMeta.Rule({behavior 
 local _pass, expression
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
-local _state = input.stream
-input.stream = input.stream:property('expression')
-_pass, expression = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, expression = input:applyWithArgs(input.grammar.property, 'expression', input.grammar.trans)
 return _pass, expression
 end)) then
 return false
@@ -268,10 +226,7 @@ end, arity = 0, grammar = nil, name = 'Group'}), [Do] = OMeta.Rule({behavior = f
 local _pass, block
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
-local _state = input.stream
-input.stream = input.stream:property('block')
-_pass, block = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, block = input:applyWithArgs(input.grammar.property, 'block', input.grammar.trans)
 return _pass, block
 end)) then
 return false
@@ -283,17 +238,11 @@ local _pass, expression, block
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('block')
-_pass, block = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, block = input:applyWithArgs(input.grammar.property, 'block', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('expression')
-_pass, expression = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, expression = input:applyWithArgs(input.grammar.property, 'expression', input.grammar.trans)
 return _pass, expression
 end)
 end)) then
@@ -306,17 +255,11 @@ local _pass, expression, block
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('block')
-_pass, block = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, block = input:applyWithArgs(input.grammar.property, 'block', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('expression')
-_pass, expression = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, expression = input:applyWithArgs(input.grammar.property, 'expression', input.grammar.trans)
 return _pass, expression
 end)
 end)) then
@@ -329,33 +272,21 @@ local _pass, elseBlock, elseIfs, expression, block
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('expression')
-_pass, expression = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, expression = input:applyWithArgs(input.grammar.property, 'expression', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('block')
-_pass, block = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, block = input:applyWithArgs(input.grammar.property, 'block', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('elseIfs')
-_pass, elseIfs = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, elseIfs = input:applyWithArgs(input.grammar.property, 'elseIfs', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans)
 end)
-input.stream = _state
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('elseBlock')
-_pass, elseBlock = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, elseBlock = input:applyWithArgs(input.grammar.property, 'elseBlock', input.grammar.trans)
 return _pass, elseBlock
 end)
 end)) then
@@ -368,17 +299,11 @@ local _pass, block, expression
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('expression')
-_pass, expression = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, expression = input:applyWithArgs(input.grammar.property, 'expression', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('block')
-_pass, block = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, block = input:applyWithArgs(input.grammar.property, 'block', input.grammar.trans)
 return _pass, block
 end)
 end)) then
@@ -391,38 +316,23 @@ local _pass, block, stepExpression, startExpression, name, stopExpression
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('name')
-_pass, name = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, name = input:applyWithArgs(input.grammar.property, 'name', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('block')
-_pass, block = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, block = input:applyWithArgs(input.grammar.property, 'block', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('startExpression')
-_pass, startExpression = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, startExpression = input:applyWithArgs(input.grammar.property, 'startExpression', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('stopExpression')
-_pass, stopExpression = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, stopExpression = input:applyWithArgs(input.grammar.property, 'stopExpression', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('stepExpression')
-_pass, stepExpression = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, stepExpression = input:applyWithArgs(input.grammar.property, 'stepExpression', input.grammar.trans)
 return _pass, stepExpression
 end)
 end)) then
@@ -435,28 +345,19 @@ local _pass, names, expressions, block
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('names')
-_pass, names = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, names = input:applyWithArgs(input.grammar.property, 'names', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans)
 end)
-input.stream = _state
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('block')
-_pass, block = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, block = input:applyWithArgs(input.grammar.property, 'block', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('expressions')
-_pass, expressions = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, expressions = input:applyWithArgs(input.grammar.property, 'expressions', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans)
 end)
-input.stream = _state
 return _pass, expressions
 end)
 end)) then
@@ -469,42 +370,27 @@ local _pass, arguments, variableArguments, block, name, context
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('context')
-_pass, context = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, context = input:applyWithArgs(input.grammar.property, 'context', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans)
 end)
-input.stream = _state
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('name')
-_pass, name = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, name = input:applyWithArgs(input.grammar.property, 'name', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('arguments')
-_pass, arguments = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, arguments = input:applyWithArgs(input.grammar.property, 'arguments', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans)
 end)
-input.stream = _state
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('variableArguments')
-_pass, variableArguments = input:applyWithArgs(input.grammar.choice, input.grammar.anything)
-input.stream = _state
+_pass, variableArguments = input:applyWithArgs(input.grammar.property, 'variableArguments', input.grammar.anything)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('block')
-_pass, block = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, block = input:applyWithArgs(input.grammar.property, 'block', input.grammar.trans)
 return _pass, block
 end)
 end)) then
@@ -518,42 +404,24 @@ return input:applyWithArgs(input.grammar.choice, function (input)
 local _pass, variableArguments, arguments, name, block
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('isLocal')
-_pass = input:applyWithArgs(input.grammar.choice, function (input)
-return input:applyWithArgs(input.grammar.exactly, true)
-end)
-input.stream = _state
+if not (input:applyWithArgs(input.grammar.property, 'isLocal', true)) then
+return false
+end
+_pass, name = input:applyWithArgs(input.grammar.property, 'name', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('name')
-_pass, name = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
-if not (_pass) then
-return false
-end
-local _state = input.stream
-input.stream = input.stream:property('arguments')
-_pass, arguments = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, arguments = input:applyWithArgs(input.grammar.property, 'arguments', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans)
 end)
-input.stream = _state
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('variableArguments')
-_pass, variableArguments = input:applyWithArgs(input.grammar.choice, input.grammar.anything)
-input.stream = _state
+_pass, variableArguments = input:applyWithArgs(input.grammar.property, 'variableArguments', input.grammar.anything)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('block')
-_pass, block = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, block = input:applyWithArgs(input.grammar.property, 'block', input.grammar.trans)
 return _pass, block
 end)
 end)) then
@@ -564,35 +432,23 @@ end, function (input)
 local _pass, block, arguments, variableArguments, context
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('context')
-_pass, context = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, context = input:applyWithArgs(input.grammar.property, 'context', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans)
 end)
-input.stream = _state
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('arguments')
-_pass, arguments = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, arguments = input:applyWithArgs(input.grammar.property, 'arguments', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans)
 end)
-input.stream = _state
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('variableArguments')
-_pass, variableArguments = input:applyWithArgs(input.grammar.choice, input.grammar.anything)
-input.stream = _state
+_pass, variableArguments = input:applyWithArgs(input.grammar.property, 'variableArguments', input.grammar.anything)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('block')
-_pass, block = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, block = input:applyWithArgs(input.grammar.property, 'block', input.grammar.trans)
 return _pass, block
 end)
 end)) then
@@ -605,26 +461,17 @@ local _pass, arguments, variableArguments, block
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('arguments')
-_pass, arguments = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, arguments = input:applyWithArgs(input.grammar.property, 'arguments', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans)
 end)
-input.stream = _state
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('variableArguments')
-_pass, variableArguments = input:applyWithArgs(input.grammar.choice, input.grammar.anything)
-input.stream = _state
+_pass, variableArguments = input:applyWithArgs(input.grammar.property, 'variableArguments', input.grammar.anything)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('block')
-_pass, block = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, block = input:applyWithArgs(input.grammar.property, 'block', input.grammar.trans)
 return _pass, block
 end)
 end)) then
@@ -638,22 +485,18 @@ return input:applyWithArgs(input.grammar.choice, function (input)
 local _pass, context, index
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('index')
-_pass, index = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, index = input:applyWithArgs(input.grammar.property, 'index', function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.andPredicate, Name)) then
 return false
 end
 return input:apply(input.grammar.trans)
 end)
-input.stream = _state
+end)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('context')
-_pass, context = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, context = input:applyWithArgs(input.grammar.property, 'context', input.grammar.trans)
 return _pass, context
 end)
 end)) then
@@ -664,17 +507,11 @@ end, function (input)
 local _pass, context, index
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('index')
-_pass, index = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, index = input:applyWithArgs(input.grammar.property, 'index', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('context')
-_pass, context = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, context = input:applyWithArgs(input.grammar.property, 'context', input.grammar.trans)
 return _pass, context
 end)
 end)) then
@@ -687,28 +524,18 @@ local _pass, argument, name, context
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('name')
-_pass, name = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, name = input:applyWithArgs(input.grammar.property, 'name', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('context')
-_pass, context = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, context = input:applyWithArgs(input.grammar.property, 'context', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('arguments')
-_pass = input:applyWithArgs(input.grammar.choice, function (input)
+return input:applyWithArgs(input.grammar.property, 'arguments', function (input)
 _pass, argument = input:apply(input.grammar.trans)
 return _pass, argument
 end)
-input.stream = _state
-return _pass
 end)
 end)) then
 return false
@@ -721,19 +548,12 @@ return input:applyWithArgs(input.grammar.choice, function (input)
 local _pass, context
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('name')
-_pass = input:applyWithArgs(input.grammar.choice, function (input)
+if not (input:applyWithArgs(input.grammar.property, 'name', function (input)
 return input:applyWithArgs(input.grammar.object, 'not', nil)
-end)
-input.stream = _state
-if not (_pass) then
+end)) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('context')
-_pass, context = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, context = input:applyWithArgs(input.grammar.property, 'context', input.grammar.trans)
 return _pass, context
 end)
 end)) then
@@ -744,17 +564,11 @@ end, function (input)
 local _pass, name, context
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('name')
-_pass, name = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, name = input:applyWithArgs(input.grammar.property, 'name', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('context')
-_pass, context = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, context = input:applyWithArgs(input.grammar.property, 'context', input.grammar.trans)
 return _pass, context
 end)
 end)) then
@@ -767,19 +581,13 @@ local _pass, arguments, context
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('context')
-_pass, context = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, context = input:applyWithArgs(input.grammar.property, 'context', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('arguments')
-_pass, arguments = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, arguments = input:applyWithArgs(input.grammar.property, 'arguments', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans)
 end)
-input.stream = _state
 return _pass, arguments
 end)
 end)) then
@@ -792,26 +600,17 @@ local _pass, arguments, name, context
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('name')
-_pass, name = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, name = input:applyWithArgs(input.grammar.property, 'name', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('context')
-_pass, context = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, context = input:applyWithArgs(input.grammar.property, 'context', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('arguments')
-_pass, arguments = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, arguments = input:applyWithArgs(input.grammar.property, 'arguments', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans)
 end)
-input.stream = _state
 return _pass, arguments
 end)
 end)) then
@@ -823,12 +622,9 @@ end, arity = 0, grammar = nil, name = 'Send'}), [TableConstructor] = OMeta.Rule(
 local _pass, properties
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
-local _state = input.stream
-input.stream = input.stream:property('properties')
-_pass, properties = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, properties = input:applyWithArgs(input.grammar.property, 'properties', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans)
 end)
-input.stream = _state
 return _pass, properties
 end)) then
 return false
@@ -841,22 +637,18 @@ return input:applyWithArgs(input.grammar.choice, function (input)
 local _pass, expression, index
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('index')
-_pass, index = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, index = input:applyWithArgs(input.grammar.property, 'index', function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.andPredicate, Name)) then
 return false
 end
 return input:apply(input.grammar.trans)
 end)
-input.stream = _state
+end)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('expression')
-_pass, expression = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, expression = input:applyWithArgs(input.grammar.property, 'expression', input.grammar.trans)
 return _pass, expression
 end)
 end)) then
@@ -867,17 +659,10 @@ end, function (input)
 local _pass, expression
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('index')
-_pass = input:applyWithArgs(input.grammar.choice, input.grammar.eos)
-input.stream = _state
-if not (_pass) then
+if not (input:applyWithArgs(input.grammar.property, 'index', input.grammar.eos)) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('expression')
-_pass, expression = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, expression = input:applyWithArgs(input.grammar.property, 'expression', input.grammar.trans)
 return _pass, expression
 end)
 end)) then
@@ -888,17 +673,11 @@ end, function (input)
 local _pass, expression, index
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _state = input.stream
-input.stream = input.stream:property('index')
-_pass, index = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, index = input:applyWithArgs(input.grammar.property, 'index', input.grammar.trans)
 if not (_pass) then
 return false
 end
-local _state = input.stream
-input.stream = input.stream:property('expression')
-_pass, expression = input:applyWithArgs(input.grammar.choice, input.grammar.trans)
-input.stream = _state
+_pass, expression = input:applyWithArgs(input.grammar.property, 'expression', input.grammar.trans)
 return _pass, expression
 end)
 end)) then
@@ -910,12 +689,9 @@ end, arity = 0, grammar = nil, name = 'SetProperty'}), [Return] = OMeta.Rule({be
 local _pass, expressions
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
-local _state = input.stream
-input.stream = input.stream:property('expressions')
-_pass, expressions = input:applyWithArgs(input.grammar.choice, function (input)
+_pass, expressions = input:applyWithArgs(input.grammar.property, 'expressions', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans)
 end)
-input.stream = _state
 return _pass, expressions
 end)) then
 return false

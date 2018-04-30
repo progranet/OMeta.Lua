@@ -18,10 +18,10 @@ local Literal, NilLiteral, BooleanLiteral, NumberLiteral, IntegerLiteral, RealLi
 local omas = require 'ometa_abstractsyntax'
 local Binding, Application, Choice, Sequence, Lookahead,
       Exactly, Token, Subsequence, NotPredicate, AndPredicate, Optional, Many, Consumed, Loop, Anything,
-      HostNode, HostPredicate, HostStatement, HostExpression, RuleApplication, Object, Key, Rule, RuleExpression, RuleStatement
+      HostNode, HostPredicate, HostStatement, HostExpression, RuleApplication, Object, Property, Rule, RuleExpression, RuleStatement
     = omas.Binding, omas.Application, omas.Choice, omas.Sequence, omas.Lookahead,
       omas.Exactly, omas.Token, omas.Subsequence, omas.NotPredicate, omas.AndPredicate, omas.Optional, omas.Many, omas.Consumed, omas.Loop, omas.Anything,
-      omas.HostNode, omas.HostPredicate, omas.HostStatement, omas.HostExpression, omas.RuleApplication, omas.Object, omas.Key, omas.Rule, omas.RuleExpression, omas.RuleStatement
+      omas.HostNode, omas.HostPredicate, omas.HostStatement, omas.HostExpression, omas.RuleApplication, omas.Object, omas.Property, omas.Rule, omas.RuleExpression, omas.RuleStatement
 
 local Commons = require 'grammar_commons'   
 
@@ -69,9 +69,9 @@ local ometa OMetaGrammar {
                 |                 ";"? map:list(prop, ",", 1)       [{NilLiteral {},  Choice      {nodes = Array {Sequence {nodes = map}}}}]
                 |                 ";"?                              [{NilLiteral {},  NilLiteral  {}}]
                 ,
-  prop          = index:name ":=" exp:choiceDef                 exp:[Binding          {expression = exp, name = index}]
-                                                                    [Key              {expression = exp, index = StringLiteral {index[1]}}]
-                | index:name  "=" exp:choiceDef                     [Key              {expression = exp, index = StringLiteral {index[1]}}]
+  prop          = index:name ":=" exp:choiceDef                prop:[Property         {expression = exp,  index = StringLiteral {index[1]}}]
+                                                                    [Binding          {expression = prop, name = index}]
+                | index:name  "=" exp:choiceDef                     [Property         {expression = exp,  index = StringLiteral {index[1]}}]
                 ,------------------------------------- tokens ------------------------------------------------------------------------------
   special       = [[..]]  | [[**]]
                 | [[:=]]  | ':'     | '='

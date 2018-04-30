@@ -1,3 +1,9 @@
+**1.0.5-beta 2018-04-30**
+
+Issues fixed:
+- proper handling of the Object's named properties in the reference (OMeta AST -> Lua AST) translator;
+- *OMeta::apply* now properly handles primitive Lua values provided as the *ruleImpl* argument;
+___
 **1.0.4-beta 2018-04-29**
 
 Improvement:

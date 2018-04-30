@@ -6,7 +6,7 @@ local utils = require('utils')
 local asc = require('abstractsyntax_commons')
 local Literal, NilLiteral, BooleanLiteral, NumberLiteral, IntegerLiteral, RealLiteral, StringLiteral, Name, Keyword, Special, Node, Statement, Expression, Control, Iterative, Invocation = asc.Literal, asc.NilLiteral, asc.BooleanLiteral, asc.NumberLiteral, asc.IntegerLiteral, asc.RealLiteral, asc.StringLiteral, asc.Name, asc.Keyword, asc.Special, asc.Node, asc.Statement, asc.Expression, asc.Control, asc.Iterative, asc.Invocation
 local omas = require('ometa_abstractsyntax')
-local Binding, Application, Choice, Sequence, Lookahead, Exactly, Token, Subsequence, NotPredicate, AndPredicate, Optional, Many, Consumed, Loop, Anything, HostNode, HostPredicate, HostStatement, HostExpression, RuleApplication, Object, Key, Rule, RuleExpression, RuleStatement = omas.Binding, omas.Application, omas.Choice, omas.Sequence, omas.Lookahead, omas.Exactly, omas.Token, omas.Subsequence, omas.NotPredicate, omas.AndPredicate, omas.Optional, omas.Many, omas.Consumed, omas.Loop, omas.Anything, omas.HostNode, omas.HostPredicate, omas.HostStatement, omas.HostExpression, omas.RuleApplication, omas.Object, omas.Key, omas.Rule, omas.RuleExpression, omas.RuleStatement
+local Binding, Application, Choice, Sequence, Lookahead, Exactly, Token, Subsequence, NotPredicate, AndPredicate, Optional, Many, Consumed, Loop, Anything, HostNode, HostPredicate, HostStatement, HostExpression, RuleApplication, Object, Property, Rule, RuleExpression, RuleStatement = omas.Binding, omas.Application, omas.Choice, omas.Sequence, omas.Lookahead, omas.Exactly, omas.Token, omas.Subsequence, omas.NotPredicate, omas.AndPredicate, omas.Optional, omas.Many, omas.Consumed, omas.Loop, omas.Anything, omas.HostNode, omas.HostPredicate, omas.HostStatement, omas.HostExpression, omas.RuleApplication, omas.Object, omas.Property, omas.Rule, omas.RuleExpression, omas.RuleStatement
 local Commons = require('grammar_commons')
 local OMetaGrammar = OMeta.Grammar({_grammarName = 'OMetaGrammar', choiceDef = OMeta.Rule({behavior = function (input)
 local _pass, nodes
@@ -321,7 +321,7 @@ end)
 end, arity = 0, grammar = nil, name = 'props'}), prop = OMeta.Rule({behavior = function (input)
 local _pass
 return input:applyWithArgs(input.grammar.choice, function (input)
-local _pass, exp, index
+local _pass, prop, index, exp
 _pass, index = input:apply(input.grammar.name)
 if not (_pass) then
 return false
@@ -333,11 +333,11 @@ _pass, exp = input:apply(input.grammar.choiceDef)
 if not (_pass) then
 return false
 end
-_pass, exp = true, Binding({expression = exp, name = index})
+_pass, prop = true, Property({expression = exp, index = StringLiteral({index[1]})})
 if not (_pass) then
 return false
 end
-return true, Key({expression = exp, index = StringLiteral({index[1]})})
+return true, Binding({expression = prop, name = index})
 end, function (input)
 local _pass, exp, index
 _pass, index = input:apply(input.grammar.name)
@@ -351,7 +351,7 @@ _pass, exp = input:apply(input.grammar.choiceDef)
 if not (_pass) then
 return false
 end
-return true, Key({expression = exp, index = StringLiteral({index[1]})})
+return true, Property({expression = exp, index = StringLiteral({index[1]})})
 end)
 end, arity = 0, grammar = nil, name = 'prop'}), special = OMeta.Rule({behavior = function (input)
 local _pass

@@ -72,21 +72,25 @@ OMeta.Input = class {
       return pass, result
     end
     
-    local behavior = ruleImpl.behavior
-    if not behavior then
-      -- "plain" type as a rule
-      --print(self.stream._index, depth, ruleImpl.name .. string.rep(' ', 25 - #ruleImpl.name), self.stream._head)
-      depth = depth - 1
-      if ruleType == 'table' then 
-        if ruleImpl:isInstance(self.stream._head) then return self:next() end
+    if ruleType == 'table' then
+      local behavior = ruleImpl.behavior
+      if not behavior then
+        -- "plain" type as a rule
+        --print(self.stream._index, depth, ruleImpl.name .. string.rep(' ', 25 - #ruleImpl.name), self.stream._head)
+        depth = depth - 1
+        if ruleImpl:isInstance(self.stream._head) then 
+          return self:next()
+        else
+          return false, self.stream._head
+        end
       else
-        return self:applyWithArgs(self.grammar.exactly, ruleImpl)
+        return self:_memoize(ruleImpl, entryState, entryState, entryState)
       end
-      
-      return false, self.stream._head
     end
     
-    return self:_memoize(ruleImpl, entryState, entryState, entryState)
+    -- primitive Lua value (string|number|boolean)
+    depth = depth - 1
+    return self:applyWithArgs(self.grammar.exactly, ruleImpl)
   end,
   
   applyWithArgs = function(self, ruleImpl, ...)
@@ -211,6 +215,10 @@ OMeta.Input = class {
     end
     self.stream = tl
     return true, result
+  end;
+  
+  property = function(self, index)
+    self.stream = self.stream:property(index)
   end;
   
   match = function(self, ruleImpl, ...)

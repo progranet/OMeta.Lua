@@ -177,9 +177,11 @@ local Object = class {
   arguments = {'array', 'map'};
 }
 
-local Key = class {
-	name = 'Key',
-	super = {Expression};
+local Property = class {
+	name = 'Property',
+	super = {Application};
+  
+  arguments = {'index', 'expression'};
 }
 
 local Rule = class {
@@ -242,7 +244,7 @@ return {
   HostPredicate       = HostPredicate,
   RuleApplication     = RuleApplication,
   Object              = Object,
-  Key                 = Key,
+  Property            = Property,
   Rule                = Rule,
   RuleExpression      = RuleExpression,
   RuleStatement       = RuleStatement,
