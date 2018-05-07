@@ -1,0 +1,3 @@
+Folder contains implementation of abstract syntax tree node classes. Each file provides package of classes related to some Grammar.
+
+Classes in those packages define primarily structure and additionally may define some basic behavior. By definition those implementations do not provide behavior related to model transformations (which is provided in separate parsers and translators). Exception to this rule is reference Lua AST into Lua source code translator written as operation *toLuaAst()* implemented as methods on classes of Lua AST nodes. However this is reference implementation which should be used primarily to testing, support, etc. purposes.
