@@ -143,9 +143,9 @@ Below, there is an overview of the basic means used to build a Rule.
 |Quantifiers|`a?`<br>`a*`<br>`a+`<br>`a**min`, `a**min..max`<br>`a/num`|optional<br>zero to many<br>one to many<br>*min* to *max* (or many)<br>repeat *num* times|
 |Grouping|`( a \| b c )`<br>`< a b c >`<br>`{ a b ; prop=c }`|to group nodes and create scope<br>consumed input stream<br>an object - [matches complex structures](#parsing-complex-data)|
 |Literals|`"keyword"`, `"("`, `")"`<br>`[[abc]]`<br>`'abc'`<br>`5`, `0xFF`, `-1.2e3`<br>`false`, `true`<br>`nil`<br>|[tokens](#tokens)<br>a sequence of characters (`'a' 'b' 'c'`)<br>a string literal<br>number literals<br>boolean literals<br>a nil literal|
-|Rule application|`.`<br>`number`<br>`list(exp, ",")`<br>`LuaGrammar.exp`<br>`Grammar.stat@Grammar`|Anything - a single element of any kind<br>matches a named Rule *number*<br>an [application with arguments](#parametrized-rules)<br>a [foreign application](#foreign-rules)<br>a foreign application with a context switch|
-|[Host Nodes](#semantic-actions)|`[string.rep('.', n)]`<br>`[! print('hello')]`<br>`[? #str == 5]`|[Host Expressions](#host-expression) - pass and return a value<br>[Host Statement](#host-statement) - pass without a value<br>[Host Predicate](#host-predicate) - no value but can fail|
-|[Binding](#binding)|`variable:a`<br>`num:[10]`<br>`{; prop:=string }`|to bind a result of *a* to the *variable*<br>to bind `10` (Host Expression) to the *num*<br>a binding combined with parsing property|
+|Rule application|`.`<br>`number`<br>`list(exp, ",")`<br>`Auxiliary.apply('rname')`<br>`LuaGrammar.stat@LuaGrammar`|Anything - a single element of any kind<br>matches a named Rule *number*<br>an [application with arguments](#parametrized-rules)<br>a [foreign application](#foreign-rules)<br>a foreign application with a context switch|
+|[Host Nodes](#semantic-actions)|`[string.rep('.', n)]`<br>`[! print('hello')]`<br>`[? #str == 5]`|[Host Expression](#host-expression) - pass and return a value<br>[Host Statement](#host-statement) - pass without a value<br>[Host Predicate](#host-predicate) - no value but can fail|
+|[Binding](#binding)|`variable:a`<br>`num:[10]`<br>`{; prop:=string }`<br>`^:exp`|to bind a result of *a* to the *variable*<br>to bind `10` (Host Expression) to the *num*<br>a binding combined with parsing property<br>[result binding](#result-binding) - indicates result of whole Sequence|
 
 ### Semantic Actions
 The PEG's *semantic actions* in OMeta/Lua are generalized to the **Host Nodes**.
@@ -191,6 +191,13 @@ In OMeta you can bind a return value of any Node to a chosen name:
 concatenate = "(" left:digit+ "," right:<digit+> ")" [left:concat() .. '/' .. right],
 innerResult = "[" inner:(~"]" .)* "]"
 ```
+#### Result binding
+In OMeta value of the last Node in current Sequence (whole Rule, current alternative of Choice, subexpression in parentheses, etc.) becomes value of the result of this Sequence. This behavior can be changed by the result binding:
+```lua
+expInParens  = "(" ^:exp ")",
+expsWithSemi = exps:(^:exp ";")* last:exp ";"? [exps:append(last)]
+```
+In the above example result of whole Rule and result of subexpression is arbitrary changed to the results of indicated Nodes.
 
 #### Scoping
 The scope of a variable is lexical. For the Rule parameters this is a whole Rule body, but for the user defined variables the scope begins from a point of name binding and it lasts until (first of the below):
@@ -225,7 +232,7 @@ local ometa TableTreeCalc {
           | l:mulexp '/' r:primexp  [{'/', l, r}] 
           | primexp
           , 
-  primexp = '(' exp:exp ')'         [exp] 
+  primexp = '(' ^:exp ')'
           | numstr
           , 
   numstr  = digits:<'-'? digit+>    [tonumber(digits)]
@@ -290,11 +297,13 @@ where:
 - a *minimum* - the Host Expression - a minimum number of elements in a matched list (default `0`).
 
 For example:
-- `list(exp, ',')` - any number of *exp*s separated by commas (as a single char) - it is not the same as...
-- `list(exp, ",")` - ...where commas are tokens;
-- `list(number | boolean | string, ";" | ",", [num or 1])` - matches at least *num* (or `1` if *num* is "falsy") primitive Lua values delimited by semicolons or commas;
-- `list(list(<(~(','|'\n') .)*>, ','), '\n')` - "one-liner" for parsing multi-line comma-separated values (returns two-dimensional array);
-- `list(.,.)` - note that even such an expression is valid - any number of anything separated by anything;
+```lua
+list(exp, ',') -- any number of 'exp's separated by commas (as a single char) - it is not the same as...
+list(exp, ",") -- ...where commas are tokens;
+list(number | boolean | string, ";" | ",", [num or 1]) -- matches at least 'num' (or 1 if 'num' is "falsy") primitive Lua values delimited by semicolons or commas;
+list(list(<(~(','|'\n') .)*>, ','), '\n') -- "one-liner" for parsing multi-line comma-separated values (returns two-dimensional array);
+list(.,.) -- even such an expression is valid - any number of anything separated by anything;
+```
 
 A higher order Rule may be user defined, e.g.:
 ```lua
@@ -374,7 +383,7 @@ local ometa OpTreeCalc {
             | l:mulexp "/" r:primexp      [BinOp {operator = 'div', left = l, right = r}] 
             | primexp
             , 
-  primexp   = "(" exp:exp ")"             [exp] 
+  primexp   = "(" ^:exp ")"
             | numstr
             , 
   numstr    = ws* digits:<"-"? digit+>    [tonumber(digits)],
@@ -397,7 +406,7 @@ local ometa MixedOTCalc {
             | OpTreeCalc.numstr  -- "super" apply
             ,
   eval      = opr:&BinOp                  Aux.apply([opr.operator], unknown)
-            | num:number                  [num]
+            | number
             | any:.                       [? error('unexpected expression: ' .. tostring(any))]
             , 
   add       = {; left:=eval, right:=eval} [! print('+', left, right)] [left + right],
