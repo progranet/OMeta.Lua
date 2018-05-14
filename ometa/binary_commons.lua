@@ -1,21 +1,83 @@
 local tostring, tonumber, select, type, getmetatable, setmetatable, rawget = tostring, tonumber, select, type, getmetatable, setmetatable, rawget
 local bit = require('bit')
-local band, bor, lshift = bit.band, bit.bor, bit.lshift
+local bnot, band, bor, bxor, lshift, rshift = bit.bnot, bit.band, bit.bor, bit.bxor, bit.lshift, bit.rshift
 local Types = require('types')
 local Any, Array = Types.Any, Types.Array
 local OMeta = require('ometa')
 local utils = require('utils')
 local Commons = require('commons')
 local BinaryCommons = OMeta.Grammar({_grammarName = 'BinaryCommons', byte = OMeta.Rule({behavior = function (input)
-local __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (type(input.stream._head) == "number" and band(input.stream._head, 255) == input.stream._head) then
 return false
 end
 return input:apply(input.grammar.anything)
 end)
-end, arity = 0, grammar = nil, name = 'byte'}), int16 = OMeta.Rule({behavior = function (input)
-local __pass__, a, b
+end, arity = 0, grammar = BinaryCommons, name = 'byte'}), char = OMeta.Rule({behavior = function (input, n)
+return input:applyWithArgs(input.grammar.choice, function (input)
+return input:applyWithArgs(input.grammar.codesToString, function (input)
+return input:applyWithArgs(input.grammar.loop, input.grammar.byte, n or 1)
+end)
+end)
+end, arity = 1, grammar = BinaryCommons, name = 'char'})})
+BinaryCommons:merge(Commons)
+local function bitfield(msb, number, bitn)
+local fields = {}
+local f, t, s
+if msb then
+f, t, s = #bitn, 1, -1
+else
+f, t, s = 1, #bitn, 1
+end
+for fn = f, t, s do
+local n = bitn[fn]
+local mask = bnot(lshift(bnot(0), n))
+local field = band(number, mask)
+fields[fn] = field
+number = rshift(number, n)
+end
+return fields
+end
+local Msb0 = OMeta.Grammar({_grammarName = 'Msb0', bit = OMeta.Rule({behavior = function (input, offset, n)
+local val, __pass__
+return input:applyWithArgs(input.grammar.choice, function (input)
+__pass__, val = input:apply(input.grammar.byte)
+if not (__pass__) then
+return false
+end
+return true, rshift(band(rshift(255, offset or 0), val), 8 - (n or 1) - (offset or 0))
+end)
+end, arity = 2, grammar = Msb0, name = 'bit'}), bitfield = OMeta.Rule({behavior = function (input, r, bitn)
+local val, __pass__
+return input:applyWithArgs(input.grammar.choice, function (input)
+__pass__, val = input:apply(r)
+if not (__pass__) then
+return false
+end
+return true, bitfield(true, val, bitn)
+end)
+end, arity = 2, grammar = Msb0, name = 'bitfield'})})
+local Lsb0 = OMeta.Grammar({_grammarName = 'Lsb0', bit = OMeta.Rule({behavior = function (input, offset, n)
+local val, __pass__
+return input:applyWithArgs(input.grammar.choice, function (input)
+__pass__, val = input:apply(input.grammar.byte)
+if not (__pass__) then
+return false
+end
+return true, band(rshift(val, offset or 0), bnot(lshift(bnot(0), n or 1)))
+end)
+end, arity = 2, grammar = Lsb0, name = 'bit'}), bitfield = OMeta.Rule({behavior = function (input, r, bitn)
+local val, __pass__
+return input:applyWithArgs(input.grammar.choice, function (input)
+__pass__, val = input:apply(r)
+if not (__pass__) then
+return false
+end
+return true, bitfield(false, val, bitn)
+end)
+end, arity = 2, grammar = Lsb0, name = 'bitfield'})})
+local BigEndian = OMeta.Grammar({_grammarName = 'BigEndian', int16 = OMeta.Rule({behavior = function (input)
+local b, __pass__, a
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, a = input:apply(input.grammar.byte)
 if not (__pass__) then
@@ -27,8 +89,8 @@ return false
 end
 return true, bor(lshift(a, 8), b)
 end)
-end, arity = 0, grammar = nil, name = 'int16'}), int32 = OMeta.Rule({behavior = function (input)
-local __pass__, a, b
+end, arity = 0, grammar = BigEndian, name = 'int16'}), int32 = OMeta.Rule({behavior = function (input)
+local b, __pass__, a
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, a = input:apply(input.grammar.int16)
 if not (__pass__) then
@@ -40,24 +102,36 @@ return false
 end
 return true, bor(lshift(a, 16), b)
 end)
-end, arity = 0, grammar = nil, name = 'int32'}), char = OMeta.Rule({behavior = function (input, n)
-local __pass__, str
+end, arity = 0, grammar = BigEndian, name = 'int32'})})
+local LittleEndian = OMeta.Grammar({_grammarName = 'LittleEndian', int16 = OMeta.Rule({behavior = function (input)
+local b, __pass__, a
 return input:applyWithArgs(input.grammar.choice, function (input)
-__pass__, str = input:applyWithArgs(input.grammar.loop, function (input)
-return input:applyWithArgs(input.grammar.choice, function (input)
-local __pass__, b
 __pass__, b = input:apply(input.grammar.byte)
 if not (__pass__) then
 return false
 end
-return true, string.char(b)
-end)
-end, n or 1)
+__pass__, a = input:apply(input.grammar.byte)
 if not (__pass__) then
 return false
 end
-return true, str:concat()
+return true, bor(lshift(a, 8), b)
 end)
-end, arity = 1, grammar = nil, name = 'char'})})
-BinaryCommons:merge(Commons)
+end, arity = 0, grammar = LittleEndian, name = 'int16'}), int32 = OMeta.Rule({behavior = function (input)
+local b, __pass__, a
+return input:applyWithArgs(input.grammar.choice, function (input)
+__pass__, b = input:apply(input.grammar.int16)
+if not (__pass__) then
+return false
+end
+__pass__, a = input:apply(input.grammar.int16)
+if not (__pass__) then
+return false
+end
+return true, bor(lshift(a, 16), b)
+end)
+end, arity = 0, grammar = LittleEndian, name = 'int32'})})
+BinaryCommons.Msb0 = Msb0
+BinaryCommons.Lsb0 = Lsb0
+BinaryCommons.BigEndian = BigEndian
+BinaryCommons.LittleEndian = LittleEndian
 return BinaryCommons

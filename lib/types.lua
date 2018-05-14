@@ -6,7 +6,7 @@ local Any, Array
 
 local __instances = {}
 
-local term, toTree, used = true
+local term, toTree, used = false
 toTree = function(levelprefix, subtree)
   local result = ''
   local al, ml = 0, 0
@@ -330,7 +330,8 @@ local function typestat()
 end
 
 getType = function(obj)
-  return getmetatable(obj).type
+  local mt = getmetatable(obj)
+  return mt and mt.type or nil
 end
 
 return {

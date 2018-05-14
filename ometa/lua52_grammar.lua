@@ -9,19 +9,22 @@ local las = require('lua_abstractsyntax')
 local Get, Set, Group, Block, Chunk, Do, While, Repeat, If, ElseIf, For, ForIn, Function, MethodStatement, FunctionStatement, FunctionExpression, Return, Break, LastStatement, Call, Send, BinaryOperation, UnaryOperation, GetProperty, VariableArguments, TableConstructor, SetProperty, Goto, Label = las.Get, las.Set, las.Group, las.Block, las.Chunk, las.Do, las.While, las.Repeat, las.If, las.ElseIf, las.For, las.ForIn, las.Function, las.MethodStatement, las.FunctionStatement, las.FunctionExpression, las.Return, las.Break, las.LastStatement, las.Call, las.Send, las.BinaryOperation, las.UnaryOperation, las.GetProperty, las.VariableArguments, las.TableConstructor, las.SetProperty, las.lua52.Goto, las.lua52.Label
 local LuaGrammar = require('lua_grammar')
 local Lua52Grammar = OMeta.Grammar({_grammarName = 'Lua52Grammar', special = OMeta.Rule({behavior = function (input)
-local __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:applyWithArgs(input.grammar.subsequence, [[::]])
-end, LuaGrammar.special)
-end, arity = 0, grammar = nil, name = 'special'}), keyword = OMeta.Rule({behavior = function (input)
-local __pass__
-return input:applyWithArgs(input.grammar.choice, LuaGrammar.keyword, function (input)
+end, function (input)
+return input:apply(LuaGrammar.special)
+end)
+end, arity = 0, grammar = Lua52Grammar, name = 'special'}), keyword = OMeta.Rule({behavior = function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
+return input:apply(LuaGrammar.keyword)
+end, function (input)
 return input:applyWithArgs(input.grammar.exactly, 'goto')
 end)
-end, arity = 0, grammar = nil, name = 'keyword'}), stat = OMeta.Rule({behavior = function (input)
-local __pass__
-return input:applyWithArgs(input.grammar.choice, LuaGrammar.stat, function (input)
-local __pass__, labelName
+end, arity = 0, grammar = Lua52Grammar, name = 'keyword'}), stat = OMeta.Rule({behavior = function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
+return input:apply(LuaGrammar.stat)
+end, function (input)
+local labelName, __pass__
 if not (input:applyWithArgs(input.grammar.token, "goto")) then
 return false
 end
@@ -30,9 +33,11 @@ if not (__pass__) then
 return false
 end
 return true, Goto({name = labelName})
-end, input.grammar.label)
-end, arity = 0, grammar = nil, name = 'stat'}), label = OMeta.Rule({behavior = function (input)
-local __pass__, labelName
+end, function (input)
+return input:apply(input.grammar.label)
+end)
+end, arity = 0, grammar = Lua52Grammar, name = 'stat'}), label = OMeta.Rule({behavior = function (input)
+local labelName, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.token, "::")) then
 return false
@@ -46,6 +51,6 @@ return false
 end
 return true, Label({name = labelName})
 end)
-end, arity = 0, grammar = nil, name = 'label'})})
+end, arity = 0, grammar = Lua52Grammar, name = 'label'})})
 Lua52Grammar:merge(LuaGrammar)
 return Lua52Grammar

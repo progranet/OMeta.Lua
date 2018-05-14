@@ -1,0 +1,129 @@
+local OMeta = require 'ometa'
+local Types = require 'types'
+local class = Types.class
+local Any, Array = Types.Any, Types.Array
+local Commons = require 'binary_commons'
+local Aux = require 'auxiliary'
+local utils = require 'utils'
+
+local bit = require 'bit'
+local bnot, band, bor, bxor, lshift, rshift = bit.bnot, bit.band, bit.bor, bit.bxor, bit.lshift, bit.rshift
+
+local Gif = class {name = 'Gif', super = {Any}}
+local Block = class {name = 'Block', super = {Any}}
+local Color = class {name = 'Color', super = {Any}}
+
+local ometa GifGrammar {
+  
+  image         = -- 17. Header.
+                  0x47 0x49 0x46
+                  version:char(3) [? version == '87a' or version == '89a'] 
+                  
+                  -- 18. Logical Screen Descriptor.
+                  width:int16 height:int16
+                  fields:bitfield(byte, [{1, 3, 1, 3}])
+                  bci:byte
+                  par:byte
+                  ar:[par == 0 and 1 or (par + 15) / 64]
+                  
+                  -- 19. Global Color Table.
+                  gct:rgbColor/[fields[1] * lshift(1, fields[4] + 1)]
+                    
+                  data:( 0x21 label:byte Aux.apply([label], genericExt) -- extension
+                       | 0x2C imageData
+                       )*
+                  -- 27. Trailer.
+                  0x3B
+                  
+                  [Gif {
+                    version = version,
+                    width = width, height = height, 
+                    colorResolution = fields[2],
+                    colorSort = (fields[3] == 1), -- order by decreasing importance
+                    backgroundColorIndex = bci,
+                    pixelAspectRatio = par,
+                    aspectRatio = ar,
+                    globalColorTable = gct,
+                    data = data}]
+                ,
+  dataBlock     = -- 15. Data Sub-blocks.
+                  ^:byte/(^:byte [? ($^) ~= 0])
+                ,
+  rgbColor      = r:byte g:byte b:byte 
+                  [Color {red = r, green = g, blue = b}]
+                ,
+  imageData     = -- 20. Image Descriptor.
+                  left:int16 top:int16
+                  width:int16 height:int16
+                  fields:bitfield(byte, [{1, 1, 1, 2, 3}])
+                  
+                  -- 21. Local Color Table.
+                  lct:rgbColor/[fields[1] * lshift(1, fields[5] + 1)]
+                  
+                  -- 22. Table Based Image Data.
+                  lzwmcs:byte -- LZW Minimum Code Size
+                  blocks:dataBlock* 0x00
+
+                  [Block {name = 'Table-Based Image',
+                    left = left, top = top,
+                    width = width, height = height,
+                    interlace = (fields[2] == 1),
+                    colorSort = (fields[3] == 1),
+                    localColorTable = lct,
+                    lzwMinimumCodeSize = lzwmcs,
+                    blocks = blocks}]
+                ,
+  [0xF9]        = -- 23. Graphic Control Extension.
+                  0x04 -- Block Size
+                  fields:bitfield(byte, [{3, 3, 1, 1}])
+                  delay:int16 -- number of hundredths (1/100) of a second to wait
+                  transpIdx:byte 
+                  0x00
+
+                  [Block {name = 'Graphic Control Extension',
+                    disposalMethod = fields[2],
+                    userInput = (fields[3] == 1),
+                    transparency = (fields[4] == 1),
+                    transpIndex = transpIdx,
+                    delayTime = delay}]
+                ,
+  [0xFE]        = -- 24. Comment Extension.
+                  data:dataBlock* 0x00
+                  [Block {name = 'Comment Extension',
+                    data = data}]
+                ,
+  [0x01]        = -- 25. Plain Text Extension.
+                  0x0C -- Block size
+                  left:int16 top:int16
+                  gridWidth:int16 gridHeight:int16
+                  cellWidth:byte cellHeight:byte
+                  foreColorIdx:byte backColorIdx:byte
+                  ptData:dataBlock* 0x00
+
+                  [Block {name = 'Plain Text Extension',
+                    left = left, top = top,
+                    gridWidth = gridWidth, gridHeight = gridHeight,
+                    cellWidth = cellWidth, cellHeight = cellHeight,
+                    foregroundColorIndex = foreColorIdx, backgroundColorIndex = backColorIdx,
+                    plainTextData = ptData}]
+                ,
+  [0xFF]        = -- 26. Application Extension.
+                  0x0B -- Block size
+                  appId:char(8)
+                  appAuthCode:byte/3
+                  appData:dataBlock* 0x00
+
+                  [Block {name = 'Application Extension',
+                    applicationId = appId,
+                    applicationAuthenticationCode = appAuthCode,
+                    applicationData = appData}]
+                ,
+  genericExt    = data:dataBlock* 0x00
+                  [Block {name = 'Generic Extension',
+                    data = data}]
+}
+GifGrammar:merge(Commons)
+GifGrammar:merge(Commons.LittleEndian)
+GifGrammar:merge(Commons.Msb0)
+
+return GifGrammar

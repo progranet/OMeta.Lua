@@ -12,20 +12,26 @@ local Literal, NilLiteral, BooleanLiteral, NumberLiteral, IntegerLiteral, RealLi
     = asc.Literal, asc.NilLiteral, asc.BooleanLiteral, asc.NumberLiteral, asc.IntegerLiteral, asc.RealLiteral, asc.StringLiteral, asc.Name, asc.Keyword, asc.Special,
       asc.Node, asc.Statement, asc.Expression, asc.Control, asc.Iterative, asc.Invocation
 
+local OMetaNode = class {
+  abstract = true,
+  name = 'OMetaNode',
+  super = {Any};
+}
+      
 local RuleApplication = class {
 	name = 'RuleApplication',
-	super = {Expression};
+	super = {Expression, OMetaNode};
 }
 
 local Binding = class {
 	name = 'Binding',
-	super = {Statement};
+	super = {Statement, OMetaNode};
 }
 
 local Application = class {
   abstract = true,
   name = 'Application',
-  super = {Expression};
+  super = {Expression, OMetaNode};
 
   -- provides default transformation 
   -- from specialized OMeta AST nodes
@@ -64,13 +70,13 @@ local Choice = class {
   _asRuleApplication = function(self, ruleApp)
     self.arity = #self.nodes
     ruleApp.arguments = self.nodes
-    ruleApp._generic = true
+    ruleApp.generic = true
   end;
 }
 
 local Sequence = class {
 	name = 'Sequence',
-	super = {Expression};
+	super = {Expression, OMetaNode};
 }
 
 local Anything = class {
@@ -104,7 +110,7 @@ local Subsequence = class {
 local Lookahead = class {
   abstract = true,
 	name = 'Lookahead',
-	super = {Node};
+	super = {Node, OMetaNode};
 }
 
 local NotPredicate = class {
@@ -152,7 +158,7 @@ local Consumed = class {
 local HostNode = class {
   abstract = true,
 	name = 'HostNode',
-	super = {Node};
+	super = {Node, OMetaNode};
 }
 
 local HostStatement = class {
@@ -187,7 +193,7 @@ local Property = class {
 local Rule = class {
   abstract = true,
 	name = 'Rule',
-	super = {Node};
+	super = {Node, OMetaNode};
   
   constructor = function(class, init)
     if init.locals == nil then init.locals = Array {} end
@@ -208,7 +214,7 @@ local RuleStatement = class {
 local Grammar = class {
   abstract = true,
 	name = 'Grammar',
-	super = {Node};
+	super = {Node, OMetaNode};
 }
 
 local GrammarExpression = class {
@@ -221,8 +227,9 @@ local GrammarStatement = class {
 	super = {Grammar, Statement};
 }
 
-
+    
 return {
+  OMetaNode           = OMetaNode,
   Binding             = Binding,
   Choice              = Choice,
   Sequence            = Sequence,

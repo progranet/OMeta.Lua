@@ -16,10 +16,10 @@ Name of the Rule should be equal to name of the chunk type in parsed stream - th
 
 ]]
 
+local OMeta = require 'ometa'
 local Types = require 'types'
 local class = Types.class
 local Any, Array = Types.Any, Types.Array
-local OMeta = require 'ometa'
 local Commons = require 'binary_commons'
 local Aux = require 'auxiliary'
 local utils = require 'utils'
@@ -29,12 +29,11 @@ local Chunk = class {name = 'Chunk', super = {Any}}
 
 local ometa PngGrammar {
 
-  image     = 137 80 78 71 13 10 26 10 -- PNG header
+  image     = 0x89 0x50 0x4e 0x47 0x0d 0x0a 0x1a 0x0a   -- PNG header                                     -- 137 80 78 71 13 10 26 10
               chunks:chunk+ 
-              bytes:byte*                               [Png {chunks = chunks, rest = bytes}],
+              rest:byte*                                [Png {chunks = chunks, rest = rest}],
               
-  chunk     = len:int32 
-              type:char(4)                              [!  print(type, len)  ]
+  chunk     = len:int32 type:char(4)                    [!  print(type, len)]
               data:Aux.apply([type], generic, [len])    [!  data.length = len 
                                                             data.type = type  ]
               crc:byte/4                                [Chunk(data)],
@@ -67,8 +66,7 @@ local ometa PngGrammar {
                                                           x = x, y = y, 
                                                           unit = init == 1 and 'meter' or 'unknown'}],
   sBIT      = d:byte/number                             [{name = "Significant bits", data = d}],          -- 4.2.6. sBIT Significant bits
-  tEXt      = d:(b:byte [string.char(b)])/number                                                          -- 4.2.7. tEXt Textual data
-              str:[d:concat()] 
+  tEXt      = str:codesToString(byte/number)                                                              -- 4.2.7. tEXt Textual data
               tpos:[str:find('\0', 1, true)]            [{name = "Textual data", 
                                                           keyword = str:sub(1, tpos - 1), 
                                                           text = str:sub(tpos + 1)}],
@@ -80,5 +78,6 @@ local ometa PngGrammar {
   zTXt      = d:byte/number                             [{name = "Compressed textual data", data = d}]    -- 4.2.10. zTXt Compressed textual data
 }
 PngGrammar:merge(Commons)
+PngGrammar:merge(Commons.BigEndian)
 
 return PngGrammar

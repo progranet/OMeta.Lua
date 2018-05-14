@@ -14,10 +14,8 @@ local OMetaToLuaTranslator = require('ometa_ast2lua_ast_' .. alt[1])
 local ToSourceTranslator = require 'lua_ast2source'
 
 local function parseFile(path)
-  --local ometa = OMeta.use(Grammar):forFile(path)
   return utils.measure(
     function() 
-      --return ometa:match(Grammar.block) 
       return Grammar.block:matchFile(path)
     end
   )
@@ -32,10 +30,8 @@ local function translateTree(tree)
 end
 
 local function generateSourceTrans(tree)
-  --local ometa = OMeta.use(ToSourceTranslator):forTable(Array {tree})
   return utils.measure(
     function() 
-      --return ometa:match(ToSourceTranslator.trans)
       return ToSourceTranslator.trans:matchMixed(tree)
     end
   )
@@ -50,15 +46,20 @@ local function generateSourceDirect(tree)
 end
 
 local function compileFile(name)
-  print('compilation:', name)
-  local ometaAst = parseFile(name .. '.lpp')
+  print('----------------------------')
+  print('compilation: ' .. name)
+  local ometaAst, pt = parseFile(name)
+  print(string.format('source2ast:  %.3f', pt))
   --utils.writeFile(name .. '.oast', tostring(ometaAst))
-  local luaAst = translateTree(ometaAst)
+  local luaAst, tt = translateTree(ometaAst)
+  print(string.format('ometa2lua:   %.3f', tt))
   --utils.writeFile(name .. '.last', tostring(luaAst))
-  --local luaSource = generateSourceDirect(luaAst)
-  local luaSource = generateSourceTrans(luaAst)
-  utils.writeFile(name .. '.lua', luaSource)
-  print('============================')
+  local luaSource, t2t = 
+--                    generateSourceDirect(luaAst)
+                    generateSourceTrans(luaAst)
+  print(string.format('ast2source:  %.3f', t2t))
+  utils.writeFile(name:sub(1, -5) .. '.lua', luaSource)
+  return pt + tt + t2t
 end
 
 local libs = {'commons','grammar_commons','binary_commons','auxiliary','lua_grammar','lua52_grammar','ometa_grammar','ometa_lua_grammar','ometa_ast2lua_ast_' .. alt[1],'lua_ast2source'}
@@ -70,11 +71,17 @@ return {
   compileFile = compileFile;
   
   build = function() 
+    local t = 0
     for l = 1, #libs do 
-      local pass, res = pcall(compileFile, './ometa/' .. libs[l])
+--      t = t + compileFile('./ometa/' .. libs[l])
+      local pass, res = pcall(compileFile, './ometa/' .. libs[l] .. '.lpp')
       if not pass then
         print(res)
+      else
+        t = t + res
       end
     end
+    print('----------------------------')
+    print(string.format('total:       %.3f', t))
   end;
 }

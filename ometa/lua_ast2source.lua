@@ -12,103 +12,118 @@ local Streams = require('streams')
 local Aux = require('auxiliary')
 local lsep, esep = '\n', ', '
 local LuaAstToSourceTranslator = OMeta.Grammar({_grammarName = 'LuaAstToSourceTranslator', trans = OMeta.Rule({behavior = function (input)
-local __pass__, node
 return input:applyWithArgs(input.grammar.choice, function (input)
-__pass__, node = input:applyWithArgs(input.grammar.andPredicate, input.grammar.anything)
-if not (__pass__) then
+if not (input.stream._head ~= nil) then
 return false
 end
-return input:applyWithArgs(Aux.apply, getType(node), input.grammar.unexpected)
+return input:applyWithArgs(Aux.apply, getType(input.stream._head), input.grammar.unexpected)
 end)
-end, arity = 0, grammar = nil, name = 'trans'}), unexpected = OMeta.Rule({behavior = function (input)
-local __pass__, node
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'trans'}), unexpected = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-__pass__, node = input:apply(input.grammar.anything)
-if not (__pass__) then
-return false
-end
-return error('unexpected node: ' .. tostring(node))
+return error('unexpected node: ' .. tostring(input.stream._head))
 end)
-end, arity = 0, grammar = nil, name = 'unexpected'}), [NilLiteral] = OMeta.Rule({behavior = function (input)
-local __pass__
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'unexpected'}), [NilLiteral] = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:apply(input.grammar.anything)) then
 return false
 end
 return true, 'nil'
 end)
-end, arity = 0, grammar = nil, name = 'NilLiteral'}), [BooleanLiteral] = OMeta.Rule({behavior = function (input)
-local __pass__, value
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'NilLiteral'}), [BooleanLiteral] = OMeta.Rule({behavior = function (input)
+local value, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, value = input:apply(input.grammar.anything)
 return __pass__, value
+end)
 end, nil)) then
 return false
 end
 return true, string.interpolate([[]], value, [[]])
 end)
-end, arity = 0, grammar = nil, name = 'BooleanLiteral'}), [RealLiteral] = OMeta.Rule({behavior = function (input)
-local __pass__, value
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'BooleanLiteral'}), [RealLiteral] = OMeta.Rule({behavior = function (input)
+local value, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, value = input:apply(input.grammar.anything)
 return __pass__, value
+end)
 end, nil)) then
 return false
 end
 return true, string.interpolate([[]], value, [[]])
 end)
-end, arity = 0, grammar = nil, name = 'RealLiteral'}), [IntegerLiteral] = OMeta.Rule({behavior = function (input)
-local __pass__, value
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'RealLiteral'}), [IntegerLiteral] = OMeta.Rule({behavior = function (input)
+local value, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, value = input:apply(input.grammar.anything)
 return __pass__, value
+end)
 end, nil)) then
 return false
 end
 return true, string.interpolate([[]], value, [[]])
 end)
-end, arity = 0, grammar = nil, name = 'IntegerLiteral'}), [Name] = OMeta.Rule({behavior = function (input)
-local __pass__, value
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'IntegerLiteral'}), [Name] = OMeta.Rule({behavior = function (input)
+local __result__, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, function (input)
-__pass__, value = input:apply(input.grammar.anything)
-return __pass__, value
+return input:applyWithArgs(input.grammar.choice, function (input)
+__pass__, __result__ = input:apply(input.grammar.anything)
+if not (__pass__) then
+return false
+end
+return __pass__, __result__
+end)
 end, nil)) then
 return false
 end
-return true, value
+return true, __result__
 end)
-end, arity = 0, grammar = nil, name = 'Name'}), [Keyword] = OMeta.Rule({behavior = function (input)
-local __pass__, value
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'Name'}), [Keyword] = OMeta.Rule({behavior = function (input)
+local __result__, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, function (input)
-__pass__, value = input:apply(input.grammar.anything)
-return __pass__, value
+return input:applyWithArgs(input.grammar.choice, function (input)
+__pass__, __result__ = input:apply(input.grammar.anything)
+if not (__pass__) then
+return false
+end
+return __pass__, __result__
+end)
 end, nil)) then
 return false
 end
-return true, value
+return true, __result__
 end)
-end, arity = 0, grammar = nil, name = 'Keyword'}), [Special] = OMeta.Rule({behavior = function (input)
-local __pass__, value
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'Keyword'}), [Special] = OMeta.Rule({behavior = function (input)
+local __result__, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, function (input)
-__pass__, value = input:apply(input.grammar.anything)
-return __pass__, value
+return input:applyWithArgs(input.grammar.choice, function (input)
+__pass__, __result__ = input:apply(input.grammar.anything)
+if not (__pass__) then
+return false
+end
+return __pass__, __result__
+end)
 end, nil)) then
 return false
 end
-return true, value
+return true, __result__
 end)
-end, arity = 0, grammar = nil, name = 'Special'}), [StringLiteral] = OMeta.Rule({behavior = function (input)
-local __pass__, value, rdelim, ldelim
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'Special'}), [StringLiteral] = OMeta.Rule({behavior = function (input)
+local ldelim, __pass__, rdelim, value
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, value = input:apply(input.grammar.anything)
 return __pass__, value
+end)
 end, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, ldelim = input:applyWithArgs(input.grammar.property, 'ldelim', function (input)
@@ -127,21 +142,22 @@ return false
 end
 return true, string.interpolate([[]], ldelim or "'", [[]], value, [[]], rdelim or "'", [[]])
 end)
-end, arity = 0, grammar = nil, name = 'StringLiteral'}), [Get] = OMeta.Rule({behavior = function (input)
-local __pass__, name
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'StringLiteral'}), [Get] = OMeta.Rule({behavior = function (input)
+local name, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, name = input:applyWithArgs(input.grammar.property, 'name', input.grammar.trans)
 return __pass__, name
+end)
 end)) then
 return false
 end
 return true, name
 end)
-end, arity = 0, grammar = nil, name = 'Get'}), [Set] = OMeta.Rule({behavior = function (input)
-local __pass__
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'Get'}), [Set] = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local __pass__, names, expressions
+local names, __pass__, expressions
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.property, 'isLocal', true)) then
@@ -163,7 +179,7 @@ return false
 end
 return true, string.interpolate([[local ]], names:concat(esep), [[ = ]], expressions:concat(esep), [[]])
 end, function (input)
-local __pass__, names
+local names, __pass__
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.property, 'isLocal', true)) then
@@ -179,7 +195,7 @@ return false
 end
 return true, string.interpolate([[local ]], names:concat(esep), [[]])
 end, function (input)
-local __pass__, names, expressions
+local names, __pass__, expressions
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, names = input:applyWithArgs(input.grammar.property, 'names', function (input)
@@ -198,42 +214,48 @@ return false
 end
 return true, string.interpolate([[]], names:concat(esep), [[ = ]], expressions:concat(esep), [[]])
 end)
-end, arity = 0, grammar = nil, name = 'Set'}), [Chunk] = OMeta.Rule({behavior = function (input)
-local __pass__, statements
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'Set'}), [Chunk] = OMeta.Rule({behavior = function (input)
+local statements, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, statements = input:applyWithArgs(input.grammar.property, 'statements', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans)
 end)
 return __pass__, statements
+end)
 end)) then
 return false
 end
 return true, statements:append(''):concat(lsep)
 end)
-end, arity = 0, grammar = nil, name = 'Chunk'}), [Group] = OMeta.Rule({behavior = function (input)
-local __pass__, expression
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'Chunk'}), [Group] = OMeta.Rule({behavior = function (input)
+local expression, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, expression = input:applyWithArgs(input.grammar.property, 'expression', input.grammar.trans)
 return __pass__, expression
+end)
 end)) then
 return false
 end
 return true, string.interpolate([[(]], expression, [[)]])
 end)
-end, arity = 0, grammar = nil, name = 'Group'}), [Do] = OMeta.Rule({behavior = function (input)
-local __pass__, block
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'Group'}), [Do] = OMeta.Rule({behavior = function (input)
+local block, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, block = input:applyWithArgs(input.grammar.property, 'block', input.grammar.trans)
 return __pass__, block
+end)
 end)) then
 return false
 end
 return true, string.interpolate([[do]], lsep, [[]], block, [[end]])
 end)
-end, arity = 0, grammar = nil, name = 'Do'}), [While] = OMeta.Rule({behavior = function (input)
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'Do'}), [While] = OMeta.Rule({behavior = function (input)
 local __pass__, expression, block
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
@@ -250,7 +272,7 @@ return false
 end
 return true, string.interpolate([[while ]], expression, [[ do]], lsep, [[]], block, [[end]])
 end)
-end, arity = 0, grammar = nil, name = 'While'}), [Repeat] = OMeta.Rule({behavior = function (input)
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'While'}), [Repeat] = OMeta.Rule({behavior = function (input)
 local __pass__, expression, block
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
@@ -267,8 +289,8 @@ return false
 end
 return true, string.interpolate([[repeat]], lsep, [[]], block, [[until ]], expression, [[]])
 end)
-end, arity = 0, grammar = nil, name = 'Repeat'}), [If] = OMeta.Rule({behavior = function (input)
-local __pass__, elseBlock, elseIfs, expression, block
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'Repeat'}), [If] = OMeta.Rule({behavior = function (input)
+local elseIfs, block, __pass__, elseBlock, expression
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
@@ -294,7 +316,7 @@ return false
 end
 return true, string.interpolate([[if ]], expression, [[ then]], lsep, [[]], block, [[]], elseIfs:concat(), [[]], (#elseBlock ~= 0 and (string.interpolate([[else]], lsep, [[]], elseBlock, [[]])) or string.interpolate([[]])), [[end]])
 end)
-end, arity = 0, grammar = nil, name = 'If'}), [ElseIf] = OMeta.Rule({behavior = function (input)
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'If'}), [ElseIf] = OMeta.Rule({behavior = function (input)
 local __pass__, block, expression
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
@@ -311,8 +333,8 @@ return false
 end
 return true, string.interpolate([[elseif ]], expression, [[ then]], lsep, [[]], block, [[]])
 end)
-end, arity = 0, grammar = nil, name = 'ElseIf'}), [For] = OMeta.Rule({behavior = function (input)
-local __pass__, block, stepExpression, startExpression, name, stopExpression
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'ElseIf'}), [For] = OMeta.Rule({behavior = function (input)
+local stepExpression, block, __pass__, startExpression, name, stopExpression
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
@@ -340,8 +362,8 @@ return false
 end
 return true, string.interpolate([[for ]], name, [[ = ]], startExpression, [[]], esep, [[]], stopExpression, [[]], (stepExpression == '1' and string.interpolate([[]]) or string.interpolate([[]], esep, [[]], stepExpression, [[]])), [[ do]], lsep, [[]], block, [[end]])
 end)
-end, arity = 0, grammar = nil, name = 'For'}), [ForIn] = OMeta.Rule({behavior = function (input)
-local __pass__, names, expressions, block
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'For'}), [ForIn] = OMeta.Rule({behavior = function (input)
+local names, __pass__, expressions, block
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
@@ -365,8 +387,8 @@ return false
 end
 return true, string.interpolate([[for ]], names:concat(esep), [[ in ]], expressions:concat(esep), [[ do]], lsep, [[]], block, [[end]])
 end)
-end, arity = 0, grammar = nil, name = 'ForIn'}), [MethodStatement] = OMeta.Rule({behavior = function (input)
-local __pass__, arguments, variableArguments, block, name, context
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'ForIn'}), [MethodStatement] = OMeta.Rule({behavior = function (input)
+local arguments, variableArguments, block, __pass__, name, context
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
@@ -398,10 +420,9 @@ return false
 end
 return true, string.interpolate([[function ]], context:concat('.'), [[:]], name, [[(]], (variableArguments and arguments:append('...') or arguments):concat(esep), [[)]], lsep, [[]], block, [[end]])
 end)
-end, arity = 0, grammar = nil, name = 'MethodStatement'}), [FunctionStatement] = OMeta.Rule({behavior = function (input)
-local __pass__
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'MethodStatement'}), [FunctionStatement] = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local __pass__, variableArguments, arguments, name, block
+local arguments, variableArguments, block, __pass__, name
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.property, 'isLocal', true)) then
@@ -429,7 +450,7 @@ return false
 end
 return true, string.interpolate([[local function ]], name, [[(]], (variableArguments and arguments:append('...') or arguments):concat(esep), [[)]], lsep, [[]], block, [[end]])
 end, function (input)
-local __pass__, block, arguments, variableArguments, context
+local arguments, variableArguments, block, __pass__, context
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, context = input:applyWithArgs(input.grammar.property, 'context', function (input)
@@ -456,7 +477,7 @@ return false
 end
 return true, string.interpolate([[function ]], context:concat('.'), [[(]], (variableArguments and arguments:append('...') or arguments):concat(esep), [[)]], lsep, [[]], block, [[end]])
 end)
-end, arity = 0, grammar = nil, name = 'FunctionStatement'}), [FunctionExpression] = OMeta.Rule({behavior = function (input)
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'FunctionStatement'}), [FunctionExpression] = OMeta.Rule({behavior = function (input)
 local __pass__, arguments, variableArguments, block
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
@@ -479,8 +500,7 @@ return false
 end
 return true, string.interpolate([[function (]], (variableArguments and arguments:append('...') or arguments):concat(esep), [[)]], lsep, [[]], block, [[end]])
 end)
-end, arity = 0, grammar = nil, name = 'FunctionExpression'}), [GetProperty] = OMeta.Rule({behavior = function (input)
-local __pass__
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'FunctionExpression'}), [GetProperty] = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local __pass__, context, index
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
@@ -519,8 +539,8 @@ return false
 end
 return true, string.interpolate([[]], context, [[[]], index, [=[]]=])
 end)
-end, arity = 0, grammar = nil, name = 'GetProperty'}), [BinaryOperation] = OMeta.Rule({behavior = function (input)
-local __pass__, argument, name, context
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'GetProperty'}), [BinaryOperation] = OMeta.Rule({behavior = function (input)
+local argument, __pass__, name, context
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
@@ -533,8 +553,10 @@ if not (__pass__) then
 return false
 end
 return input:applyWithArgs(input.grammar.property, 'arguments', function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, argument = input:apply(input.grammar.trans)
 return __pass__, argument
+end)
 end)
 end)
 end)) then
@@ -542,10 +564,9 @@ return false
 end
 return true, string.interpolate([[]], context, [[ ]], name, [[ ]], argument, [[]])
 end)
-end, arity = 0, grammar = nil, name = 'BinaryOperation'}), [UnaryOperation] = OMeta.Rule({behavior = function (input)
-local __pass__
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'BinaryOperation'}), [UnaryOperation] = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local __pass__, context
+local context, __pass__
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.property, 'name', function (input)
@@ -576,7 +597,7 @@ return false
 end
 return true, string.interpolate([[]], name, [[]], context, [[]])
 end)
-end, arity = 0, grammar = nil, name = 'UnaryOperation'}), [Call] = OMeta.Rule({behavior = function (input)
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'UnaryOperation'}), [Call] = OMeta.Rule({behavior = function (input)
 local __pass__, arguments, context
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
@@ -595,8 +616,8 @@ return false
 end
 return true, string.interpolate([[]], context, [[(]], arguments:concat(esep), [[)]])
 end)
-end, arity = 0, grammar = nil, name = 'Call'}), [Send] = OMeta.Rule({behavior = function (input)
-local __pass__, arguments, name, context
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'Call'}), [Send] = OMeta.Rule({behavior = function (input)
+local arguments, __pass__, name, context
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
@@ -618,21 +639,22 @@ return false
 end
 return true, string.interpolate([[]], context, [[:]], name, [[(]], arguments:concat(esep), [[)]])
 end)
-end, arity = 0, grammar = nil, name = 'Send'}), [TableConstructor] = OMeta.Rule({behavior = function (input)
-local __pass__, properties
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'Send'}), [TableConstructor] = OMeta.Rule({behavior = function (input)
+local properties, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, properties = input:applyWithArgs(input.grammar.property, 'properties', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans)
 end)
 return __pass__, properties
+end)
 end)) then
 return false
 end
 return true, string.interpolate([[{]], properties:concat(esep), [[}]])
 end)
-end, arity = 0, grammar = nil, name = 'TableConstructor'}), [SetProperty] = OMeta.Rule({behavior = function (input)
-local __pass__
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'TableConstructor'}), [SetProperty] = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local __pass__, expression, index
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
@@ -656,7 +678,7 @@ return false
 end
 return true, string.interpolate([[]], index, [[ = ]], expression, [[]])
 end, function (input)
-local __pass__, expression
+local expression, __pass__
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.property, 'index', input.grammar.eos)) then
@@ -685,35 +707,35 @@ return false
 end
 return true, string.interpolate([[[]], index, [[] = ]], expression, [[]])
 end)
-end, arity = 0, grammar = nil, name = 'SetProperty'}), [Return] = OMeta.Rule({behavior = function (input)
-local __pass__, expressions
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'SetProperty'}), [Return] = OMeta.Rule({behavior = function (input)
+local expressions, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.object, nil, function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, expressions = input:applyWithArgs(input.grammar.property, 'expressions', function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.trans)
 end)
 return __pass__, expressions
+end)
 end)) then
 return false
 end
 return true, string.interpolate([[return ]], expressions:concat(esep), [[]])
 end)
-end, arity = 0, grammar = nil, name = 'Return'}), [Break] = OMeta.Rule({behavior = function (input)
-local __pass__
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'Return'}), [Break] = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:apply(input.grammar.anything)) then
 return false
 end
 return true, string.interpolate([[break]])
 end)
-end, arity = 0, grammar = nil, name = 'Break'}), [VariableArguments] = OMeta.Rule({behavior = function (input)
-local __pass__
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'Break'}), [VariableArguments] = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:apply(input.grammar.anything)) then
 return false
 end
 return true, string.interpolate([[...]])
 end)
-end, arity = 0, grammar = nil, name = 'VariableArguments'})})
+end, arity = 0, grammar = LuaAstToSourceTranslator, name = 'VariableArguments'})})
 LuaAstToSourceTranslator:merge(Commons)
 return LuaAstToSourceTranslator

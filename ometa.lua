@@ -60,15 +60,12 @@ OMeta.Input = class {
   
   apply = function(self, ruleImpl)
     
-    depth = depth + 1
     local entryState = self.stream
     local ruleType = type(ruleImpl)
     
     if ruleType == 'function' then
-      --print(self.stream._index, depth, 'native fn' .. string.rep(' ', 16), self.stream._head)
       local pass, result = ruleImpl(self)
       if not pass then self.stream = entryState end
-      depth = depth - 1
       return pass, result
     end
     
@@ -76,8 +73,6 @@ OMeta.Input = class {
       local behavior = ruleImpl.behavior
       if not behavior then
         -- "plain" type as a rule
-        --print(self.stream._index, depth, ruleImpl.name .. string.rep(' ', 25 - #ruleImpl.name), self.stream._head)
-        depth = depth - 1
         if ruleImpl:isInstance(self.stream._head) then 
           return self:next()
         else
@@ -89,35 +84,28 @@ OMeta.Input = class {
     end
     
     -- primitive Lua value (string|number|boolean)
-    depth = depth - 1
     return self:applyWithArgs(self.grammar.exactly, ruleImpl)
   end,
   
   applyWithArgs = function(self, ruleImpl, ...)
 
-    depth = depth + 1
     local entryState = self.stream
     
     if type(ruleImpl) == 'function' then
-      --print(self.stream._index, depth, 'native fn' .. string.rep(' ', 16), self.stream._head, 'args:', ...)
       local pass, result = ruleImpl(self, ...)
       if not pass then self.stream = entryState end
-      depth = depth - 1
       return pass, result
     end
     
     local behavior = ruleImpl.behavior
     if not behavior then
       -- expected behavior not yet specified
-      --print(self.stream._index, depth, ruleImpl.name .. string.rep(' ', 25 - #ruleImpl.name), self.stream._head, 'args:', ...)
       print('warning:', 'object does not implement rule behavior', ruleImpl)
-      depth = depth - 1
       return false
     end
 
     local argsn = select('#', ...)
     local fnarity = ruleImpl.arity and ruleImpl.arity ~= -1 and ruleImpl.arity or argsn
-    --print(self.stream._index, depth, ruleImpl.name .. string.rep(' ', 25 - #ruleImpl.name), self.stream._head, 'args (' .. tostring(fnarity) .. '/' .. tostring(argsn) .. '):', ...)
     if fnarity < argsn then
       self.stream = self.stream:prepend(argsn - fnarity, select(fnarity + 1, ...))
     end
@@ -125,7 +113,6 @@ OMeta.Input = class {
     if fnarity ~= 0 and not self.memoizeParameters then
       local pass, result = behavior(self, ...)
       if not pass then self.stream = entryState end
-      depth = depth - 1
       return pass, result
     end
 
@@ -146,7 +133,6 @@ OMeta.Input = class {
       local pass, result = ruleImpl.behavior(self, ...)
       if not pass then 
         self.stream = entryState
-        depth = depth - 1
         return false, result 
       end
       record.pass       = pass
@@ -171,13 +157,11 @@ OMeta.Input = class {
       ruleImpl.hits = ruleImpl.hits + 1
       if record.failer then
         record.failerUsed = true
-        depth = depth - 1
         return false
       end
       ruleImpl.cache = ruleImpl.cache + 1
     end
     self.stream = record.nextState
-    depth = depth - 1
     return record.pass, record.result
   end,
 
@@ -268,8 +252,15 @@ OMeta.Input = class {
             end
           end
         else
-          num = num + 1
-          res[num] = element
+--          if Array:isInstance(element) and #element ~= 0 then
+--            for i = 1, #element do
+--              num = num + 1
+--              res[num] = element[i]
+--            end
+--          else
+            num = num + 1
+            res[num] = element
+--          end
         end
       end
     end

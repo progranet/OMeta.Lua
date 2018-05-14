@@ -48,13 +48,13 @@ local ometa OMetaGrammar {
                 ----------------------------------------------------------------------------------------------------------------------------
                 |     primexp
                 ,------------------------------------ grouping -----------------------------------------------------------------------------
-  primexp       = "(" exp:choiceDef ")"         [!exp.scope = true] [exp]
+  primexp       = "(" ^:choiceDef ")" [! ($^).scope = true]
                 | "<" exp:choiceDef ">"                             [Consumed         {expression = exp}]
                 | "{" props:props "}"                               [Object           {array = props[1], map = props[2]}]
                 ------------------------------------- literals -----------------------------------------------------------------------------
                 | ws* literal:strlitQ                               [Token            {expression = literal}]
                 | ws* literal:strlitL                               [Subsequence      {expression = literal}]
-                | ws* literal:( strlitA | intlit | hexlit 
+                | ws* literal:( strlitA | hexlit | intlit 
                               | boollit | nillit )                  [Exactly          {expression = literal}]
                 ------------------------------------ application ---------------------------------------------------------------------------
                 | "."                                               [Anything         {}]
@@ -63,7 +63,7 @@ local ometa OMetaGrammar {
                 ,--------------------------------- building blocks -------------------------------------------------------------------------
   path          = list(name, '.', 1)
                 ,
-  args          = '(' args:list(choiceDef, ",") ")"                 [args]
+  args          = '(' ^:list(^:choiceDef [! ($^).scope = true], ",") ")"
                 ,
   props         = array:choiceDef ";"  map:list(prop, ",", 1)       [{array,          Choice      {nodes = Array {Sequence {nodes = map}}}}]
                 | array:choiceDef ";"?                              [{array,          NilLiteral  {}}]

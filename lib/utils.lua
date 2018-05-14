@@ -42,9 +42,9 @@ end
 
 local function measure(fn)
   local start = os.clock()
-  local res = fn()
-  print(string.format("time: %.3f", os.clock() - start))
-  return res
+  --local res = fn()
+  --print(string.format("time: %.3f", os.clock() - start))
+  return fn(), os.clock() - start
 end
 
 local function existsFile(path)

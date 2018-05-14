@@ -61,13 +61,12 @@ PrependedInputStream = class {
     local index = head == nil and nilSentinel or head
     local prepended = tail.prefix[index]
     if prepended ~= nil then
-      --print(head)
       return prepended
     end
     prepended = PrependedInputStream {
-      memo = {},
-      prefix = {},
-      _source  = tail._source,
+      memo    = {},
+      prefix  = {},
+      _source = tail._source,
       _index  = tail._index,
       _head   = head,
       _tail   = tail
@@ -86,22 +85,22 @@ ListInputStream = class {
   new = function(type, source, index)
     index = index or 1
     local init = {
-      memo = {},
-      prefix = {},
+      memo    = {},
+      prefix  = {},
       _source = source,
-      _index = index
+      _index  = index
     }
     if index > #source then
       type = InputStreamEnd
     end
-    init._head = type._head(init)
-    init.type = type
+    init._head = type._getHead(init)
+    --init.type = type
     return (type(init))
   end,
   
   tail = function(self)
     if self._tail == nil then
-      self._tail = self.type:new(self._source, self._index + 1)
+      self._tail = getType(self):new(self._source, self._index + 1)
     end
     return self._tail
   end,
@@ -128,7 +127,7 @@ StringInputStream = class {
     return (self._source:match('^' .. pat, self._index))
   end,
   
-  _head = function(self)
+  _getHead = function(self)
     return (self._source:sub(self._index, self._index))
   end;
 }
@@ -138,7 +137,7 @@ BinaryInputStream = class {
   name = 'BinaryInputStream', 
   super = {ListInputStream};
   
-  _head = function(self)
+  _getHead = function(self)
     return (self._source:sub(self._index, self._index):byte())
   end;
 }
@@ -152,7 +151,7 @@ TableInputStream = class {
     return (self._source:sub(self._index, self._index + count - 1, true))
   end,
   
-  _head = function(self)
+  _getHead = function(self)
     return self._source[self._index]
   end;
 }
@@ -163,7 +162,7 @@ InputStreamEnd = class {
   name = 'InputStreamEnd', 
   super = {ListInputStream};
   
-  _head = function(self)
+  _getHead = function(self)
     return nil
   end,
   
@@ -182,15 +181,27 @@ PropertyInputStream = class {
   super = {InputStream};
   
   new = function(tail, index)
-    local stream = PropertyInputStream {
-      memo = {},
-      prefix = {},
+    local init = {
+      memo    = {},
+      prefix  = {},
       _source = tail._source,
-      _head = tail._source[index],
-      _tail = tail
+      --_head   = tail._source[index],
+      _index  = index,
+      _tail   = tail
     }
-    return stream
+    local type
+    if tail._source[index] == nil then
+      type = InputStreamEnd
+    else
+      type = PropertyInputStream
+    end
+    init._head = type._getHead(init)
+    return (type(init))
   end;
+  
+  _getHead = function(self)
+    return self._source[self._index]
+  end,
   
   property = function(self, index)
     local prop = self._source[index]

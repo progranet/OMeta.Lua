@@ -105,7 +105,7 @@ local ometa LuaGrammar {
                 ,
   primexp       = ws* ( nillit 
                       | boollit 
-                      | reallit | hexlit  | intlit 
+                      | hexlit  | reallit | intlit 
                       | strlitA | strlitQ | strlitL
                       )
                 | "..."                                                         [VariableArguments {}]
@@ -122,7 +122,7 @@ local ometa LuaGrammar {
                 | "[" i:exp "]"                                                 [GetProperty  {context = ctx, index = i}]
                 | "." i:name                                                    [GetProperty  {context = ctx, index = i}]
                 ,
-  args          = "(" as:(explist | empty [Array {}] ) ")"                      [as]
+  args          = "(" ^:(explist | empty [Array {}] ) ")"
                 | a:tableconstr                                                 [Array {a}]
                 | ws* a:(strlitA | strlitQ | strlitL)                           [Array {a}]
                 ,
@@ -138,7 +138,7 @@ local ometa LuaGrammar {
                 ,
   tableconstr   = "{" fields:fieldlist "}"                                      [TableConstructor {properties = fields}]
                 ,
-  fieldlist     = fields:list(field, "," | ";", 1) ("," | ";")?                 [fields]
+  fieldlist     = ^:list(field, "," | ";", 1) ("," | ";")?
                 | empty                                                         [Array {}]
                 ,
   field         = "[" i:exp "]" "=" v:exp                                       [SetProperty {index = i, expression = v}]

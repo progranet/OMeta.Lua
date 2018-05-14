@@ -8,25 +8,34 @@ local OMeta = require 'ometa'
 local utils = require 'utils'
 local StdLib = require 'ometa_stdlib'
 
--- Rules of this Grammar use "private" property `Stream::_head`
--- this is not part of API and is therefore subject to change - use with caution
-
 local ometa Commons {
 
-  eos                 =                                               ~.,
-  empty               = [? true]                                      , -- nothing to return
-  string              = [? type(input.stream._head) == 'string']      .,
-  number              = [? type(input.stream._head) == 'number']      .,
-  boolean             = [? type(input.stream._head) == 'boolean']     .,
-  table               = [? type(input.stream._head) == 'table']       .,
-  ['function']        = [? type(input.stream._head) == 'function']    .,
-  notLast(element)    = ^:element &element,
+  eos                   =                                         ~.,
+  empty                 = [? true]                                , -- nothing to return
+  
+  string                = [? type($head) == 'string']             .,
+  number                = [? type($head) == 'number']             .,
+  boolean               = [? type($head) == 'boolean']            .,
+  table                 = [? type($head) == 'table']              .,
+  ['function']          = [? type($head) == 'function']           .,
+  
+  toNumber(source)      = str:source                              [tonumber(str)],
+  toString(source)      = val:source                              [tostring(val)],
+  codesToString(source) = val:source ( [? Array:isInstance(val)]  [string.char(unpack(val))]
+                                     |                            [string.char(val)]
+                                     )
+                        ,
+  charToCode(source)    = str:source                              [str:byte()],
+  
+  concat(source, sep)   = chars:source                            [chars:concat(sep)],
+  
+  notLast(element)      = ^:element &element,
   list(element, delim, minimum)
-                      = first:element rest:(delim element)* 
-                        [? (#rest + 1) >= (minimum or 0)]             [rest:prepend(first)]
-                      | [? not minimum or minimum == 0]               [Array {}]
-                      ,
-  range(first, last)  = < first (~last .)* last >
+                        = first:element rest:(delim element)* 
+                          [? (#rest + 1) >= (minimum or 0)]       [rest:prepend(first)]
+                        | [? not minimum or minimum == 0]         [Array {}]
+                        ,
+  range(first, last)    = < first (~last .)* last >
 }
 Commons:merge(StdLib)
 

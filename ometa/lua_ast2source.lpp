@@ -32,16 +32,16 @@ local lsep, esep = '\n', ', '
 
 local ometa LuaAstToSourceTranslator {
 
-  trans                 = node:&.                                                                 Aux.apply([getType(node)], unexpected),
-  unexpected            = node:.                                                                  [? error('unexpected node: ' .. tostring(node))],
+  trans                 = [? $head ~= nil]                                                        Aux.apply([getType($head)], unexpected),
+  unexpected            = [? error('unexpected node: ' .. tostring($head))],
   
   [NilLiteral]          = .                                                                       ['nil'],
   [BooleanLiteral]      = {value:.}                                                               [`${value}`],
   [RealLiteral]         = {value:.}                                                               [`${value}`],
   [IntegerLiteral]      = {value:.}                                                               [`${value}`],
-  [Name]                = {value:.}                                                               [value],
-  [Keyword]             = {value:.}                                                               [value],
-  [Special]             = {value:.}                                                               [value],
+  [Name]                = {^:.}                                                                   ,
+  [Keyword]             = {^:.}                                                                   ,
+  [Special]             = {^:.}                                                                   ,
   [StringLiteral]       = {value:.; ldelim:=.?, rdelim:=.?}                                       [`${ldelim or "'"}${value}${rdelim or "'"}`],
   
   [Get]                 = {; name:=trans}                                                         [name],

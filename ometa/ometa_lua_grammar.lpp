@@ -35,9 +35,9 @@ local Binding, Application, Choice, Sequence, Lookahead,
       
 local OMeta = require 'ometa'
 local OMetaGrammar = require 'ometa_grammar'
-local OMetaInLuaGrammar
+local OMetaInLua, OMetaInLuaExt
 
-local ometa LuaInOMetaGrammar {
+local ometa LuaInOMeta {
 
   special       = OMetaGrammar.special
                 | [[[?]] | [[[!]] | '[' | ']'
@@ -45,28 +45,27 @@ local ometa LuaInOMetaGrammar {
   keyword       = 'end'
                 ,
   node          = OMetaGrammar.node
-                | "[?" exp:OMetaInLuaGrammar.exp@OMetaInLuaGrammar "]"                  [HostPredicate {value = exp}]
-                | "[!" exp:OMetaInLuaGrammar.stat@OMetaInLuaGrammar* "]"                [HostStatement {value = exp}]
+                | "[?" exp:OMetaInLuaExt.exp@OMetaInLuaExt "]"                          [HostPredicate {value = exp}]
+                | "[!" exp:OMetaInLuaExt.stat@OMetaInLuaExt* "]"                        [HostStatement {value = exp}]
                 ,
   primexp       = OMetaGrammar.primexp
-                | "[" exp:OMetaInLuaGrammar.exp@OMetaInLuaGrammar "]"                   [HostExpression {value = exp}]
+                | "[" exp:OMetaInLuaExt.exp@OMetaInLuaExt "]"                           [HostExpression {value = exp}]
                 ,
   prop          = OMetaGrammar.prop
-                | index:("[" e:OMetaInLuaGrammar.exp@OMetaInLuaGrammar "]" [e]) 
-                  "=" exp:choiceDef                                                     [Property       {expression = exp, index = index}]
+                | "[" index:OMetaInLuaExt.exp@OMetaInLuaExt "]" "=" exp:choiceDef       [Property       {expression = exp, index = index}]
 }
-LuaInOMetaGrammar:merge(OMetaGrammar)
+LuaInOMeta:merge(OMetaGrammar)
 
 --------------------------------------------------------------------------------------------------------------------------------------
 
 local LuaGrammar = require 'lua52_grammar'
-local OMetaInLuaMixedGrammar
+local OMetaInLuaMixed
 
 local function exp(...)
-  return OMetaInLuaMixedGrammar.exp:matchMixed(...)
+  return OMetaInLuaMixed.exp:matchMixed(...)
 end
 
-ometa OMetaInLuaGrammar {
+ometa OMetaInLua {
   
   keyword       = LuaGrammar.keyword
                 | 'ometa'
@@ -87,14 +86,14 @@ ometa OMetaInLuaGrammar {
                 | ws* strlitB
                 ,
   ruleBody      = "(" params:parlist ")" 
-                    body:LuaInOMetaGrammar.choiceDef@LuaInOMetaGrammar
+                    body:LuaInOMeta.choiceDef@LuaInOMeta
                   "end"                                                                 [{params, body}]
                 ,
-  grammarBody   = "{" rules:list(innerRuleBody, "," | ";") ("," | ";")? "}"             [rules]
+  grammarBody   = "{" ^:list(innerRuleBody, "," | ";") ("," | ";")? "}"
                 ,
   innerRuleBody = index:(name | "[" ^:exp "]") 
                   params:( "(" ^:parlist ")" | empty [{Array {}, false}] ) 
-                  "=" body:LuaInOMetaGrammar.choiceDef@LuaInOMetaGrammar                [RuleExpression {
+                  "=" body:LuaInOMeta.choiceDef@LuaInOMeta                              [RuleExpression {
                                                                                           name = index, 
                                                                                           arguments = params[1], variableArguments = params[2], 
                                                                                           block = body}]
@@ -103,85 +102,95 @@ ometa OMetaInLuaGrammar {
                 ,
   slice         = str:<(escchar | ~'`' ~'$' char)*>                                     [StringLiteral {str, ldelim = '[[', rdelim = ']]'}]
 }
-OMetaInLuaGrammar:merge(LuaGrammar)
-
+OMetaInLua:merge(LuaGrammar)
 
 --------------------------------------------------------------------------------------------------------------------------------------
 
-ometa OMetaInLuaMixedGrammar {
+ometa OMetaInLuaExt {
   
-  --mix(object, element, delim, minimum)
-                      --= col:(object | e:element delim [e])* last:(object | element)
-                        --[? (#col + 1) >= (minimum or 0)]              [col:append(last)]
-                      --| [? not minimum or minimum == 0]               [Array {}]
-                      --,
+  special       = OMetaInLua.special
+                | '$' 
+                ,
+  primexp       = OMetaInLua.primexp
+                | ws* "$" ("^" | [[result]])                                            [exp`__result__`]
+                | ws* "$" ("." | [[head]])                                              [exp`input.stream._head`]
+                | ws* "$" [[index]]                                                     [exp`input.stream._index`]
+                | ws* "$" [[input]]                                                     [exp`input`]
+                | ws* "$" [[state]]                                                     [exp`input.stream`]
+                | ws* "$" [[source]]                                                    [exp`input.stream._source`]
+}
+OMetaInLuaExt:merge(OMetaInLua)
 
-  name        = OMetaInLuaGrammar.name
+--------------------------------------------------------------------------------------------------------------------------------------
+
+ometa OMetaInLuaMixed {
+  
+  name        = OMetaInLua.name
               | Name
               ,
-  token(str)  = OMetaInLuaGrammar.token(str)
-              | token:(Keyword | Special)                           [? token[1] == str] [token]
+  token(str)  = OMetaInLua.token(str)
+              | ^:(Keyword | Special) [? ($^)[1] == str]
               ,
   chunk       = -- Order of alternatives is important:
                 -- - LuaGrammar.chunk always returns truthy result and rules out any subsequent check
                 Chunk
               --| &Array {stats:stat*}                                                    [Chunk            {statements = stats}]
               | stats:Array                                                             [Chunk            {statements = stats}]
-              | OMetaInLuaGrammar.chunk
+              | OMetaInLua.chunk
               ,
-  stat        = OMetaInLuaGrammar.stat 
+  stat        = OMetaInLua.stat 
               | Do | While | Repeat | If | ElseIf | For | ForIn 
               | MethodStatement | FunctionStatement | Set | Goto
               ,
-  label       = OMetaInLuaGrammar.label
+  label       = OMetaInLua.label
               | Label
               ,
-  laststat    = OMetaInLuaGrammar.laststat 
+  laststat    = OMetaInLua.laststat 
               | Return | Break
               ,
-  namelist    = OMetaInLuaGrammar.namelist
+  namelist    = OMetaInLua.namelist
               --| &Array {name+}
               | Array
-              --| mix(Name, name, ",", [1])
               ,
-  explist     = OMetaInLuaGrammar.explist
+  explist     = OMetaInLua.explist
               --| &Array {exp+}
               | Array
               ,
-  mulexp      = OMetaInLuaGrammar.mulexp 
+  mulexp      = OMetaInLua.mulexp 
               | BinaryOperation
               ,
-  unary       = OMetaInLuaGrammar.unary
+  unary       = OMetaInLua.unary
               | UnaryOperation
               ,
-  primexp     = OMetaInLuaGrammar.primexp 
+  primexp     = OMetaInLua.primexp 
               | NilLiteral | BooleanLiteral | RealLiteral | StringLiteral 
               | VariableArguments | FunctionExpression
               ,
   prefixexp   = ctx:prefixexp suffixexp(ctx)
               | Call | Send | GetProperty | Get | Group
-              | OMetaInLuaGrammar.prefixexp
+              | OMetaInLua.prefixexp
               ,
-  args        = OMetaInLuaGrammar.args
+  args        = OMetaInLua.args
               --| &Array {exp*}
               | Array
               | a:TableConstructor                                                      [Array {a}]
               | a:StringLiteral                                                         [Array {a}]
               ,
-  tableconstr = OMetaInLuaGrammar.tableconstr                                            
+  tableconstr = OMetaInLua.tableconstr                                            
               | TableConstructor
               ,
-  fieldlist   = OMetaInLuaGrammar.fieldlist
+  fieldlist   = OMetaInLua.fieldlist
               --| &Array {field*}
               | Array
               ,
-  field       = OMetaInLuaGrammar.field
+  field       = OMetaInLua.field
               | SetProperty
 }
-OMetaInLuaMixedGrammar:merge(OMetaInLuaGrammar)
+OMetaInLuaMixed:merge(OMetaInLua)
 
 return {
-  LuaInOMetaGrammar = LuaInOMetaGrammar;
-  OMetaInLuaGrammar = OMetaInLuaGrammar;
-  OMetaInLuaMixedGrammar = OMetaInLuaMixedGrammar;
+  LuaInOMetaGrammar = LuaInOMeta;
+  OMetaInLuaGrammar = OMetaInLua;
+  OMetaInLuaExtGrammar = OMetaInLuaExt;
+  OMetaInLuaMixedGrammar = OMetaInLuaMixed;
 }

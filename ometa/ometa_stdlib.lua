@@ -49,7 +49,6 @@ local StandardLibrary = OMeta.Grammar {
   subsequence = OMeta.Rule {
     name = 'subsequence';
     behavior = function(input, expression)
-      --TODO: accept types other than string
       local r = input.stream:subsequence(#expression)
       if r ~= expression then return false, r end
       local pass, res = input:collect(#r)

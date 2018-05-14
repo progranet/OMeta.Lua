@@ -9,7 +9,7 @@ local omas = require('ometa_abstractsyntax')
 local Binding, Application, Choice, Sequence, Lookahead, Exactly, Token, Subsequence, NotPredicate, AndPredicate, Optional, Many, Consumed, Loop, Anything, HostNode, HostPredicate, HostStatement, HostExpression, RuleApplication, Object, Property, Rule, RuleExpression, RuleStatement = omas.Binding, omas.Application, omas.Choice, omas.Sequence, omas.Lookahead, omas.Exactly, omas.Token, omas.Subsequence, omas.NotPredicate, omas.AndPredicate, omas.Optional, omas.Many, omas.Consumed, omas.Loop, omas.Anything, omas.HostNode, omas.HostPredicate, omas.HostStatement, omas.HostExpression, omas.RuleApplication, omas.Object, omas.Property, omas.Rule, omas.RuleExpression, omas.RuleStatement
 local Commons = require('grammar_commons')
 local OMetaGrammar = OMeta.Grammar({_grammarName = 'OMetaGrammar', choiceDef = OMeta.Rule({behavior = function (input)
-local __pass__, nodes
+local nodes, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, nodes = input:applyWithArgs(input.grammar.list, input.grammar.sequenceDef, function (input)
 return input:applyWithArgs(input.grammar.token, "|")
@@ -19,8 +19,8 @@ return false
 end
 return true, Choice({nodes = nodes})
 end)
-end, arity = 0, grammar = nil, name = 'choiceDef'}), sequenceDef = OMeta.Rule({behavior = function (input)
-local __pass__, nodes
+end, arity = 0, grammar = OMetaGrammar, name = 'choiceDef'}), sequenceDef = OMeta.Rule({behavior = function (input)
+local nodes, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, nodes = input:applyWithArgs(input.grammar.many, input.grammar.node, 1)
 if not (__pass__) then
@@ -28,8 +28,7 @@ return false
 end
 return true, Sequence({nodes = nodes})
 end)
-end, arity = 0, grammar = nil, name = 'sequenceDef'}), node = OMeta.Rule({behavior = function (input)
-local __pass__
+end, arity = 0, grammar = OMetaGrammar, name = 'sequenceDef'}), node = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local __pass__, name, exp
 __pass__, name = input:apply(input.grammar.name)
@@ -58,11 +57,12 @@ if not (__pass__) then
 return false
 end
 return true, Binding({expression = exp, name = name})
-end, input.grammar.prefixexp)
-end, arity = 0, grammar = nil, name = 'node'}), prefixexp = OMeta.Rule({behavior = function (input)
-local __pass__
+end, function (input)
+return input:apply(input.grammar.prefixexp)
+end)
+end, arity = 0, grammar = OMetaGrammar, name = 'node'}), prefixexp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local __pass__, exp
+local exp, __pass__
 if not (input:applyWithArgs(input.grammar.token, "~")) then
 return false
 end
@@ -72,7 +72,7 @@ return false
 end
 return true, NotPredicate({expression = exp})
 end, function (input)
-local __pass__, exp
+local exp, __pass__
 if not (input:applyWithArgs(input.grammar.token, "&")) then
 return false
 end
@@ -81,9 +81,10 @@ if not (__pass__) then
 return false
 end
 return true, AndPredicate({expression = exp})
-end, input.grammar.suffixexp)
-end, arity = 0, grammar = nil, name = 'prefixexp'}), suffixexp = OMeta.Rule({behavior = function (input)
-local __pass__
+end, function (input)
+return input:apply(input.grammar.suffixexp)
+end)
+end, arity = 0, grammar = OMetaGrammar, name = 'prefixexp'}), suffixexp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local __pass__, num, exp
 __pass__, exp = input:apply(input.grammar.primexp)
@@ -93,7 +94,11 @@ end
 if not (input:applyWithArgs(input.grammar.token, "/")) then
 return false
 end
-__pass__, num = input:applyWithArgs(input.grammar.choice, input.grammar.intlit, input.grammar.primexp)
+__pass__, num = input:applyWithArgs(input.grammar.choice, function (input)
+return input:apply(input.grammar.intlit)
+end, function (input)
+return input:apply(input.grammar.primexp)
+end)
 if not (__pass__) then
 return false
 end
@@ -113,7 +118,7 @@ return false
 end
 if not (input:applyWithArgs(input.grammar.optional, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local __pass__, max
+local max, __pass__
 if not (input:applyWithArgs(input.grammar.token, "..")) then
 return false
 end
@@ -125,7 +130,7 @@ return false
 end
 return true, Many({expression = exp, minimum = min, maximum = max})
 end, function (input)
-local __pass__, exp
+local exp, __pass__
 __pass__, exp = input:apply(input.grammar.primexp)
 if not (__pass__) then
 return false
@@ -135,7 +140,7 @@ return false
 end
 return true, Many({expression = exp})
 end, function (input)
-local __pass__, exp
+local exp, __pass__
 __pass__, exp = input:apply(input.grammar.primexp)
 if not (__pass__) then
 return false
@@ -145,7 +150,7 @@ return false
 end
 return true, Many({expression = exp, minimum = RealLiteral({1})})
 end, function (input)
-local __pass__, exp
+local exp, __pass__
 __pass__, exp = input:apply(input.grammar.primexp)
 if not (__pass__) then
 return false
@@ -154,25 +159,26 @@ if not (input:applyWithArgs(input.grammar.token, "?")) then
 return false
 end
 return true, Optional({expression = exp})
-end, input.grammar.primexp)
-end, arity = 0, grammar = nil, name = 'suffixexp'}), primexp = OMeta.Rule({behavior = function (input)
-local __pass__
+end, function (input)
+return input:apply(input.grammar.primexp)
+end)
+end, arity = 0, grammar = OMetaGrammar, name = 'suffixexp'}), primexp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local __pass__, exp
+local __result__, __pass__
 if not (input:applyWithArgs(input.grammar.token, "(")) then
 return false
 end
-__pass__, exp = input:apply(input.grammar.choiceDef)
+__pass__, __result__ = input:apply(input.grammar.choiceDef)
 if not (__pass__) then
 return false
 end
 if not (input:applyWithArgs(input.grammar.token, ")")) then
 return false
 end
-exp.scope = true
-return true, exp
+(__result__).scope = true
+return true, __result__
 end, function (input)
-local __pass__, exp
+local exp, __pass__
 if not (input:applyWithArgs(input.grammar.token, "<")) then
 return false
 end
@@ -185,7 +191,7 @@ return false
 end
 return true, Consumed({expression = exp})
 end, function (input)
-local __pass__, props
+local props, __pass__
 if not (input:applyWithArgs(input.grammar.token, "{")) then
 return false
 end
@@ -198,7 +204,7 @@ return false
 end
 return true, Object({array = props[1], map = props[2]})
 end, function (input)
-local __pass__, literal
+local literal, __pass__
 if not (input:applyWithArgs(input.grammar.many, input.grammar.ws)) then
 return false
 end
@@ -208,7 +214,7 @@ return false
 end
 return true, Token({expression = literal})
 end, function (input)
-local __pass__, literal
+local literal, __pass__
 if not (input:applyWithArgs(input.grammar.many, input.grammar.ws)) then
 return false
 end
@@ -218,30 +224,38 @@ return false
 end
 return true, Subsequence({expression = literal})
 end, function (input)
-local __pass__, literal
+local literal, __pass__
 if not (input:applyWithArgs(input.grammar.many, input.grammar.ws)) then
 return false
 end
-__pass__, literal = input:applyWithArgs(input.grammar.choice, input.grammar.strlitA, input.grammar.intlit, input.grammar.hexlit, input.grammar.boollit, input.grammar.nillit)
+__pass__, literal = input:applyWithArgs(input.grammar.choice, function (input)
+return input:apply(input.grammar.strlitA)
+end, function (input)
+return input:apply(input.grammar.hexlit)
+end, function (input)
+return input:apply(input.grammar.intlit)
+end, function (input)
+return input:apply(input.grammar.boollit)
+end, function (input)
+return input:apply(input.grammar.nillit)
+end)
 if not (__pass__) then
 return false
 end
 return true, Exactly({expression = literal})
 end, function (input)
-local __pass__
 if not (input:applyWithArgs(input.grammar.token, ".")) then
 return false
 end
 return true, Anything({})
 end, function (input)
-local __pass__, target, name, args
+local target, __pass__, name, args
 __pass__, name = input:apply(input.grammar.path)
 if not (__pass__) then
 return false
 end
 __pass__, target = input:applyWithArgs(input.grammar.optional, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local __pass__
 if not (input:applyWithArgs(input.grammar.token, "@")) then
 return false
 end
@@ -257,18 +271,27 @@ return false
 end
 return true, RuleApplication({name = name, target = target, arguments = args or Array({})})
 end)
-end, arity = 0, grammar = nil, name = 'primexp'}), path = OMeta.Rule({behavior = function (input)
-local __pass__
+end, arity = 0, grammar = OMetaGrammar, name = 'primexp'}), path = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:applyWithArgs(input.grammar.list, input.grammar.name, '.', 1)
 end)
-end, arity = 0, grammar = nil, name = 'path'}), args = OMeta.Rule({behavior = function (input)
-local __pass__, args
+end, arity = 0, grammar = OMetaGrammar, name = 'path'}), args = OMeta.Rule({behavior = function (input)
+local __result__, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.exactly, '(')) then
 return false
 end
-__pass__, args = input:applyWithArgs(input.grammar.list, input.grammar.choiceDef, function (input)
+__pass__, __result__ = input:applyWithArgs(input.grammar.list, function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
+local __result__, __pass__
+__pass__, __result__ = input:apply(input.grammar.choiceDef)
+if not (__pass__) then
+return false
+end
+(__result__).scope = true
+return true, __result__
+end)
+end, function (input)
 return input:applyWithArgs(input.grammar.token, ",")
 end)
 if not (__pass__) then
@@ -277,10 +300,9 @@ end
 if not (input:applyWithArgs(input.grammar.token, ")")) then
 return false
 end
-return true, args
+return true, __result__
 end)
-end, arity = 0, grammar = nil, name = 'args'}), props = OMeta.Rule({behavior = function (input)
-local __pass__
+end, arity = 0, grammar = OMetaGrammar, name = 'args'}), props = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local __pass__, array, map
 __pass__, array = input:apply(input.grammar.choiceDef)
@@ -298,7 +320,7 @@ return false
 end
 return true, {array, Choice({nodes = Array({Sequence({nodes = map})})})}
 end, function (input)
-local __pass__, array
+local array, __pass__
 __pass__, array = input:apply(input.grammar.choiceDef)
 if not (__pass__) then
 return false
@@ -310,7 +332,7 @@ return false
 end
 return true, {array, NilLiteral({})}
 end, function (input)
-local __pass__, map
+local map, __pass__
 if not (input:applyWithArgs(input.grammar.optional, function (input)
 return input:applyWithArgs(input.grammar.token, ";")
 end)) then
@@ -324,7 +346,6 @@ return false
 end
 return true, {NilLiteral({}), Choice({nodes = Array({Sequence({nodes = map})})})}
 end, function (input)
-local __pass__
 if not (input:applyWithArgs(input.grammar.optional, function (input)
 return input:applyWithArgs(input.grammar.token, ";")
 end)) then
@@ -332,10 +353,9 @@ return false
 end
 return true, {NilLiteral({}), NilLiteral({})}
 end)
-end, arity = 0, grammar = nil, name = 'props'}), prop = OMeta.Rule({behavior = function (input)
-local __pass__
+end, arity = 0, grammar = OMetaGrammar, name = 'props'}), prop = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local __pass__, prop, index, exp
+local prop, __pass__, exp, index
 __pass__, index = input:apply(input.grammar.name)
 if not (__pass__) then
 return false
@@ -367,8 +387,7 @@ return false
 end
 return true, Property({expression = exp, index = StringLiteral({index[1]})})
 end)
-end, arity = 0, grammar = nil, name = 'prop'}), special = OMeta.Rule({behavior = function (input)
-local __pass__
+end, arity = 0, grammar = OMetaGrammar, name = 'prop'}), special = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:applyWithArgs(input.grammar.subsequence, [[..]])
 end, function (input)
@@ -416,11 +435,10 @@ return input:applyWithArgs(input.grammar.exactly, '&')
 end, function (input)
 return input:applyWithArgs(input.grammar.exactly, '@')
 end)
-end, arity = 0, grammar = nil, name = 'special'}), keyword = OMeta.Rule({behavior = function (input)
-local __pass__
+end, arity = 0, grammar = OMetaGrammar, name = 'special'}), keyword = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:applyWithArgs(input.grammar.exactly, '')
 end)
-end, arity = 0, grammar = nil, name = 'keyword'})})
+end, arity = 0, grammar = OMetaGrammar, name = 'keyword'})})
 OMetaGrammar:merge(Commons)
 return OMetaGrammar

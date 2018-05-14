@@ -3,3 +3,6 @@ todo
 model.low/abstractsyntax_commons.lua
 model.low/lua_abstractsyntax.lua
 model.low/ometa_abstractsyntax.lua
+ometa_d.lua
+ometa/ometa_ast2lua_ast_ref2.lpp
+lib/types.c.lua
