@@ -1,10 +1,29 @@
+
+**1.2.0-beta 2018-05-14**
+
+Features:
+- "pseudo-variables". Lua code in the *Host Nodes* has access to some important values using variables beginning with `$` (dollar sign), for example: `$head` (current head of the input stream), `$index` (current position of the input stream);
+
+Improvements:
+- conversion Rules. Standard type conversions are performed now by means of provided Rules instead of *semantic actions*. E.g.: `toNumber(<'-'? digit+>)`, `codesToString(byte/number)`;
+- all OMeta AST node types extend *OMetaNode* class now. This (and only this) class and its subclasses implement *toLuaAst* behavior;
+- *Binary Commons* consists of several Grammars now. User can "require" and merge specific Grammars depending on endianness, ordering of bits, etc.;
+
+Examples:
+- new GIF Grammar. Experimental implementation of the GIF specification in OMeta/Lua;
+
+Issues:
+- value of the Stream head on the end position is always `nil` now;
+- global function *getType* returns `nil` for primitive Lua values now (instead of raising an error);
+___
+
 **1.1.0-beta 2018-04-30**
 
 Feature:
 - "result binding" - default Rule behavior can be changed in a way that value returned from the application is arbitrary changed by the caret character (`^`) bound to the expected Node.
 
 E.g.: 
-- `res:a b c [res]` may be writen now: `^:a b c`
+- `res:a b c [res]` may be written now: `^:a b c`
 - `"(" e:exp ")" [e]` == `"(" ^:exp ")"`
 ___
 **1.0.5-beta 2018-04-30**
