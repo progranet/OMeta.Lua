@@ -180,10 +180,23 @@ Everything what is truthy in Lua gives the Rule a pass and everything, what is f
 
 The Host predicate is marked with the question mark at the beginning. For example:
 ```lua
-[? type(head) == 'string']
+[? type($head) == 'string']
 [? char:byte() == 32]
 [? false] -- always fails
 ```
+#### Pseudo variables
+Lua code in the Host Nodes has access to some important values related to the input stream, its state, etc. Those values are available as hidden parameters in Lua functions implementing Rule behavior. Although you can see these parameters in the compiled code, this is not recommended to use them. This is not part of the API and is subject to the change.
+
+Fortunately there are "pseudo variables" provided which allow to safely get necessary values without the risk of producing difficult to maintain code:
+
+|Pseudo&nbsp;variable|Meaning|Notes|
+|:-------:|-----|-----|
+|`$head` / `$.`|The head of the input stream|Useful for testing without input consuming, e.g:<br>`[? type($.) == 'string'] .`|
+|`$result` / `$^`|Result of the current Sequence|Available only if there is [result binding](#result-binding), e.g.:<br>`^:string [? #($^) == 1]`|
+|`$index`|Position (index) of the input stream||
+|`$input`|The input - whole state|[*OMeta*](#ometa-api) class instance.<br>Stores not only the input stream but current Grammar, etc. too.|
+|`$state`|The state of the input stream|Can be used to build "transactions" - to persist and to "rollback" the stream state.|
+|`$source`|The underlying input stream source|String, file content, table, etc. provided to the Rule.|
 
 ### Binding
 In OMeta you can bind a return value of any Node to a chosen name:
