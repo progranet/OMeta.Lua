@@ -191,8 +191,8 @@ Fortunately there are "pseudo variables" provided which allow to safely get nece
 
 |Pseudo&nbsp;variable|Meaning|Notes|
 |:-------:|-----|-----|
-|`$head` / `$.`|The head of the input stream|Useful for testing without input consuming, e.g:<br>`[? type($.) == 'string'] .`|
-|`$result` / `$^`|Result of the current Sequence|Available only if there is [result binding](#result-binding), e.g.:<br>`^:string [? #($^) == 1]`|
+|`$head` / `$.`|The head of the input stream|Useful for testing without input consuming, e.g:<br>`[? type($.) == 'string' and #($.) == 1] .`|
+|`$result` / `$^`|Result of the current Sequence|Available only if there is [result binding](#result-binding), e.g.:<br>`^:. [? type($^) == 'string' and #($^) == 1]`|
 |`$index`|Position (index) of the input stream||
 |`$input`|The input - whole state|[*OMeta*](#ometa-api) class instance.<br>Stores not only the input stream but current Grammar, etc. too.|
 |`$state`|The state of the input stream|Can be used to build "transactions" - to persist and to "rollback" the stream state.|
