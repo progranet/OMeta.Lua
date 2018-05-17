@@ -494,17 +494,29 @@ Eventually, let's try to utilize string interpolation to improve our Hello World
 
 If you decide to compile your source files before usage, you can do something like this:
 ```lua
+-- some helper functions
 local Calc = OMeta.doFile('calc.lpp')
-local calcexp = function(...)
+local calc = function(...)
   return Calc.exp:matchMixed(...)
 end
+local eval = function(...)
+  return Calc.eval:matchMixed(...)
+end
 
-local subexp = calcexp `2 * (5 + 6)`
-local ast = calcexp `2 * (${subexp} - 1)`
+local subexp = calc `2 * (5 + 6)`
+local ast = calc `2 * (${subexp} - 1)`
 
-print(Calc.eval:matchMixed(ast)) -- 42
+print(eval(ast)) -- 42
 ```
-But remember, above source must be compiled to plain Lua source before you can execute it (try for example `OMeta.doString([[...]])`).
+(But remember, above source must be compiled to plain Lua source before you can execute it - try for example `OMeta.doString([[...]])`)
+
+Above expressions looking as innocent string concatenations work in fact on the underlying objects. This means that we can not only dynamically modify resulting abstract syntax tree but source objects, too. Let's try to change our intermediate *subexp* value and see what happens.
+```lua
+subexp.left = calc `20 / 5`
+
+print(eval(ast)) -- 86
+```
+By the source object modification we affect the entire resulting tree (or trees if there is more complex parser).
 
 ## API
 
