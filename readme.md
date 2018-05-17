@@ -510,13 +510,13 @@ print(eval(ast)) -- 42
 ```
 (But remember, above source must be compiled to plain Lua source before you can execute it - try for example `OMeta.doString([[...]])`)
 
-Above expressions looking as innocent string concatenations work in fact on the underlying objects. This means that we can not only dynamically modify resulting abstract syntax tree but source objects, too. Let's try to change our intermediate *subexp* value and see what happens.
+Above expressions looking as innocent string concatenations work in fact on the underlying objects. Let's try to change our intermediate *subexp* value and see what happens.
 ```lua
 subexp.left = calc `20 / 5`
 
 print(eval(ast)) -- 86
 ```
-By the source object modification we affect the entire resulting tree (or trees if there is more complex parser).
+By the source object modification we affect the entire resulting tree.
 
 ## API
 
