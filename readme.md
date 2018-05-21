@@ -248,7 +248,7 @@ local ometa TableTreeCalc {
   primexp = '(' ^:exp ')'
           | numstr
           , 
-  numstr  = digits:<'-'? digit+>    [tonumber(digits)]
+  numstr  = toNumber(<'-'? digit+>)
 } 
 TableTreeCalc:merge(require'grammar_commons') 
 return TableTreeCalc
@@ -399,7 +399,7 @@ local ometa OpTreeCalc {
   primexp   = "(" ^:exp ")"
             | numstr
             , 
-  numstr    = ws* digits:<"-"? digit+>    [tonumber(digits)],
+  numstr    = ws* toNumber(<"-"? digit+>),
   special   = '+' | '-' | '*' | '/' 
             | '(' | ')' 
 } 
