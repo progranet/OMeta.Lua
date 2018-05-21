@@ -73,7 +73,7 @@ local ometa OpTreeCalc {
   primexp   = "(" ^:exp ")"
             | numstr
             , 
-  numstr    = toNumber(<"-"? ws* digit+>),
+  numstr    = ws* toNumber(<"-"? digit+>),
   special   = '+' | '-' | '*' | '/' 
             | '(' | ')' 
 } 
@@ -129,7 +129,7 @@ local ometa AstCalc {
   primexp   = "(" ^:exp ")"
             | numstr
             , 
-  numstr    = toNumber(<"-"? ws* digit+>),
+  numstr    = ws* toNumber(<"-"? digit+>),
   special   = '+' | '-' | '*' | '/' 
             | '(' | ')' 
 } 
