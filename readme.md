@@ -447,6 +447,21 @@ local ast = MixedCalc.exp:matchMixed('2 * (', exp, ' - 1)')
 
 -- we can print string representation of AST - feature of OMeta types
 print(ast)
+--[[
+    ╔ BinOp:
+    ├─╦ right: BinOp (0/3)
+    │ ├─═ right: 1
+    │ ├─╦ left: BinOp (0/3)
+    │ │ ├─╦ right: BinOp (0/3)
+    │ │ │ ├─═ right: 6
+    │ │ │ ├─═ left: 5
+    │ │ │ └─═ operator: add
+    │ │ ├─═ left: 2
+    │ │ └─═ operator: mul
+    │ └─═ operator: sub
+    ├─═ left: 2
+    └─═ operator: mul
+]]
 
 -- let's evaluate parsed tree
 print(MixedCalc.eval:matchMixed(ast)) -- 42
@@ -505,6 +520,18 @@ end
 
 local subexp = calc `2 * (5 + 6)`
 local ast = calc `2 * (${subexp} - 1)`
+print(ast)
+--[[
+    ╔ MulOp:
+    ├─╦ right: SubOp (0/2)
+    │ ├─═ right: 1
+    │ └─╦ left: MulOp (0/2)
+    │   ├─╦ right: AddOp (0/2)
+    │   │ ├─═ right: 6
+    │   │ └─═ left: 5
+    │   └─═ left: 2
+    └─═ left: 2
+]]
 
 print(eval(ast)) -- 42
 ```
@@ -513,6 +540,20 @@ print(eval(ast)) -- 42
 Above expressions looking as innocent string concatenations work in fact on the underlying objects. Let's try to change our intermediate *subexp* value and see what happens.
 ```lua
 subexp.left = calc `20 / 5`
+print(ast)
+--[[
+    ╔ MulOp:
+    ├─╦ right: SubOp (0/2)
+    │ ├─═ right: 1
+    │ └─╦ left: MulOp (0/2)
+    │   ├─╦ right: AddOp (0/2)
+    │   │ ├─═ right: 6
+    │   │ └─═ left: 5
+    │   └─╦ left: DivOp (0/2) - here is the change
+    │     ├─═ right: 5
+    │     └─═ left: 20
+    └─═ left: 2
+]]
 
 print(eval(ast)) -- 86
 ```
