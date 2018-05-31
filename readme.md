@@ -68,7 +68,7 @@ Compiled Grammar packages are normal Lua modules that can be required.
 ```lua
 local LuaGrammar = require 'lua52_grammar'
 local luaAst = LuaGrammar.block:matchFile('some_lua_source.lua')
-print(luaAst) -- prints textual representation of abstract syntax tree parsed from file
+print(luaAst) -- prints text representation of abstract syntax tree
 ```
 The following chapters bring subject of writing the Grammars closer. If you need firstly to find out how to use the predefined Grammars by means of provided API, jump to chapter [API](#api).
 
@@ -577,6 +577,25 @@ local luaCtx = OMeta.use(LuaGrammar)
 luaCtx:forString('local mess = "hello" return mess')
 local luaAst = luaCtx:match(LuaGrammar.block)
 print(luaAst)
+--[[
+    ╔ Chunk:
+    └─╦ statements: Array (2/0)
+      ├─╦ 1: Set (0/3)
+      │ ├─═ isLocal: true
+      │ ├─╦ names: Array (1/0)
+      │ │ └─╦ 1: Name (1/0)
+      │ │   └─═ 1: mess
+      │ └─╦ expressions: Array (1/0)
+      │   └─╦ 1: StringLiteral (1/2)
+      │     ├─═ 1: hello
+      │     ├─═ rdelim: "
+      │     └─═ ldelim: "
+      └─╦ 2: Return (0/1)
+        └─╦ expressions: Array (1/0)
+          └─╦ 1: Get (0/1)
+            └─╦ name: Name (1/0)
+              └─═ 1: mess
+]]
 ```
 ___
 ```lua
