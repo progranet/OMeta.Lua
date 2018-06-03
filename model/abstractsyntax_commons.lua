@@ -105,8 +105,6 @@ local Space = dataType {
 }
 
 
-local id = 0
-
 local Node = class {
 
   abstract = true,
@@ -114,31 +112,7 @@ local Node = class {
   super = {Any};
   
   constructor = function(class, init)
-    id = id + 1
-    init._id = '_' .. class.name:lower() .. tostring(id)
     return init
-  end;
-
-  collectNodes = function(self, type, filter)
-    local nodes = Array {}
-    if type:isInstance(self) then 
-      if not filter or filter(self) then
-        nodes[1] = self
-      end
-    end
-    for k, v in pairs(self) do
-      if Node:isInstance(v) then
-        nodes:appendAll(v:collectNodes(type, filter))
-      elseif Array:isinstance(v) then
-        for k = 1, #v do
-          local vk = v[k]
-          if Node:isInstance(vk) then
-            nodes:appendAll(vk:collectNodes(type, filter))
-          end
-        end
-      end
-    end
-    return nodes
   end;
 }
 

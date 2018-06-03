@@ -20,7 +20,7 @@ return false
 end
 return true, n * m
 end)
-end, arity = 0, grammar = Factorial, name = 'fact'})})
+end, arity = 0, name = 'fact'})})
 Factorial:merge(require('commons'))
 print(Factorial.fact:matchMixed(5))
 return Factorial

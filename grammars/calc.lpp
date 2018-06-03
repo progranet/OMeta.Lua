@@ -2,7 +2,13 @@ local OMeta = require'ometa'
 local Types = require'types'
 local class, Any, Array = Types.class, Types.Any, Types.Array
 
-local ometa Calc {
+local Commons = require'grammar_commons'
+
+--[===============================[--
+  | Example 1: Simple text parser |
+--]===============================]--
+
+local ometa Calc merges require 'grammar_commons' {
   exp     = addexp,
   addexp  = addexp '+' mulexp
           | addexp '-' mulexp
@@ -17,10 +23,15 @@ local ometa Calc {
           , 
   numstr  = '-'? digit+
 } 
-Calc:merge(require'grammar_commons') 
+
+Calc.exp:matchString '11*2-1'
 
 
-local ometa EvalCalc {
+--[=======================================[--
+  | Example 2: Text parser and calculator |
+--]=======================================]--
+
+local ometa EvalCalc merges Commons {
   exp     = addexp,
   addexp  = l:addexp '+' r:mulexp   [l + r]
           | l:addexp '-' r:mulexp   [l - r]
@@ -30,16 +41,21 @@ local ometa EvalCalc {
           | l:mulexp '/' r:primexp  [l / r]
           | primexp
           , 
-  primexp = '(' ^:exp ')'
+  primexp = '(' $^:exp ')'
           | numstr
           , 
   numstr  = toNumber(<'-'? digit+>)
 } 
-EvalCalc:merge(require'grammar_commons') 
+
+local result = EvalCalc.exp:matchString '11*2-1'
+print(result) -- 21
 
 
+--[===============================[--
+  | Example 3: Simple AST builder |
+--]===============================]--
 
-local ometa TableTreeCalc {
+local ometa TableTreeCalc merges Commons {
   exp     = addexp,
   addexp  = l:addexp '+' r:mulexp   [{'+', l, r}] 
           | l:addexp '-' r:mulexp   [{'-', l, r}] 
@@ -49,18 +65,25 @@ local ometa TableTreeCalc {
           | l:mulexp '/' r:primexp  [{'/', l, r}] 
           | primexp
           , 
-  primexp = '(' ^:exp ')'
+  primexp = '(' $^:exp ')'
           | numstr
           , 
   numstr  = toNumber(<'-'? digit+>)
 } 
-TableTreeCalc:merge(require'grammar_commons') 
+
+local astTable = TableTreeCalc.exp:matchString '11*2-1'
+local astRoot = Any(astTable) -- wrap plain Lua table into Any type to get string representation to print
+print(astRoot)
 
 
+--[===============================================================[--
+  | Example 4: AST builder and evaluator for text and mixed input |
+  |            Using of the token syntax                          |
+--]===============================================================]--
 
 local BinOp = class {name = 'BinOp', super = {Any}} -- our new AST node type
 
-local ometa OpTreeCalc {
+local ometa OpTreeCalc merges Commons {
   exp       = addexp,
   addexp    = l:addexp "+" r:mulexp       [BinOp {operator = 'add', left = l, right = r}] 
             | l:addexp "-" r:mulexp       [BinOp {operator = 'sub', left = l, right = r}] 
@@ -70,18 +93,17 @@ local ometa OpTreeCalc {
             | l:mulexp "/" r:primexp      [BinOp {operator = 'div', left = l, right = r}] 
             | primexp
             , 
-  primexp   = "(" ^:exp ")"
+  primexp   = "(" $^:exp ")"
             | numstr
             , 
   numstr    = ws* toNumber(<"-"? digit+>),
   special   = '+' | '-' | '*' | '/' 
             | '(' | ')' 
 } 
-OpTreeCalc:merge(require'grammar_commons') 
 
 local Aux = require 'auxiliary'
 
-local ometa MixedOTCalc {
+local ometa MixedOTCalc merges OpTreeCalc {
   primexp   = BinOp
             | OpTreeCalc.primexp  -- "super" apply
             ,
@@ -98,7 +120,6 @@ local ometa MixedOTCalc {
   div       = {; left:=eval, right:=eval} [! print('/', left, right)] [left / right],
   unknown   = {; operator:=.}             [? error('unexpected operator: ' .. operator)]
 } 
-MixedOTCalc:merge(OpTreeCalc)
 
 -- example of the standalone Rule definition
 -- overriding of the existing Rule 'primexp'
@@ -108,15 +129,29 @@ rule MixedOTCalc:primexp()
   | OpTreeCalc.primexp
 end
 
+-- exp has intermediate result - already parsed expression
+local exp = BinOp {operator='mul', left=2, right=BinOp {operator='add', left=5, right=6}}
+local ast = MixedOTCalc.exp:matchMixed('2 * (', exp, ' - 1)')
+
+-- we can print string representation of AST - feature of OMeta types
+print(ast)
+
+-- let's evaluate parsed tree
+print(MixedOTCalc.eval:matchMixed(ast)) -- 42
 
 
+
+--[================================================[--
+  | Example 5: AST node type hierarchy             |
+  |            Interpolation of mixed input stream |
+--]================================================]--
 
 local AddOp = class {name = 'AddOp', super = {BinOp}}
 local SubOp = class {name = 'SubOp', super = {BinOp}}
 local MulOp = class {name = 'MulOp', super = {BinOp}}
 local DivOp = class {name = 'DivOp', super = {BinOp}}
 
-local ometa AstCalc {
+local ometa AstCalc merges Commons {
   exp       = addexp,
   addexp    = l:addexp "+" r:mulexp       [AddOp {left = l, right = r}] 
             | l:addexp "-" r:mulexp       [SubOp {left = l, right = r}] 
@@ -126,16 +161,15 @@ local ometa AstCalc {
             | l:mulexp "/" r:primexp      [DivOp {left = l, right = r}] 
             | primexp
             , 
-  primexp   = "(" ^:exp ")"
+  primexp   = "(" $^:exp ")"
             | numstr
             , 
   numstr    = ws* toNumber(<"-"? digit+>),
   special   = '+' | '-' | '*' | '/' 
             | '(' | ')' 
 } 
-AstCalc:merge(require'grammar_commons') 
 
-local ometa MixedAstCalc {
+local ometa MixedAstCalc merges AstCalc {
   primexp   = BinOp
             | AstCalc.primexp -- "super" apply
             ,
@@ -152,7 +186,29 @@ local ometa MixedAstCalc {
   [DivOp]   = {; left:=eval, right:=eval} [! print('/', left, right)] [left / right],
   unknown   = opr:.                       [? error('unexpected operation kind: ' .. tostring(opr))]
 } 
-MixedAstCalc:merge(AstCalc)
+
+-- helper functions
+local calc = function(...) return MixedAstCalc.exp:matchMixed(...) end
+local eval = function(...) return MixedAstCalc.eval:matchMixed(...) end
+
+
+-- intermediate value
+local exp = calc `2 * (5 + 6)`
+
+-- the abstract syntax tree from mixed content stream
+local ast = calc `2 * (${exp} - 1)`
+print(ast)
+
+-- evaluate expression in AST
+print('result before:', eval(ast)) -- 42
+
+-- dynamic source (not resulting ast) modification
+exp.left = calc `20 / 5` -- 2 : number --> 20/5 : DivOp
+print(ast)
+
+-- evaluation again
+print('result after:', eval(ast)) -- 86
+
 
 return {
   Calc          = Calc;

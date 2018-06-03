@@ -27,7 +27,7 @@ local utils = require 'utils'
 local Png = class {name = 'Png', super = {Any}}
 local Chunk = class {name = 'Chunk', super = {Any}}
 
-local ometa PngGrammar {
+local ometa PngGrammar merges Commons, Commons.BigEndian {
 
   image     = 0x89 0x50 0x4e 0x47 0x0d 0x0a 0x1a 0x0a   -- PNG header                                     -- 137 80 78 71 13 10 26 10
               chunks:chunk+ 
@@ -77,7 +77,5 @@ local ometa PngGrammar {
   tRNS      = d:byte/number                             [{name = "Transparency", data = d}],              -- 4.2.9. tRNS Transparency
   zTXt      = d:byte/number                             [{name = "Compressed textual data", data = d}]    -- 4.2.10. zTXt Compressed textual data
 }
-PngGrammar:merge(Commons)
-PngGrammar:merge(Commons.BigEndian)
 
 return PngGrammar

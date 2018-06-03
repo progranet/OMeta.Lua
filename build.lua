@@ -67,7 +67,7 @@ local libs = {'commons','grammar_commons','binary_commons','auxiliary','lua_gram
 return {
   parseFile = parseFile,
   translateTree = translateTree,
-  generateSource = generateSource,
+  generateSource = generateSourceTrans,
   compileFile = compileFile;
   
   build = function() 

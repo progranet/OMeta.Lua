@@ -83,7 +83,7 @@ return false
 end
 return true, Gif({version = version, width = width, height = height, colorResolution = fields[2], colorSort = (fields[3] == 1), backgroundColorIndex = bci, pixelAspectRatio = par, aspectRatio = ar, globalColorTable = gct, data = data})
 end)
-end, arity = 0, grammar = GifGrammar, name = 'image'}), dataBlock = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'image'}), dataBlock = OMeta.Rule({behavior = function (input)
 local __result__, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, __result__ = input:applyWithArgs(input.grammar.loop, input.grammar.byte, function (input)
@@ -104,7 +104,7 @@ return false
 end
 return __pass__, __result__
 end)
-end, arity = 0, grammar = GifGrammar, name = 'dataBlock'}), rgbColor = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'dataBlock'}), rgbColor = OMeta.Rule({behavior = function (input)
 local r, __pass__, b, g
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, r = input:apply(input.grammar.byte)
@@ -121,7 +121,7 @@ return false
 end
 return true, Color({red = r, green = g, blue = b})
 end)
-end, arity = 0, grammar = GifGrammar, name = 'rgbColor'}), imageData = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'rgbColor'}), imageData = OMeta.Rule({behavior = function (input)
 local width, top, lct, __pass__, left, fields, blocks, lzwmcs, height
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, left = input:apply(input.grammar.int16)
@@ -161,7 +161,7 @@ return false
 end
 return true, Block({name = 'Table-Based Image', left = left, top = top, width = width, height = height, interlace = (fields[2] == 1), colorSort = (fields[3] == 1), localColorTable = lct, lzwMinimumCodeSize = lzwmcs, blocks = blocks})
 end)
-end, arity = 0, grammar = GifGrammar, name = 'imageData'}), [249] = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'imageData'}), [249] = OMeta.Rule({behavior = function (input)
 local transpIdx, __pass__, fields, delay
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.exactly, 4)) then
@@ -184,7 +184,7 @@ return false
 end
 return true, Block({name = 'Graphic Control Extension', disposalMethod = fields[2], userInput = (fields[3] == 1), transparency = (fields[4] == 1), transpIndex = transpIdx, delayTime = delay})
 end)
-end, arity = 0, grammar = GifGrammar, name = '249'}), [254] = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = '249'}), [254] = OMeta.Rule({behavior = function (input)
 local data, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, data = input:applyWithArgs(input.grammar.many, input.grammar.dataBlock)
@@ -196,7 +196,7 @@ return false
 end
 return true, Block({name = 'Comment Extension', data = data})
 end)
-end, arity = 0, grammar = GifGrammar, name = '254'}), [1] = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = '254'}), [1] = OMeta.Rule({behavior = function (input)
 local foreColorIdx, cellHeight, top, __pass__, backColorIdx, gridHeight, left, ptData, gridWidth, cellWidth
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.exactly, 12)) then
@@ -243,7 +243,7 @@ return false
 end
 return true, Block({name = 'Plain Text Extension', left = left, top = top, gridWidth = gridWidth, gridHeight = gridHeight, cellWidth = cellWidth, cellHeight = cellHeight, foregroundColorIndex = foreColorIdx, backgroundColorIndex = backColorIdx, plainTextData = ptData})
 end)
-end, arity = 0, grammar = GifGrammar, name = '1'}), [255] = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = '1'}), [255] = OMeta.Rule({behavior = function (input)
 local appAuthCode, __pass__, appId, appData
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.exactly, 11)) then
@@ -266,7 +266,7 @@ return false
 end
 return true, Block({name = 'Application Extension', applicationId = appId, applicationAuthenticationCode = appAuthCode, applicationData = appData})
 end)
-end, arity = 0, grammar = GifGrammar, name = '255'}), genericExt = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = '255'}), genericExt = OMeta.Rule({behavior = function (input)
 local data, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, data = input:applyWithArgs(input.grammar.many, input.grammar.dataBlock)
@@ -278,7 +278,7 @@ return false
 end
 return true, Block({name = 'Generic Extension', data = data})
 end)
-end, arity = 0, grammar = GifGrammar, name = 'genericExt'})})
+end, arity = 0, name = 'genericExt'})})
 GifGrammar:merge(Commons)
 GifGrammar:merge(Commons.LittleEndian)
 GifGrammar:merge(Commons.Msb0)

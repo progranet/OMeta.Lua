@@ -18,26 +18,26 @@ local Commons = require 'commons'
 local Aux = require 'auxiliary'
 
 local ometa CharacterPatterns {
-  space         = ^:string [? ($^):match('^%s$')],
-  digit         = ^:string [? ($^):match('^%d$')],
-  hexdigit      = ^:string [? ($^):match('^%x$')],
-  lower         = ^:string [? ($^):match('^%l$')],
-  upper         = ^:string [? ($^):match('^%u$')],
-  letter        = ^:string [? ($^):match('^%a$')],
-  alphanum      = ^:string [? ($^):match('^%w$')],
-  nameFirst     = ^:string [? ($^):match('^[%a_]$')],
-  nameRest      = ^:string [? ($^):match('^[%w_]$')],
+  space         = $^:string [? ($^):match('^%s$')],
+  digit         = $^:string [? ($^):match('^%d$')],
+  hexdigit      = $^:string [? ($^):match('^%x$')],
+  lower         = $^:string [? ($^):match('^%l$')],
+  upper         = $^:string [? ($^):match('^%u$')],
+  letter        = $^:string [? ($^):match('^%a$')],
+  alphanum      = $^:string [? ($^):match('^%w$')],
+  nameFirst     = $^:string [? ($^):match('^[%a_]$')],
+  nameRest      = $^:string [? ($^):match('^[%w_]$')],
   nameString    = Aux.pattern('[%a_][%w_]*')
 }
 
 local ometa CharacterSets {
-  space         = [? type($.) == 'string' and #($.) == 1 and ($.):byte() <= 32] .,
-  digit         = [? type($.) == 'string' and #($.) == 1 and ($.) >= '0' and ($.) <= '9'] .,
+  space         = [? type($.) == 'string' and #$. == 1 and ($.):byte() <= 32] .,
+  digit         = [? type($.) == 'string' and #$. == 1 and $. >= '0' and $. <= '9'] .,
   hexdigit      = digit 
-                | [? type($.) == 'string' and #($.) == 1 and ($.) >= 'a' and ($.) <= 'f' or ($.) >= 'A' and ($.) <= 'F'] .
+                | [? type($.) == 'string' and #$. == 1 and $. >= 'a' and $. <= 'f' or $. >= 'A' and $. <= 'F'] .
                 ,
-  lower         = [? type($.) == 'string' and #($.) == 1 and ($.) >= 'a' and ($.) <= 'z'] .,
-  upper         = [? type($.) == 'string' and #($.) == 1 and ($.) >= 'A' and ($.) <= 'Z'] .,
+  lower         = [? type($.) == 'string' and #$. == 1 and $. >= 'a' and $. <= 'z'] .,
+  upper         = [? type($.) == 'string' and #$. == 1 and $. >= 'A' and $. <= 'Z'] .,
   letter        = lower | upper,
   alphanum      = letter | digit,
   nameFirst     = letter | '_',
@@ -45,7 +45,7 @@ local ometa CharacterSets {
   nameString    = < nameFirst nameRest* >
 }
 
-local ometa GrammarCommons {
+local ometa GrammarCommons merges Commons, CharacterSets { -- alt. CharacterPatterns
   comment       = < [[--]] strlitL >
                 | range([[--]], '\n' | eos)
                 ,
@@ -56,7 +56,7 @@ local ometa GrammarCommons {
                       | ns:nameString [? str == ns] keyword([ns])     [Keyword {ns}]
                       )
                 ,
-  escchar       = <'\\' (digit+ | char)>,
+  escchar       = <'\\' (digit+ | 'x' hexdigit/2 | char)>,
   strlitA       = '\'' str:<(escchar | ~'\'' char)*> '\''             [StringLiteral {str}],
   strlitQ       = '\"' str:<(escchar | ~'\"' char)*> '\"'             [StringLiteral {str, ldelim = '"', rdelim = '"'}],
   strlitB       = '`'  str:<(escchar | ~'`'  char)*> '`'              [StringLiteral {str, ldelim = '`', rdelim = '`'}],
@@ -73,8 +73,5 @@ local ometa GrammarCommons {
   boollit       = str:nameString [? str == 'true' or str == 'false']  [BooleanLiteral {str == 'true'}],
   nillit        = str:nameString [? str == 'nil']                     [NilLiteral {}]
 }
-GrammarCommons:merge(Commons)
---GrammarCommons:merge(CharacterPatterns)
-GrammarCommons:merge(CharacterSets)
 
 return GrammarCommons

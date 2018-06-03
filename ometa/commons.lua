@@ -8,46 +8,46 @@ local Commons = OMeta.Grammar({_grammarName = 'Commons', eos = OMeta.Rule({behav
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:applyWithArgs(input.grammar.notPredicate, input.grammar.anything)
 end)
-end, arity = 0, grammar = Commons, name = 'eos'}), empty = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'eos'}), empty = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return true
 end)
-end, arity = 0, grammar = Commons, name = 'empty'}), string = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'empty'}), string = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (type(input.stream._head) == 'string') then
 return false
 end
 return input:apply(input.grammar.anything)
 end)
-end, arity = 0, grammar = Commons, name = 'string'}), number = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'string'}), number = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (type(input.stream._head) == 'number') then
 return false
 end
 return input:apply(input.grammar.anything)
 end)
-end, arity = 0, grammar = Commons, name = 'number'}), boolean = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'number'}), boolean = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (type(input.stream._head) == 'boolean') then
 return false
 end
 return input:apply(input.grammar.anything)
 end)
-end, arity = 0, grammar = Commons, name = 'boolean'}), table = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'boolean'}), table = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (type(input.stream._head) == 'table') then
 return false
 end
 return input:apply(input.grammar.anything)
 end)
-end, arity = 0, grammar = Commons, name = 'table'}), ['function'] = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'table'}), ['function'] = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (type(input.stream._head) == 'function') then
 return false
 end
 return input:apply(input.grammar.anything)
 end)
-end, arity = 0, grammar = Commons, name = 'function'}), toNumber = OMeta.Rule({behavior = function (input, source)
+end, arity = 0, name = 'function'}), toNumber = OMeta.Rule({behavior = function (input, source)
 local str, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, str = input:apply(source)
@@ -56,7 +56,7 @@ return false
 end
 return true, tonumber(str)
 end)
-end, arity = 1, grammar = Commons, name = 'toNumber'}), toString = OMeta.Rule({behavior = function (input, source)
+end, arity = 1, name = 'toNumber'}), toString = OMeta.Rule({behavior = function (input, source)
 local val, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, val = input:apply(source)
@@ -65,7 +65,7 @@ return false
 end
 return true, tostring(val)
 end)
-end, arity = 1, grammar = Commons, name = 'toString'}), codesToString = OMeta.Rule({behavior = function (input, source)
+end, arity = 1, name = 'toString'}), codesToString = OMeta.Rule({behavior = function (input, source)
 local val, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, val = input:apply(source)
@@ -81,7 +81,7 @@ end, function (input)
 return true, string.char(val)
 end)
 end)
-end, arity = 1, grammar = Commons, name = 'codesToString'}), charToCode = OMeta.Rule({behavior = function (input, source)
+end, arity = 1, name = 'codesToString'}), charToCode = OMeta.Rule({behavior = function (input, source)
 local str, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, str = input:apply(source)
@@ -90,7 +90,7 @@ return false
 end
 return true, str:byte()
 end)
-end, arity = 1, grammar = Commons, name = 'charToCode'}), concat = OMeta.Rule({behavior = function (input, source, sep)
+end, arity = 1, name = 'charToCode'}), concat = OMeta.Rule({behavior = function (input, source, sep)
 local chars, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, chars = input:apply(source)
@@ -99,7 +99,7 @@ return false
 end
 return true, chars:concat(sep)
 end)
-end, arity = 2, grammar = Commons, name = 'concat'}), notLast = OMeta.Rule({behavior = function (input, element)
+end, arity = 2, name = 'concat'}), notLast = OMeta.Rule({behavior = function (input, element)
 local __result__, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, __result__ = input:apply(element)
@@ -111,7 +111,7 @@ return false
 end
 return true, __result__
 end)
-end, arity = 1, grammar = Commons, name = 'notLast'}), list = OMeta.Rule({behavior = function (input, element, delim, minimum)
+end, arity = 1, name = 'notLast'}), list = OMeta.Rule({behavior = function (input, element, delim, minimum)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local __pass__, rest, first
 __pass__, first = input:apply(element)
@@ -139,7 +139,7 @@ return false
 end
 return true, Array({})
 end)
-end, arity = 3, grammar = Commons, name = 'list'}), range = OMeta.Rule({behavior = function (input, first, last)
+end, arity = 3, name = 'list'}), range = OMeta.Rule({behavior = function (input, first, last)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:applyWithArgs(input.grammar.consumed, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
@@ -160,6 +160,6 @@ return input:apply(last)
 end)
 end)
 end)
-end, arity = 2, grammar = Commons, name = 'range'})})
+end, arity = 2, name = 'range'})})
 Commons:merge(StdLib)
 return Commons

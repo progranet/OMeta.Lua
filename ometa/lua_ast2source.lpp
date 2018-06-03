@@ -30,7 +30,7 @@ local Aux     = require 'auxiliary'
 
 local lsep, esep = '\n', ', '
 
-local ometa LuaAstToSourceTranslator {
+local ometa LuaAstToSourceTranslator merges Commons {
 
   trans                 = [? $head ~= nil]                                                        Aux.apply([getType($head)], unexpected),
   unexpected            = [? error('unexpected node: ' .. tostring($head))],
@@ -39,9 +39,9 @@ local ometa LuaAstToSourceTranslator {
   [BooleanLiteral]      = {value:.}                                                               [`${value}`],
   [RealLiteral]         = {value:.}                                                               [`${value}`],
   [IntegerLiteral]      = {value:.}                                                               [`${value}`],
-  [Name]                = {^:.}                                                                   ,
-  [Keyword]             = {^:.}                                                                   ,
-  [Special]             = {^:.}                                                                   ,
+  [Name]                = {$^:.}                                                                   ,
+  [Keyword]             = {$^:.}                                                                   ,
+  [Special]             = {$^:.}                                                                   ,
   [StringLiteral]       = {value:.; ldelim:=.?, rdelim:=.?}                                       [`${ldelim or "'"}${value}${rdelim or "'"}`],
   
   [Get]                 = {; name:=trans}                                                         [name],
@@ -51,10 +51,10 @@ local ometa LuaAstToSourceTranslator {
   [Chunk]               = {; statements:=trans*}                                                  [statements:append(''):concat(lsep)],
   [Group]               = {; expression:=trans}                                                   [`(${expression})`],
   [Do]                  = {; block:=trans}                                                        [`do${lsep}${block}end`],
-  [While]               = {; block:=trans, expression:=trans}                                     [`while ${expression} do${lsep}${block}end`],
-  [Repeat]              = {; block:=trans, expression:=trans}                                     [`repeat${lsep}${block}until ${expression}`],
-  [If]                  = {; expression:=trans, block:=trans, elseIfs:=trans*, elseBlock:=trans}  [`if ${expression} then${lsep}${block}${elseIfs:concat()}${(#elseBlock ~= 0 and (`else${lsep}${elseBlock}`) or ``)}end`],
-  [ElseIf]              = {; expression:=trans, block:=trans}                                     [`elseif ${expression} then${lsep}${block}`],
+  [While]               = {; block:=trans, condition:=trans}                                      [`while ${condition} do${lsep}${block}end`],
+  [Repeat]              = {; block:=trans, condition:=trans}                                      [`repeat${lsep}${block}until ${condition}`],
+  [If]                  = {; condition:=trans, block:=trans, elseIfs:=trans*, elseBlock:=trans}   [`if ${condition} then${lsep}${block}${elseIfs:concat()}${(#elseBlock ~= 0 and (`else${lsep}${elseBlock}`) or ``)}end`],
+  [ElseIf]              = {; condition:=trans, block:=trans}                                      [`elseif ${condition} then${lsep}${block}`],
   [For]                 = {; name:=trans, block:=trans, startExpression:=trans, 
                                                         stopExpression:=trans, 
                                                         stepExpression:=trans}                    [`for ${name} = ${startExpression}${esep}${stopExpression}${(stepExpression == '1' and `` or `${esep}${stepExpression}`)} do${lsep}${block}end`],
@@ -81,6 +81,5 @@ local ometa LuaAstToSourceTranslator {
   [Break]               = .                                                                       [`break`],
   [VariableArguments]   = .                                                                       [`...`]
 }
-LuaAstToSourceTranslator:merge(Commons)
 
 return LuaAstToSourceTranslator

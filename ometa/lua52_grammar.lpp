@@ -26,7 +26,7 @@ local Get, Set, Group, Block, Chunk, Do, While, Repeat, If, ElseIf,
 
 local LuaGrammar = require 'lua_grammar'
 
-local ometa Lua52Grammar {
+local ometa Lua52Grammar merges LuaGrammar {
   
   special   = [[::]]
             | LuaGrammar.special
@@ -40,6 +40,5 @@ local ometa Lua52Grammar {
             ,
   label     = "::" labelName:name "::"                                      [Label {name = labelName}]
 }
-Lua52Grammar:merge(LuaGrammar)
 
 return Lua52Grammar

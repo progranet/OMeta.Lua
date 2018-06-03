@@ -3,48 +3,9 @@ local tostring, tonumber, select, type, getmetatable, setmetatable, rawget
     = tostring, tonumber, select, type, getmetatable, setmetatable, rawget
 
 local Any, Array
-
 local __instances = {}
 
-local term, toTree, used = false
-toTree = function(levelprefix, subtree)
-  local result = ''
-  local al, ml = 0, 0
-  if used[subtree] then
-    return false
-  end
-  local copy = {}
-  used[subtree] = copy
-  for k, v in pairs(subtree) do
-    if type(k) == 'number' then 
-      al = al + 1
-      copy[k] = v
-    elseif type(k) == 'string' then 
-      if k:sub(1, 1) ~= '_' then
-        ml = ml + 1 
-        copy[k] = v
-      end
-    end
-  end
-  for k, v in pairs(copy) do
-    local hasnext = next(copy, k)
-    local pf = levelprefix .. (hasnext and (term and '\195\196' or '+-') or (term and '\192\196' or '--'))
-    if type(v) == 'table' then
-      local mt = getmetatable(v)
-      local nt = mt and mt.name or '[table]'
-      local nested, aln, mln = toTree(levelprefix .. (hasnext and (term and '\179 ' or '| ') or '  '), v)
-      if nested then
-        result = result .. (pf .. ((aln + mln == 0) and (term and '\205' or '-') or (term and '\203' or '+')) .. ' ' .. k .. ': ' .. nt .. ' (' .. tostring(aln) .. '/' .. tostring(mln) .. ')\n') .. nested
-      else
-        result = result .. (pf .. (term and '\205' or '-') .. ' ' .. k .. ': ' .. nt .. ' (<recursion>)\n')
-      end
-    else
-      result = result .. (pf .. (term and '\205' or '-') .. ' ' .. k .. ': ' .. tostring(v)) .. '\n'
-    end
-  end
-  return result, al, ml
-end
-
+local serialize = require 'serialize'
 
 local typetemp = {
 
@@ -69,11 +30,7 @@ local typetemp = {
 
 local instancetemp = {
 
-  tostring = function(self)
-    local p = (term and '\201' or '=') .. ' ' .. getmetatable(self).name .. ':\n'
-    used = {}
-    return p .. toTree('', self)
-  end;    
+  tostring = serialize.toTermTree;
 }
 
 local function newtype(typeinit)

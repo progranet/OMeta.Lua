@@ -12,14 +12,17 @@ local utils = require 'utils'
 
 local Commons = require 'commons'
 
-local ometa BinaryCommons {
+local ometa BinaryCommons merges Commons {
   byte              = [? type($head) == "number" and band($head, 0xFF) == $head] .,
   char(n)           = codesToString(byte/[n or 1])
 }
-BinaryCommons:merge(Commons)
 
 
--- https://en.wikipedia.org/wiki/Bit_numbering
+--[[ 
+    Below Grammars cannot be used standalone
+    You should merge required packages into the BinaryCommons (main) Grammar
+    See gif.lpp and png.lpp examples
+]]
 
 local function bitfield(msb, number, bitn)
   local fields = {}
@@ -38,6 +41,8 @@ local function bitfield(msb, number, bitn)
   end
   return fields
 end
+
+-- https://en.wikipedia.org/wiki/Bit_numbering
 
 -- Most Significant Bit First
 local ometa Msb0 {

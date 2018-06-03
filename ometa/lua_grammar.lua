@@ -62,7 +62,7 @@ return input:applyWithArgs(input.grammar.exactly, '^')
 end, function (input)
 return input:applyWithArgs(input.grammar.exactly, '#')
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'special'}), keyword = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'special'}), keyword = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:applyWithArgs(input.grammar.exactly, 'nil')
 end, function (input)
@@ -106,7 +106,7 @@ return input:applyWithArgs(input.grammar.exactly, 'return')
 end, function (input)
 return input:applyWithArgs(input.grammar.exactly, 'local')
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'keyword'}), chunk = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'keyword'}), chunk = OMeta.Rule({behavior = function (input)
 local __pass__, last, stats
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, stats = input:applyWithArgs(input.grammar.many, function (input)
@@ -147,11 +147,11 @@ return false
 end
 return true, Chunk({statements = stats:append(last)})
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'chunk'}), block = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'chunk'}), block = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(input.grammar.chunk)
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'block'}), stat = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'block'}), stat = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local body, __pass__
 if not (input:applyWithArgs(input.grammar.token, "do")) then
@@ -184,7 +184,7 @@ end
 if not (input:applyWithArgs(input.grammar.token, "end")) then
 return false
 end
-return true, While({expression = cond, block = body})
+return true, While({condition = cond, block = body})
 end, function (input)
 local cond, body, __pass__
 if not (input:applyWithArgs(input.grammar.token, "repeat")) then
@@ -201,7 +201,7 @@ __pass__, cond = input:apply(input.grammar.exp)
 if not (__pass__) then
 return false
 end
-return true, Repeat({block = body, expression = cond})
+return true, Repeat({block = body, condition = cond})
 end, function (input)
 local elseIfs, elseBody, __pass__, thenBody, ifCond
 if not (input:applyWithArgs(input.grammar.token, "if")) then
@@ -235,7 +235,7 @@ __pass__, elseIfBody = input:apply(input.grammar.block)
 if not (__pass__) then
 return false
 end
-return true, ElseIf({expression = elseIfCond, block = elseIfBody})
+return true, ElseIf({condition = elseIfCond, block = elseIfBody})
 end)
 end)
 if not (__pass__) then
@@ -258,7 +258,7 @@ end
 if not (input:applyWithArgs(input.grammar.token, "end")) then
 return false
 end
-return true, If({expression = ifCond, block = thenBody, elseIfs = elseIfs, elseBlock = elseBody})
+return true, If({condition = ifCond, block = thenBody, elseIfs = elseIfs, elseBlock = elseBody})
 end, function (input)
 local startExp, var, stopExp, __pass__, body, stepExp
 if not (input:applyWithArgs(input.grammar.token, "for")) then
@@ -433,7 +433,7 @@ return true, Set({isLocal = false, names = names, expressions = exps})
 end, function (input)
 return input:apply(input.grammar.prefixexp)
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'stat'}), laststat = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'stat'}), laststat = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local exps, __pass__
 if not (input:applyWithArgs(input.grammar.token, "return")) then
@@ -457,11 +457,11 @@ return false
 end
 return true, Break({})
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'laststat'}), exp = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'laststat'}), exp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(input.grammar.orexp)
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'exp'}), orexp = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'exp'}), orexp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local op, __pass__, l, r
 __pass__, l = input:apply(input.grammar.orexp)
@@ -480,7 +480,7 @@ return true, BinaryOperation({context = l, name = op, arguments = Array({r})})
 end, function (input)
 return input:apply(input.grammar.andexp)
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'orexp'}), andexp = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'orexp'}), andexp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local op, __pass__, l, r
 __pass__, l = input:apply(input.grammar.andexp)
@@ -499,7 +499,7 @@ return true, BinaryOperation({context = l, name = op, arguments = Array({r})})
 end, function (input)
 return input:apply(input.grammar.eqexp)
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'andexp'}), eqexp = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'andexp'}), eqexp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local op, __pass__, l, r
 __pass__, l = input:apply(input.grammar.eqexp)
@@ -522,7 +522,7 @@ return true, BinaryOperation({context = l, name = op, arguments = Array({r})})
 end, function (input)
 return input:apply(input.grammar.relexp)
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'eqexp'}), relexp = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'eqexp'}), relexp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local op, __pass__, l, r
 __pass__, l = input:apply(input.grammar.relexp)
@@ -549,7 +549,7 @@ return true, BinaryOperation({context = l, name = op, arguments = Array({r})})
 end, function (input)
 return input:apply(input.grammar.addexp)
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'relexp'}), addexp = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'relexp'}), addexp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local op, __pass__, l, r
 __pass__, l = input:apply(input.grammar.addexp)
@@ -572,7 +572,7 @@ return true, BinaryOperation({context = l, name = op, arguments = Array({r})})
 end, function (input)
 return input:apply(input.grammar.mulexp)
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'addexp'}), mulexp = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'addexp'}), mulexp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local op, __pass__, l, r
 __pass__, l = input:apply(input.grammar.mulexp)
@@ -601,7 +601,7 @@ return true, BinaryOperation({context = l, name = op, arguments = Array({r})})
 end, function (input)
 return input:apply(input.grammar.unary)
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'mulexp'}), unary = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'mulexp'}), unary = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local op, __pass__, c
 __pass__, op = input:applyWithArgs(input.grammar.token, "-")
@@ -638,7 +638,7 @@ return true, UnaryOperation({context = c, name = op})
 end, function (input)
 return input:apply(input.grammar.primexp)
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'unary'}), primexp = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'unary'}), primexp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.many, input.grammar.ws)) then
 return false
@@ -680,7 +680,7 @@ return input:apply(input.grammar.prefixexp)
 end, function (input)
 return input:apply(input.grammar.tableconstr)
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'primexp'}), prefixexp = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'primexp'}), prefixexp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local ctx, __pass__
 __pass__, ctx = input:apply(input.grammar.prefixexp)
@@ -709,7 +709,7 @@ return false
 end
 return true, Group({expression = e})
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'prefixexp'}), suffixexp = OMeta.Rule({behavior = function (input, ctx)
+end, arity = 0, name = 'prefixexp'}), suffixexp = OMeta.Rule({behavior = function (input, ctx)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local as, __pass__
 __pass__, as = input:apply(input.grammar.args)
@@ -755,7 +755,7 @@ return false
 end
 return true, GetProperty({context = ctx, index = i})
 end)
-end, arity = 1, grammar = LuaGrammar, name = 'suffixexp'}), args = OMeta.Rule({behavior = function (input)
+end, arity = 1, name = 'suffixexp'}), args = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local __result__, __pass__
 if not (input:applyWithArgs(input.grammar.token, "(")) then
@@ -800,7 +800,7 @@ return false
 end
 return true, Array({a})
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'args'}), funcbody = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'args'}), funcbody = OMeta.Rule({behavior = function (input)
 local params, __pass__, body
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.token, "(")) then
@@ -822,7 +822,7 @@ return false
 end
 return true, {params, body}
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'funcbody'}), parlist = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'funcbody'}), parlist = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local names, __pass__, va
 __pass__, names = input:apply(input.grammar.namelist)
@@ -852,19 +852,19 @@ return false
 end
 return true, {Array({}), false}
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'parlist'}), namelist = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'parlist'}), namelist = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:applyWithArgs(input.grammar.list, input.grammar.name, function (input)
 return input:applyWithArgs(input.grammar.token, ",")
 end, 1)
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'namelist'}), explist = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'namelist'}), explist = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:applyWithArgs(input.grammar.list, input.grammar.exp, function (input)
 return input:applyWithArgs(input.grammar.token, ",")
 end, 1)
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'explist'}), tableconstr = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'explist'}), tableconstr = OMeta.Rule({behavior = function (input)
 local fields, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.token, "{")) then
@@ -879,7 +879,7 @@ return false
 end
 return true, TableConstructor({properties = fields})
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'tableconstr'}), fieldlist = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'tableconstr'}), fieldlist = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local __result__, __pass__
 __pass__, __result__ = input:applyWithArgs(input.grammar.list, input.grammar.field, function (input)
@@ -908,7 +908,7 @@ return false
 end
 return true, Array({})
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'fieldlist'}), field = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'fieldlist'}), field = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local i, __pass__, v
 if not (input:applyWithArgs(input.grammar.token, "[")) then
@@ -951,6 +951,6 @@ return false
 end
 return true, SetProperty({expression = v})
 end)
-end, arity = 0, grammar = LuaGrammar, name = 'field'})})
+end, arity = 0, name = 'field'})})
 LuaGrammar:merge(Commons)
 return LuaGrammar

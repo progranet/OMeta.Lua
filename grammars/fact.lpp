@@ -5,11 +5,10 @@
 
 local OMeta = require'ometa' 
 
-local ometa Factorial {
+local ometa Factorial merges require 'commons' {
   fact  = 0                                   [1]
         | n:number [? n > 0] m:fact([n - 1])  [n * m]
 }
-Factorial:merge(require 'commons')
 
 print(Factorial.fact:matchMixed(5))
 

@@ -108,7 +108,7 @@ local StandardLibrary = OMeta.Grammar {
   
   loop = OMeta.Rule {
     name = 'loop';
-    behavior = function(input, expression, times)
+    behavior = function(input, expression, times, name)
       local state = input.stream
       if type(times) ~= 'number' then
         local pass, res = input:apply(times)
@@ -126,7 +126,7 @@ local StandardLibrary = OMeta.Grammar {
       end
       return true, res
     end;
-    arity = 2,
+    arity = 3
   };
   
   consumed = OMeta.Rule {

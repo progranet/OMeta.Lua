@@ -19,7 +19,7 @@ return false
 end
 return (__result__):match('^%s$'), __result__
 end)
-end, arity = 0, grammar = CharacterPatterns, name = 'space'}), digit = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'space'}), digit = OMeta.Rule({behavior = function (input)
 local __result__, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, __result__ = input:apply(input.grammar.string)
@@ -31,7 +31,7 @@ return false
 end
 return (__result__):match('^%d$'), __result__
 end)
-end, arity = 0, grammar = CharacterPatterns, name = 'digit'}), hexdigit = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'digit'}), hexdigit = OMeta.Rule({behavior = function (input)
 local __result__, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, __result__ = input:apply(input.grammar.string)
@@ -43,7 +43,7 @@ return false
 end
 return (__result__):match('^%x$'), __result__
 end)
-end, arity = 0, grammar = CharacterPatterns, name = 'hexdigit'}), lower = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'hexdigit'}), lower = OMeta.Rule({behavior = function (input)
 local __result__, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, __result__ = input:apply(input.grammar.string)
@@ -55,7 +55,7 @@ return false
 end
 return (__result__):match('^%l$'), __result__
 end)
-end, arity = 0, grammar = CharacterPatterns, name = 'lower'}), upper = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'lower'}), upper = OMeta.Rule({behavior = function (input)
 local __result__, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, __result__ = input:apply(input.grammar.string)
@@ -67,7 +67,7 @@ return false
 end
 return (__result__):match('^%u$'), __result__
 end)
-end, arity = 0, grammar = CharacterPatterns, name = 'upper'}), letter = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'upper'}), letter = OMeta.Rule({behavior = function (input)
 local __result__, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, __result__ = input:apply(input.grammar.string)
@@ -79,7 +79,7 @@ return false
 end
 return (__result__):match('^%a$'), __result__
 end)
-end, arity = 0, grammar = CharacterPatterns, name = 'letter'}), alphanum = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'letter'}), alphanum = OMeta.Rule({behavior = function (input)
 local __result__, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, __result__ = input:apply(input.grammar.string)
@@ -91,7 +91,7 @@ return false
 end
 return (__result__):match('^%w$'), __result__
 end)
-end, arity = 0, grammar = CharacterPatterns, name = 'alphanum'}), nameFirst = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'alphanum'}), nameFirst = OMeta.Rule({behavior = function (input)
 local __result__, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, __result__ = input:apply(input.grammar.string)
@@ -103,7 +103,7 @@ return false
 end
 return (__result__):match('^[%a_]$'), __result__
 end)
-end, arity = 0, grammar = CharacterPatterns, name = 'nameFirst'}), nameRest = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'nameFirst'}), nameRest = OMeta.Rule({behavior = function (input)
 local __result__, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, __result__ = input:apply(input.grammar.string)
@@ -115,73 +115,73 @@ return false
 end
 return (__result__):match('^[%w_]$'), __result__
 end)
-end, arity = 0, grammar = CharacterPatterns, name = 'nameRest'}), nameString = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'nameRest'}), nameString = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:applyWithArgs(Aux.pattern, '[%a_][%w_]*')
 end)
-end, arity = 0, grammar = CharacterPatterns, name = 'nameString'})})
+end, arity = 0, name = 'nameString'})})
 local CharacterSets = OMeta.Grammar({_grammarName = 'CharacterSets', space = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-if not (type(input.stream._head) == 'string' and #(input.stream._head) == 1 and (input.stream._head):byte() <= 32) then
+if not (type(input.stream._head) == 'string' and #input.stream._head == 1 and (input.stream._head):byte() <= 32) then
 return false
 end
 return input:apply(input.grammar.anything)
 end)
-end, arity = 0, grammar = CharacterSets, name = 'space'}), digit = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'space'}), digit = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-if not (type(input.stream._head) == 'string' and #(input.stream._head) == 1 and (input.stream._head) >= '0' and (input.stream._head) <= '9') then
+if not (type(input.stream._head) == 'string' and #input.stream._head == 1 and input.stream._head >= '0' and input.stream._head <= '9') then
 return false
 end
 return input:apply(input.grammar.anything)
 end)
-end, arity = 0, grammar = CharacterSets, name = 'digit'}), hexdigit = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'digit'}), hexdigit = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(input.grammar.digit)
 end, function (input)
-if not (type(input.stream._head) == 'string' and #(input.stream._head) == 1 and (input.stream._head) >= 'a' and (input.stream._head) <= 'f' or (input.stream._head) >= 'A' and (input.stream._head) <= 'F') then
+if not (type(input.stream._head) == 'string' and #input.stream._head == 1 and input.stream._head >= 'a' and input.stream._head <= 'f' or input.stream._head >= 'A' and input.stream._head <= 'F') then
 return false
 end
 return input:apply(input.grammar.anything)
 end)
-end, arity = 0, grammar = CharacterSets, name = 'hexdigit'}), lower = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'hexdigit'}), lower = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-if not (type(input.stream._head) == 'string' and #(input.stream._head) == 1 and (input.stream._head) >= 'a' and (input.stream._head) <= 'z') then
+if not (type(input.stream._head) == 'string' and #input.stream._head == 1 and input.stream._head >= 'a' and input.stream._head <= 'z') then
 return false
 end
 return input:apply(input.grammar.anything)
 end)
-end, arity = 0, grammar = CharacterSets, name = 'lower'}), upper = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'lower'}), upper = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-if not (type(input.stream._head) == 'string' and #(input.stream._head) == 1 and (input.stream._head) >= 'A' and (input.stream._head) <= 'Z') then
+if not (type(input.stream._head) == 'string' and #input.stream._head == 1 and input.stream._head >= 'A' and input.stream._head <= 'Z') then
 return false
 end
 return input:apply(input.grammar.anything)
 end)
-end, arity = 0, grammar = CharacterSets, name = 'upper'}), letter = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'upper'}), letter = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(input.grammar.lower)
 end, function (input)
 return input:apply(input.grammar.upper)
 end)
-end, arity = 0, grammar = CharacterSets, name = 'letter'}), alphanum = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'letter'}), alphanum = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(input.grammar.letter)
 end, function (input)
 return input:apply(input.grammar.digit)
 end)
-end, arity = 0, grammar = CharacterSets, name = 'alphanum'}), nameFirst = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'alphanum'}), nameFirst = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(input.grammar.letter)
 end, function (input)
 return input:applyWithArgs(input.grammar.exactly, '_')
 end)
-end, arity = 0, grammar = CharacterSets, name = 'nameFirst'}), nameRest = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'nameFirst'}), nameRest = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(input.grammar.nameFirst)
 end, function (input)
 return input:apply(input.grammar.digit)
 end)
-end, arity = 0, grammar = CharacterSets, name = 'nameRest'}), nameString = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'nameRest'}), nameString = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:applyWithArgs(input.grammar.consumed, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
@@ -192,7 +192,7 @@ return input:applyWithArgs(input.grammar.many, input.grammar.nameRest)
 end)
 end)
 end)
-end, arity = 0, grammar = CharacterSets, name = 'nameString'})})
+end, arity = 0, name = 'nameString'})})
 local GrammarCommons = OMeta.Grammar({_grammarName = 'GrammarCommons', comment = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:applyWithArgs(input.grammar.consumed, function (input)
@@ -214,20 +214,20 @@ return input:apply(input.grammar.eos)
 end)
 end)
 end)
-end, arity = 0, grammar = GrammarCommons, name = 'comment'}), ws = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'comment'}), ws = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(input.grammar.space)
 end, function (input)
 return input:apply(input.grammar.comment)
 end)
-end, arity = 0, grammar = GrammarCommons, name = 'ws'}), char = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'ws'}), char = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (type(input.stream._head) == 'string' and #input.stream._head == 1) then
 return false
 end
 return input:apply(input.grammar.anything)
 end)
-end, arity = 0, grammar = GrammarCommons, name = 'char'}), name = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'char'}), name = OMeta.Rule({behavior = function (input)
 local ns, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.many, input.grammar.ws)) then
@@ -244,7 +244,7 @@ return false
 end
 return true, Name({ns})
 end)
-end, arity = 0, grammar = GrammarCommons, name = 'name'}), token = OMeta.Rule({behavior = function (input, str)
+end, arity = 0, name = 'name'}), token = OMeta.Rule({behavior = function (input, str)
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.many, input.grammar.ws)) then
 return false
@@ -274,7 +274,7 @@ end
 return true, Keyword({ns})
 end)
 end)
-end, arity = 1, grammar = GrammarCommons, name = 'token'}), escchar = OMeta.Rule({behavior = function (input)
+end, arity = 1, name = 'token'}), escchar = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:applyWithArgs(input.grammar.consumed, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
@@ -284,12 +284,17 @@ end
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:applyWithArgs(input.grammar.many, input.grammar.digit, 1)
 end, function (input)
+if not (input:applyWithArgs(input.grammar.exactly, 'x')) then
+return false
+end
+return input:applyWithArgs(input.grammar.loop, input.grammar.hexdigit, 2)
+end, function (input)
 return input:apply(input.grammar.char)
 end)
 end)
 end)
 end)
-end, arity = 0, grammar = GrammarCommons, name = 'escchar'}), strlitA = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'escchar'}), strlitA = OMeta.Rule({behavior = function (input)
 local str, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.exactly, '\'')) then
@@ -315,7 +320,7 @@ return false
 end
 return true, StringLiteral({str})
 end)
-end, arity = 0, grammar = GrammarCommons, name = 'strlitA'}), strlitQ = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'strlitA'}), strlitQ = OMeta.Rule({behavior = function (input)
 local str, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.exactly, '\"')) then
@@ -341,7 +346,7 @@ return false
 end
 return true, StringLiteral({str, ldelim = '"', rdelim = '"'})
 end)
-end, arity = 0, grammar = GrammarCommons, name = 'strlitQ'}), strlitB = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'strlitQ'}), strlitB = OMeta.Rule({behavior = function (input)
 local str, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.exactly, '`')) then
@@ -367,7 +372,7 @@ return false
 end
 return true, StringLiteral({str, ldelim = '`', rdelim = '`'})
 end)
-end, arity = 0, grammar = GrammarCommons, name = 'strlitB'}), strlitL = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'strlitB'}), strlitL = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local str, __pass__
 if not (input:applyWithArgs(input.grammar.exactly, '[')) then
@@ -441,7 +446,7 @@ return false
 end
 return true, StringLiteral({str, ldelim = '[' .. eqs .. '[', rdelim = ']' .. eqs .. ']'})
 end)
-end, arity = 0, grammar = GrammarCommons, name = 'strlitL'}), intlit = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'strlitL'}), intlit = OMeta.Rule({behavior = function (input)
 local number, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, number = input:applyWithArgs(input.grammar.toNumber, function (input)
@@ -454,7 +459,7 @@ return false
 end
 return true, IntegerLiteral({number})
 end)
-end, arity = 0, grammar = GrammarCommons, name = 'intlit'}), reallit = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'intlit'}), reallit = OMeta.Rule({behavior = function (input)
 local number, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, number = input:applyWithArgs(input.grammar.toNumber, function (input)
@@ -505,7 +510,7 @@ return false
 end
 return true, RealLiteral({number})
 end)
-end, arity = 0, grammar = GrammarCommons, name = 'reallit'}), hexlit = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'reallit'}), hexlit = OMeta.Rule({behavior = function (input)
 local number, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, number = input:applyWithArgs(input.grammar.toNumber, function (input)
@@ -530,7 +535,7 @@ return false
 end
 return true, IntegerLiteral({number})
 end)
-end, arity = 0, grammar = GrammarCommons, name = 'hexlit'}), boollit = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'hexlit'}), boollit = OMeta.Rule({behavior = function (input)
 local str, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, str = input:apply(input.grammar.nameString)
@@ -542,7 +547,7 @@ return false
 end
 return true, BooleanLiteral({str == 'true'})
 end)
-end, arity = 0, grammar = GrammarCommons, name = 'boollit'}), nillit = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'boollit'}), nillit = OMeta.Rule({behavior = function (input)
 local str, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, str = input:apply(input.grammar.nameString)
@@ -554,7 +559,7 @@ return false
 end
 return true, NilLiteral({})
 end)
-end, arity = 0, grammar = GrammarCommons, name = 'nillit'})})
+end, arity = 0, name = 'nillit'})})
 GrammarCommons:merge(Commons)
 GrammarCommons:merge(CharacterSets)
 return GrammarCommons

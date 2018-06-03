@@ -25,30 +25,31 @@ local Binding, Application, Choice, Sequence, Lookahead,
 
 local Commons = require 'grammar_commons'   
 
-local ometa OMetaGrammar {
+local ometa OMetaGrammar merges Commons {
 
                 ------------------------------------- structure ----------------------------------------------------------------------------
   choiceDef     = nodes:list(sequenceDef, "|", 1)                   [Choice           {nodes = nodes}]
                 ,
-  sequenceDef   = nodes:node+                                       [Sequence         {nodes = nodes}]
+  sequenceDef   = nodes:cutNode+                                    [Sequence         {nodes = nodes}]
+                ,------------------------------------ cut points ---------------------------------------------------------------------------
+  cutNode       = $^:node ("\\" "\\")?
                 ,------------------------------------- binding -----------------------------------------------------------------------------
-  node          = name:name ":" exp:prefixexp                       [Binding          {expression = exp, name = name}]
-                | name:"^"  ":" exp:prefixexp                       [Binding          {expression = exp, name = name}]
-                |                   prefixexp
+  node          =     name:name   ":" exp:prefixexp                 [Binding          {expression = exp, name = name}]
+                | "$" name:vname  ":" exp:prefixexp                 [Binding          {expression = exp, name = name, pseudo = true}]
+                |                         prefixexp
                 ,------------------------------------ lookahead ----------------------------------------------------------------------------
   prefixexp     =             "~" exp:suffixexp                     [NotPredicate     {expression = exp}]
                 |             "&" exp:suffixexp                     [AndPredicate     {expression = exp}]
                 |                     suffixexp
                 ,----------------------------------- quantifiers ---------------------------------------------------------------------------
-  suffixexp     = exp:primexp "/" num:(intlit | primexp)            [Loop             {expression = exp, times = num}]
-                | exp:primexp "**" min:intlit (".." max:intlit)?    [Many             {expression = exp, minimum = min, maximum = max}]
+  suffixexp     = exp:primexp "/" name:($^:name ":")? num:primexp   [Loop             {expression = exp, times = num, name = name}]
+                | exp:primexp "**" min:intlit max:(".." intlit)?    [Many             {expression = exp, minimum = min, maximum = max}]
                 | exp:primexp "*"                                   [Many             {expression = exp}]
                 | exp:primexp "+"                                   [Many             {expression = exp, minimum = RealLiteral {1}}]
                 | exp:primexp "?"                                   [Optional         {expression = exp}]
-                ----------------------------------------------------------------------------------------------------------------------------
                 |     primexp
                 ,------------------------------------ grouping -----------------------------------------------------------------------------
-  primexp       = "(" ^:choiceDef ")" [! ($^).scope = true]
+  primexp       = "(" $^:choiceDef ")" [! ($^).scope = true]
                 | "<" exp:choiceDef ">"                             [Consumed         {expression = exp}]
                 | "{" props:props "}"                               [Object           {array = props[1], map = props[2]}]
                 ------------------------------------- literals -----------------------------------------------------------------------------
@@ -63,7 +64,11 @@ local ometa OMetaGrammar {
                 ,--------------------------------- building blocks -------------------------------------------------------------------------
   path          = list(name, '.', 1)
                 ,
-  args          = '(' ^:list(^:choiceDef [! ($^).scope = true], ",") ")"
+  vname         = name  
+                | "^"                                               [Name {'result'}]
+                | "."                                               [Name {'head'}]
+                ,
+  args          = '(' $^:list($^:choiceDef [! ($^).scope = true], ",") ")"
                 ,
   props         = array:choiceDef ";"  map:list(prop, ",", 1)       [{array,          Choice      {nodes = Array {Sequence {nodes = map}}}}]
                 | array:choiceDef ";"?                              [{array,          NilLiteral  {}}]
@@ -75,16 +80,15 @@ local ometa OMetaGrammar {
                 | index:name  "=" exp:choiceDef                     [Property         {expression = exp,  index = StringLiteral {index[1]}}]
                 ,------------------------------------- tokens ------------------------------------------------------------------------------
   special       = [[..]]  | [[**]]
-                | [[:=]]  | ':'     | '='     | '^'
-                | '('     | ')'     | '|'    
+                | [[:=]]  | ':'     | '='    | '^'  | '$'
+                | '('     | ')'     | '|'     
                 | '{'     | '}'
                 | '<'     | '>'  
-                | ','     | '.'     | ';'     
-                | '*'     | '+'     | '?'     | '/'
-                | '~'     | '&'     | '@'     
+                | ','     | '.'     | ';'    | '\\' 
+                | '*'     | '+'     | '?'    | '/'
+                | '~'     | '&'     | '@'    
                 ,
   keyword       = ''
 }
-OMetaGrammar:merge(Commons)
 
 return OMetaGrammar

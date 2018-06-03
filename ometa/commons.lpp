@@ -8,7 +8,7 @@ local OMeta = require 'ometa'
 local utils = require 'utils'
 local StdLib = require 'ometa_stdlib'
 
-local ometa Commons {
+local ometa Commons merges StdLib {
 
   eos                   =                                         ~.,
   empty                 = [? true]                                , -- nothing to return
@@ -29,7 +29,7 @@ local ometa Commons {
   
   concat(source, sep)   = chars:source                            [chars:concat(sep)],
   
-  notLast(element)      = ^:element &element,
+  notLast(element)      = $result:element &element,
   list(element, delim, minimum)
                         = first:element rest:(delim element)* 
                           [? (#rest + 1) >= (minimum or 0)]       [rest:prepend(first)]
@@ -37,6 +37,5 @@ local ometa Commons {
                         ,
   range(first, last)    = < first (~last .)* last >
 }
-Commons:merge(StdLib)
 
 return Commons

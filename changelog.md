@@ -1,4 +1,16 @@
 
+**1.3.0-beta 2018-06-03**
+
+Features:
+- writable "pseudo-variables". Some pseudo-variables are read/write now. *Result* (`$result` or `$^`) replaces `^` in so called *result binding* feature. *State* (`$state`) provides ability to restore stored input stream state;
+
+Improvements:
+- syntax sugar for merging Grammar packages. The Grammar definition syntax allows to enumerate all (or selected) Grammar packages merged into defined Grammar (`ometa Derived merges G1, G2 {...}`);
+- improved *tostring* behavior of OMeta types - more detailed description and modularized code;
+- abstract syntax node types - cleaning of the type hierarchy and disambiguation of some attributes' names;
+- string literals can contain hex escape characters now (e.g.: `'\x0a'`);
+___
+
 **1.2.0-beta 2018-05-14**
 
 Features:

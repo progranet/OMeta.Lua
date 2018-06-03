@@ -13,10 +13,10 @@ local Gif = class {name = 'Gif', super = {Any}}
 local Block = class {name = 'Block', super = {Any}}
 local Color = class {name = 'Color', super = {Any}}
 
-local ometa GifGrammar {
+local ometa GifGrammar merges Commons, Commons.LittleEndian, Commons.Msb0 {
   
   image         = -- 17. Header.
-                  0x47 0x49 0x46
+                  0x47 0x49 0x46 -- GIF
                   version:char(3) [? version == '87a' or version == '89a'] 
                   
                   -- 18. Logical Screen Descriptor.
@@ -47,7 +47,7 @@ local ometa GifGrammar {
                     data = data}]
                 ,
   dataBlock     = -- 15. Data Sub-blocks.
-                  ^:byte/(^:byte [? ($^) ~= 0])
+                  $^:byte/($^:byte [? ($^) ~= 0])
                 ,
   rgbColor      = r:byte g:byte b:byte 
                   [Color {red = r, green = g, blue = b}]
@@ -122,8 +122,5 @@ local ometa GifGrammar {
                   [Block {name = 'Generic Extension',
                     data = data}]
 }
-GifGrammar:merge(Commons)
-GifGrammar:merge(Commons.LittleEndian)
-GifGrammar:merge(Commons.Msb0)
 
 return GifGrammar

@@ -37,7 +37,7 @@ local OMeta = require 'ometa'
 local OMetaGrammar = require 'ometa_grammar'
 local OMetaInLua, OMetaInLuaExt
 
-local ometa LuaInOMeta {
+local ometa LuaInOMeta merges OMetaGrammar {
 
   special       = OMetaGrammar.special
                 | [[[?]] | [[[!]] | '[' | ']'
@@ -54,7 +54,6 @@ local ometa LuaInOMeta {
   prop          = OMetaGrammar.prop
                 | "[" index:OMetaInLuaExt.exp@OMetaInLuaExt "]" "=" exp:choiceDef       [Property       {expression = exp, index = index}]
 }
-LuaInOMeta:merge(OMetaGrammar)
 
 --------------------------------------------------------------------------------------------------------------------------------------
 
@@ -65,14 +64,19 @@ local function exp(...)
   return OMetaInLuaMixed.exp:matchMixed(...)
 end
 
-ometa OMetaInLua {
+ometa OMetaInLua merges LuaGrammar {
   
   keyword       = LuaGrammar.keyword
                 | 'ometa'
+                | 'merges'
                 | 'rule'
                 ,
-  stat          = "local" "ometa" n:name body:grammarBody                               [GrammarStatement {isLocal = true, name = Array {n}, rules = body}]
-                | "ometa" ns:list(name, ".", 1) body:grammarBody                        [GrammarStatement {isLocal = false, name = ns, rules = body}]
+  stat          = "local" "ometa" n:name 
+                  ms:("merges" list(exp, ",", 1))? 
+                  body:grammarBody                                                      [GrammarStatement {isLocal = true, name = Array {n}, merge = ms or Array {}, rules = body}]
+                | "ometa" ns:list(name, ".", 1) 
+                  ms:("merges" list(exp, ",", 1))? 
+                  body:grammarBody                                                      [GrammarStatement {isLocal = false, name = ns, merge = ms or Array {}, rules = body}]
                 | "rule" ns:list(name, ".", 1) ":" n:name body:ruleBody                 [RuleStatement {
                                                                                           namespace = ns, name = n, 
                                                                                           arguments = body[1][1], variableArguments = body[1][2], 
@@ -89,10 +93,10 @@ ometa OMetaInLua {
                     body:LuaInOMeta.choiceDef@LuaInOMeta
                   "end"                                                                 [{params, body}]
                 ,
-  grammarBody   = "{" ^:list(innerRuleBody, "," | ";") ("," | ";")? "}"
+  grammarBody   = "{" $^:list(innerRuleBody, "," | ";") ("," | ";")? "}"
                 ,
-  innerRuleBody = index:(name | "[" ^:exp "]") 
-                  params:( "(" ^:parlist ")" | empty [{Array {}, false}] ) 
+  innerRuleBody = index:(name | "[" $^:exp "]") 
+                  params:( "(" $^:parlist ")" | empty [{Array {}, false}] ) 
                   "=" body:LuaInOMeta.choiceDef@LuaInOMeta                              [RuleExpression {
                                                                                           name = index, 
                                                                                           arguments = params[1], variableArguments = params[2], 
@@ -102,11 +106,10 @@ ometa OMetaInLua {
                 ,
   slice         = str:<(escchar | ~'`' ~'$' char)*>                                     [StringLiteral {str, ldelim = '[[', rdelim = ']]'}]
 }
-OMetaInLua:merge(LuaGrammar)
 
 --------------------------------------------------------------------------------------------------------------------------------------
 
-ometa OMetaInLuaExt {
+ometa OMetaInLuaExt merges OMetaInLua {
   
   special       = OMetaInLua.special
                 | '$' 
@@ -119,17 +122,16 @@ ometa OMetaInLuaExt {
                 | ws* "$" [[state]]                                                     [exp`input.stream`]
                 | ws* "$" [[source]]                                                    [exp`input.stream._source`]
 }
-OMetaInLuaExt:merge(OMetaInLua)
 
 --------------------------------------------------------------------------------------------------------------------------------------
 
-ometa OMetaInLuaMixed {
+ometa OMetaInLuaMixed merges OMetaInLua {
   
   name        = OMetaInLua.name
               | Name
               ,
   token(str)  = OMetaInLua.token(str)
-              | ^:(Keyword | Special) [? ($^)[1] == str]
+              | $^:(Keyword | Special) [? ($^)[1] == str]
               ,
   chunk       = -- Order of alternatives is important:
                 -- - LuaGrammar.chunk always returns truthy result and rules out any subsequent check
@@ -186,7 +188,6 @@ ometa OMetaInLuaMixed {
   field       = OMetaInLua.field
               | SetProperty
 }
-OMetaInLuaMixed:merge(OMetaInLua)
 
 return {
   LuaInOMetaGrammar = LuaInOMeta;

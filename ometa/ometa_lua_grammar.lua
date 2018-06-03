@@ -23,11 +23,11 @@ return input:applyWithArgs(input.grammar.exactly, '[')
 end, function (input)
 return input:applyWithArgs(input.grammar.exactly, ']')
 end)
-end, arity = 0, grammar = LuaInOMeta, name = 'special'}), keyword = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'special'}), keyword = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:applyWithArgs(input.grammar.exactly, 'end')
 end)
-end, arity = 0, grammar = LuaInOMeta, name = 'keyword'}), node = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'keyword'}), node = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(OMetaGrammar.node)
 end, function (input)
@@ -59,7 +59,7 @@ return false
 end
 return true, HostStatement({value = exp})
 end)
-end, arity = 0, grammar = LuaInOMeta, name = 'node'}), primexp = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'node'}), primexp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(OMetaGrammar.primexp)
 end, function (input)
@@ -76,7 +76,7 @@ return false
 end
 return true, HostExpression({value = exp})
 end)
-end, arity = 0, grammar = LuaInOMeta, name = 'primexp'}), prop = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'primexp'}), prop = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(OMetaGrammar.prop)
 end, function (input)
@@ -100,7 +100,7 @@ return false
 end
 return true, Property({expression = exp, index = index})
 end)
-end, arity = 0, grammar = LuaInOMeta, name = 'prop'})})
+end, arity = 0, name = 'prop'})})
 LuaInOMeta:merge(OMetaGrammar)
 local LuaGrammar = require('lua52_grammar')
 local OMetaInLuaMixed
@@ -113,11 +113,13 @@ return input:apply(LuaGrammar.keyword)
 end, function (input)
 return input:applyWithArgs(input.grammar.exactly, 'ometa')
 end, function (input)
+return input:applyWithArgs(input.grammar.exactly, 'merges')
+end, function (input)
 return input:applyWithArgs(input.grammar.exactly, 'rule')
 end)
-end, arity = 0, grammar = OMetaInLua, name = 'keyword'}), stat = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'keyword'}), stat = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-local __pass__, body, n
+local body, __pass__, ms, n
 if not (input:applyWithArgs(input.grammar.token, "local")) then
 return false
 end
@@ -128,13 +130,26 @@ __pass__, n = input:apply(input.grammar.name)
 if not (__pass__) then
 return false
 end
+__pass__, ms = input:applyWithArgs(input.grammar.optional, function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
+if not (input:applyWithArgs(input.grammar.token, "merges")) then
+return false
+end
+return input:applyWithArgs(input.grammar.list, input.grammar.exp, function (input)
+return input:applyWithArgs(input.grammar.token, ",")
+end, 1)
+end)
+end)
+if not (__pass__) then
+return false
+end
 __pass__, body = input:apply(input.grammar.grammarBody)
 if not (__pass__) then
 return false
 end
-return true, GrammarStatement({isLocal = true, name = Array({n}), rules = body})
+return true, GrammarStatement({isLocal = true, name = Array({n}), merge = ms or Array({}), rules = body})
 end, function (input)
-local ns, body, __pass__
+local body, ns, ms, __pass__
 if not (input:applyWithArgs(input.grammar.token, "ometa")) then
 return false
 end
@@ -144,11 +159,24 @@ end, 1)
 if not (__pass__) then
 return false
 end
+__pass__, ms = input:applyWithArgs(input.grammar.optional, function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
+if not (input:applyWithArgs(input.grammar.token, "merges")) then
+return false
+end
+return input:applyWithArgs(input.grammar.list, input.grammar.exp, function (input)
+return input:applyWithArgs(input.grammar.token, ",")
+end, 1)
+end)
+end)
+if not (__pass__) then
+return false
+end
 __pass__, body = input:apply(input.grammar.grammarBody)
 if not (__pass__) then
 return false
 end
-return true, GrammarStatement({isLocal = false, name = ns, rules = body})
+return true, GrammarStatement({isLocal = false, name = ns, merge = ms or Array({}), rules = body})
 end, function (input)
 local body, ns, __pass__, n
 if not (input:applyWithArgs(input.grammar.token, "rule")) then
@@ -175,7 +203,7 @@ return true, RuleStatement({namespace = ns, name = n, arguments = body[1][1], va
 end, function (input)
 return input:apply(LuaGrammar.stat)
 end)
-end, arity = 0, grammar = OMetaInLua, name = 'stat'}), primexp = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'stat'}), primexp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(LuaGrammar.primexp)
 end, function (input)
@@ -189,7 +217,7 @@ return false
 end
 return true, exp([[string.interpolate(]], literal, [[)]])
 end)
-end, arity = 0, grammar = OMetaInLua, name = 'primexp'}), args = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'primexp'}), args = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(LuaGrammar.args)
 end, function (input)
@@ -198,7 +226,7 @@ return false
 end
 return input:apply(input.grammar.strlitB)
 end)
-end, arity = 0, grammar = OMetaInLua, name = 'args'}), ruleBody = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'args'}), ruleBody = OMeta.Rule({behavior = function (input)
 local params, __pass__, body
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.token, "(")) then
@@ -220,7 +248,7 @@ return false
 end
 return true, {params, body}
 end)
-end, arity = 0, grammar = OMetaInLua, name = 'ruleBody'}), grammarBody = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'ruleBody'}), grammarBody = OMeta.Rule({behavior = function (input)
 local __result__, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.token, "{")) then
@@ -250,7 +278,7 @@ return false
 end
 return true, __result__
 end)
-end, arity = 0, grammar = OMetaInLua, name = 'grammarBody'}), innerRuleBody = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'grammarBody'}), innerRuleBody = OMeta.Rule({behavior = function (input)
 local params, __pass__, body, index
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, index = input:applyWithArgs(input.grammar.choice, function (input)
@@ -303,7 +331,7 @@ return false
 end
 return true, RuleExpression({name = index, arguments = params[1], variableArguments = params[2], block = body})
 end)
-end, arity = 0, grammar = OMetaInLua, name = 'innerRuleBody'}), strlitB = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'innerRuleBody'}), strlitB = OMeta.Rule({behavior = function (input)
 local slices, __pass__, last
 return input:applyWithArgs(input.grammar.choice, function (input)
 if not (input:applyWithArgs(input.grammar.exactly, '`')) then
@@ -344,7 +372,7 @@ return false
 end
 return true, slices:flatten():append(last)
 end)
-end, arity = 0, grammar = OMetaInLua, name = 'strlitB'}), slice = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'strlitB'}), slice = OMeta.Rule({behavior = function (input)
 local str, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, str = input:applyWithArgs(input.grammar.consumed, function (input)
@@ -367,7 +395,7 @@ return false
 end
 return true, StringLiteral({str, ldelim = '[[', rdelim = ']]'})
 end)
-end, arity = 0, grammar = OMetaInLua, name = 'slice'})})
+end, arity = 0, name = 'slice'})})
 OMetaInLua:merge(LuaGrammar)
 OMetaInLuaExt = OMeta.Grammar({_grammarName = 'OMetaInLuaExt', special = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
@@ -375,7 +403,7 @@ return input:apply(OMetaInLua.special)
 end, function (input)
 return input:applyWithArgs(input.grammar.exactly, '$')
 end)
-end, arity = 0, grammar = OMetaInLuaExt, name = 'special'}), primexp = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'special'}), primexp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(OMetaInLua.primexp)
 end, function (input)
@@ -453,7 +481,7 @@ return false
 end
 return true, exp([[input.stream._source]])
 end)
-end, arity = 0, grammar = OMetaInLuaExt, name = 'primexp'})})
+end, arity = 0, name = 'primexp'})})
 OMetaInLuaExt:merge(OMetaInLua)
 OMetaInLuaMixed = OMeta.Grammar({_grammarName = 'OMetaInLuaMixed', name = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
@@ -461,7 +489,7 @@ return input:apply(OMetaInLua.name)
 end, function (input)
 return input:apply(Name)
 end)
-end, arity = 0, grammar = OMetaInLuaMixed, name = 'name'}), token = OMeta.Rule({behavior = function (input, str)
+end, arity = 0, name = 'name'}), token = OMeta.Rule({behavior = function (input, str)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:applyWithArgs(OMetaInLua.token, str)
 end, function (input)
@@ -479,7 +507,7 @@ return false
 end
 return (__result__)[1] == str, __result__
 end)
-end, arity = 1, grammar = OMetaInLuaMixed, name = 'token'}), chunk = OMeta.Rule({behavior = function (input)
+end, arity = 1, name = 'token'}), chunk = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(Chunk)
 end, function (input)
@@ -492,7 +520,7 @@ return true, Chunk({statements = stats})
 end, function (input)
 return input:apply(OMetaInLua.chunk)
 end)
-end, arity = 0, grammar = OMetaInLuaMixed, name = 'chunk'}), stat = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'chunk'}), stat = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(OMetaInLua.stat)
 end, function (input)
@@ -518,13 +546,13 @@ return input:apply(Set)
 end, function (input)
 return input:apply(Goto)
 end)
-end, arity = 0, grammar = OMetaInLuaMixed, name = 'stat'}), label = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'stat'}), label = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(OMetaInLua.label)
 end, function (input)
 return input:apply(Label)
 end)
-end, arity = 0, grammar = OMetaInLuaMixed, name = 'label'}), laststat = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'label'}), laststat = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(OMetaInLua.laststat)
 end, function (input)
@@ -532,31 +560,31 @@ return input:apply(Return)
 end, function (input)
 return input:apply(Break)
 end)
-end, arity = 0, grammar = OMetaInLuaMixed, name = 'laststat'}), namelist = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'laststat'}), namelist = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(OMetaInLua.namelist)
 end, function (input)
 return input:apply(Array)
 end)
-end, arity = 0, grammar = OMetaInLuaMixed, name = 'namelist'}), explist = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'namelist'}), explist = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(OMetaInLua.explist)
 end, function (input)
 return input:apply(Array)
 end)
-end, arity = 0, grammar = OMetaInLuaMixed, name = 'explist'}), mulexp = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'explist'}), mulexp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(OMetaInLua.mulexp)
 end, function (input)
 return input:apply(BinaryOperation)
 end)
-end, arity = 0, grammar = OMetaInLuaMixed, name = 'mulexp'}), unary = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'mulexp'}), unary = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(OMetaInLua.unary)
 end, function (input)
 return input:apply(UnaryOperation)
 end)
-end, arity = 0, grammar = OMetaInLuaMixed, name = 'unary'}), primexp = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'unary'}), primexp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(OMetaInLua.primexp)
 end, function (input)
@@ -572,7 +600,7 @@ return input:apply(VariableArguments)
 end, function (input)
 return input:apply(FunctionExpression)
 end)
-end, arity = 0, grammar = OMetaInLuaMixed, name = 'primexp'}), prefixexp = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'primexp'}), prefixexp = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local ctx, __pass__
 __pass__, ctx = input:apply(input.grammar.prefixexp)
@@ -593,7 +621,7 @@ return input:apply(Group)
 end, function (input)
 return input:apply(OMetaInLua.prefixexp)
 end)
-end, arity = 0, grammar = OMetaInLuaMixed, name = 'prefixexp'}), args = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'prefixexp'}), args = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(OMetaInLua.args)
 end, function (input)
@@ -613,24 +641,24 @@ return false
 end
 return true, Array({a})
 end)
-end, arity = 0, grammar = OMetaInLuaMixed, name = 'args'}), tableconstr = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'args'}), tableconstr = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(OMetaInLua.tableconstr)
 end, function (input)
 return input:apply(TableConstructor)
 end)
-end, arity = 0, grammar = OMetaInLuaMixed, name = 'tableconstr'}), fieldlist = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'tableconstr'}), fieldlist = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(OMetaInLua.fieldlist)
 end, function (input)
 return input:apply(Array)
 end)
-end, arity = 0, grammar = OMetaInLuaMixed, name = 'fieldlist'}), field = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'fieldlist'}), field = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 return input:apply(OMetaInLua.field)
 end, function (input)
 return input:apply(SetProperty)
 end)
-end, arity = 0, grammar = OMetaInLuaMixed, name = 'field'})})
+end, arity = 0, name = 'field'})})
 OMetaInLuaMixed:merge(OMetaInLua)
 return {LuaInOMetaGrammar = LuaInOMeta, OMetaInLuaGrammar = OMetaInLua, OMetaInLuaExtGrammar = OMetaInLuaExt, OMetaInLuaMixedGrammar = OMetaInLuaMixed}

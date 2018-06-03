@@ -53,19 +53,19 @@ local Group = class {
   end;
 }
 
-local Block = class {
-  abstract = true, 
-  name = 'Block', 
-  super = {Node};
-}
-
 local Chunk = class {
   name = 'Chunk', 
-  super = {Block};
+  super = {Node};
   
   toLuaSource = function(self)
     return self.statements:toLuaSource():append(''):concat(lsep)
   end;
+}
+
+local Block = class {
+  abstract = true, 
+  name = 'Block', 
+  super = {Node};
 }
 
 local Do = class {
@@ -83,7 +83,7 @@ local If = class {
   
   toLuaSource = function(self)
     local elseBlock = self.elseBlock:toLuaSource()
-    return 'if ' .. self.expression:toLuaSource() .. ' then' .. lsep .. self.block:toLuaSource() .. self.elseIfs:toLuaSource():concat() .. (#elseBlock ~= 0 and ('else' .. lsep .. elseBlock) or '') .. 'end'
+    return 'if ' .. self.condition:toLuaSource() .. ' then' .. lsep .. self.block:toLuaSource() .. self.elseIfs:toLuaSource():concat() .. (#elseBlock ~= 0 and ('else' .. lsep .. elseBlock) or '') .. 'end'
   end;
 }
 
@@ -92,7 +92,7 @@ local ElseIf = class {
   super = {Block, Control, Statement};
   
   toLuaSource = function(self)
-    return 'elseif ' .. self.expression:toLuaSource() .. ' then' .. lsep .. self.block:toLuaSource()
+    return 'elseif ' .. self.condition:toLuaSource() .. ' then' .. lsep .. self.block:toLuaSource()
   end;
 }
 
@@ -120,7 +120,7 @@ local While = class {
   super = {Block, Control, Iterative, Statement};
   
   toLuaSource = function(self)
-    return 'while ' .. self.expression:toLuaSource() .. ' do' .. lsep .. self.block:toLuaSource() .. 'end'
+    return 'while ' .. self.condition:toLuaSource() .. ' do' .. lsep .. self.block:toLuaSource() .. 'end'
   end;
 }
 
@@ -129,7 +129,7 @@ local Repeat = class {
   super = {Block, Control, Iterative, Statement};
   
   toLuaSource = function(self)
-    return 'repeat' .. lsep .. self.block:toLuaSource() .. 'until ' .. self.expression:toLuaSource() .. ''
+    return 'repeat' .. lsep .. self.block:toLuaSource() .. 'until ' .. self.condition:toLuaSource() .. ''
   end;
 }
 

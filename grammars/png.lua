@@ -44,7 +44,7 @@ return false
 end
 return true, Png({chunks = chunks, rest = rest})
 end)
-end, arity = 0, grammar = PngGrammar, name = 'image'}), chunk = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'image'}), chunk = OMeta.Rule({behavior = function (input)
 local data, type, __pass__, len, crc
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, len = input:apply(input.grammar.int32)
@@ -68,7 +68,7 @@ return false
 end
 return true, Chunk(data)
 end)
-end, arity = 0, grammar = PngGrammar, name = 'chunk'}), generic = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'chunk'}), generic = OMeta.Rule({behavior = function (input)
 local d, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, d = input:applyWithArgs(input.grammar.loop, input.grammar.byte, input.grammar.number)
@@ -77,7 +77,7 @@ return false
 end
 return true, {name = "Generic chunk", data = d}
 end)
-end, arity = 0, grammar = PngGrammar, name = 'generic'}), IHDR = OMeta.Rule({behavior = function (input, len)
+end, arity = 0, name = 'generic'}), IHDR = OMeta.Rule({behavior = function (input, len)
 local il, fltr, __pass__, w, ctype, h, dep, comp
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, w = input:apply(input.grammar.int32)
@@ -110,7 +110,7 @@ return false
 end
 return true, {name = "Image header", data = {width = w, height = h, bitdepth = dep, colortype = ctype, compression = comp, filter = fltr, interlace = il}}
 end)
-end, arity = 1, grammar = PngGrammar, name = 'IHDR'}), PLTE = OMeta.Rule({behavior = function (input, len)
+end, arity = 1, name = 'IHDR'}), PLTE = OMeta.Rule({behavior = function (input, len)
 local palette, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, palette = input:applyWithArgs(input.grammar.loop, function (input)
@@ -136,7 +136,7 @@ return false
 end
 return true, {name = "Palette", palette = palette}
 end)
-end, arity = 1, grammar = PngGrammar, name = 'PLTE'}), IDAT = OMeta.Rule({behavior = function (input)
+end, arity = 1, name = 'PLTE'}), IDAT = OMeta.Rule({behavior = function (input)
 local d, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, d = input:applyWithArgs(input.grammar.loop, input.grammar.byte, input.grammar.number)
@@ -145,7 +145,7 @@ return false
 end
 return true, {name = "Image data"}
 end)
-end, arity = 0, grammar = PngGrammar, name = 'IDAT'}), IEND = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'IDAT'}), IEND = OMeta.Rule({behavior = function (input)
 local d, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, d = input:applyWithArgs(input.grammar.loop, input.grammar.byte, input.grammar.number)
@@ -154,7 +154,7 @@ return false
 end
 return true, {name = "Image trailer"}
 end)
-end, arity = 0, grammar = PngGrammar, name = 'IEND'}), bKGD = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'IEND'}), bKGD = OMeta.Rule({behavior = function (input)
 local d, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, d = input:applyWithArgs(input.grammar.loop, input.grammar.byte, input.grammar.number)
@@ -163,7 +163,7 @@ return false
 end
 return true, {name = "Background color", data = d}
 end)
-end, arity = 0, grammar = PngGrammar, name = 'bKGD'}), cHRM = OMeta.Rule({behavior = function (input, len)
+end, arity = 0, name = 'bKGD'}), cHRM = OMeta.Rule({behavior = function (input, len)
 local wy, __pass__, rx, wx, by, gx, ry, gy, bx
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, wx = input:apply(input.grammar.int32)
@@ -200,7 +200,7 @@ return false
 end
 return true, {name = "Primary chromaticities and white point", ['white x'] = wx, ['white y'] = wy, ['red x'] = rx, ['red y'] = ry, ['green x'] = gx, ['green y'] = gy, ['blue x'] = bx, ['blue y'] = by}
 end)
-end, arity = 1, grammar = PngGrammar, name = 'cHRM'}), gAMA = OMeta.Rule({behavior = function (input, len)
+end, arity = 1, name = 'cHRM'}), gAMA = OMeta.Rule({behavior = function (input, len)
 local g, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, g = input:apply(input.grammar.int32)
@@ -209,7 +209,7 @@ return false
 end
 return true, {name = "Image gamma", value = g}
 end)
-end, arity = 1, grammar = PngGrammar, name = 'gAMA'}), hIST = OMeta.Rule({behavior = function (input, len)
+end, arity = 1, name = 'gAMA'}), hIST = OMeta.Rule({behavior = function (input, len)
 local d, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, d = input:applyWithArgs(input.grammar.loop, input.grammar.int16, len / 2)
@@ -218,7 +218,7 @@ return false
 end
 return true, {name = "Image histogram", data = d}
 end)
-end, arity = 1, grammar = PngGrammar, name = 'hIST'}), pHYs = OMeta.Rule({behavior = function (input, len)
+end, arity = 1, name = 'hIST'}), pHYs = OMeta.Rule({behavior = function (input, len)
 local y, x, unit, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, x = input:apply(input.grammar.int32)
@@ -235,7 +235,7 @@ return false
 end
 return true, {name = "Physical pixel dimensions", x = x, y = y, unit = init == 1 and 'meter' or 'unknown'}
 end)
-end, arity = 1, grammar = PngGrammar, name = 'pHYs'}), sBIT = OMeta.Rule({behavior = function (input)
+end, arity = 1, name = 'pHYs'}), sBIT = OMeta.Rule({behavior = function (input)
 local d, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, d = input:applyWithArgs(input.grammar.loop, input.grammar.byte, input.grammar.number)
@@ -244,7 +244,7 @@ return false
 end
 return true, {name = "Significant bits", data = d}
 end)
-end, arity = 0, grammar = PngGrammar, name = 'sBIT'}), tEXt = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'sBIT'}), tEXt = OMeta.Rule({behavior = function (input)
 local tpos, __pass__, str
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, str = input:applyWithArgs(input.grammar.codesToString, function (input)
@@ -259,7 +259,7 @@ return false
 end
 return true, {name = "Textual data", keyword = str:sub(1, tpos - 1), text = str:sub(tpos + 1)}
 end)
-end, arity = 0, grammar = PngGrammar, name = 'tEXt'}), tIME = OMeta.Rule({behavior = function (input, len)
+end, arity = 0, name = 'tEXt'}), tIME = OMeta.Rule({behavior = function (input, len)
 local day, minute, second, hour, year, month, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, year = input:apply(input.grammar.int16)
@@ -288,7 +288,7 @@ return false
 end
 return true, {name = "Image last-modification time", year = year, month = month, day = day, hour = hour, minute = minute, second = second}
 end)
-end, arity = 1, grammar = PngGrammar, name = 'tIME'}), tRNS = OMeta.Rule({behavior = function (input)
+end, arity = 1, name = 'tIME'}), tRNS = OMeta.Rule({behavior = function (input)
 local d, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, d = input:applyWithArgs(input.grammar.loop, input.grammar.byte, input.grammar.number)
@@ -297,7 +297,7 @@ return false
 end
 return true, {name = "Transparency", data = d}
 end)
-end, arity = 0, grammar = PngGrammar, name = 'tRNS'}), zTXt = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'tRNS'}), zTXt = OMeta.Rule({behavior = function (input)
 local d, __pass__
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, d = input:applyWithArgs(input.grammar.loop, input.grammar.byte, input.grammar.number)
@@ -306,7 +306,7 @@ return false
 end
 return true, {name = "Compressed textual data", data = d}
 end)
-end, arity = 0, grammar = PngGrammar, name = 'zTXt'})})
+end, arity = 0, name = 'zTXt'})})
 PngGrammar:merge(Commons)
 PngGrammar:merge(Commons.BigEndian)
 return PngGrammar
