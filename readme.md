@@ -191,12 +191,12 @@ Fortunately there are "pseudo variables" provided which allow to safely get (and
 
 |Pseudo&nbsp;variable|Reading|Writing|
 |:-------:|-------|-------|
-|`$head` / `$.`<br/>the head of the input stream|useful for testing without input consuming, e.g:<br>`[? type($.) == 'string' and #($.) == 1]`|not applicable|
-|`$result` / `$^`<br/>the result of the current Sequence|available only if there is [result binding](#result-binding), e.g.:<br>`$^:. [? type($^) == 'string' and #($^) == 1]`|[result binding](#result-binding) - arbitrary change of the result value|
-|`$index`<br/>the position (index) of the input stream|integer index or name of the property (inside [complex data](#parsing-complex-data))|not applicable|
+|`$head` / `$.`<br/>a head of the input stream|useful for testing without input consuming, e.g:<br>`[? type($.) == 'string' and #($.) == 1]`|not applicable|
+|`$result` / `$^`<br/>a result of the current Sequence|available only if there is [result binding](#result-binding), e.g.:<br>`$^:. [? type($^) == 'string' and #($^) == 1]`|[result binding](#result-binding) - arbitrary change of the result value|
+|`$index`<br/>a position (index) of the input stream|integer index or name of the property (inside [complex data](#parsing-complex-data))|not applicable|
 |`$input`<br/>the input - whole state|[*OMeta*](#ometa-api) class instance.<br>Stores not only the input stream but current Grammar, etc., too|not applicable|
-|`$state`<br/>the state of the input stream|can be used to "rollback" - to get (store):<br/>`state:[$state]`<br/>and...|...then to restore state of the stream:<br/>`$state:[state]`|
-|`$source`<br/>the underlying input stream source|string, file content, table, etc. provided to the Rule|not applicable|
+|`$state`<br/>a state of the input stream|can be used to "rollback" - to get (store):<br/>`state:[$state]`<br/>and...|...then to restore state of the stream:<br/>`$state:[state]`|
+|`$source`<br/>an underlying input stream source|string, file content, table, etc. provided to the Rule|not applicable|
 
 ### Binding
 In OMeta you can bind a return value of any Node to a chosen name:
