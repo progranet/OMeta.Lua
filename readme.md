@@ -185,18 +185,18 @@ The Host predicate is marked with the question mark at the beginning. For exampl
 [? false] -- always fails
 ```
 #### Pseudo variables
-Lua code in the Host Nodes has access to some important values related to the input stream, its state, etc. Those values are available as hidden parameters in Lua functions implementing Rule behavior. Although you can see these parameters in the compiled code, this is not recommended to use them. This is not part of the API and is subject to the change.
+Lua code in the Host Nodes has access to some important values related to the input stream, its state, etc. Those values are available as hidden parameters in Lua functions implementing the Rule behavior. Although you can see these parameters in the compiled code, this is not recommended to use them directly as they are not part of the API and are subject to change.
 
 Fortunately there are "pseudo variables" provided which allow to safely get (and sometimes to set) necessary values without the risk of producing difficult to maintain code:
 
 |Pseudo&nbsp;variable|Reading|Writing|
 |:-------:|-------|-------|
-|`$head` / `$.`<br/>a head of the input stream|useful for testing without input consuming, e.g:<br>`[? type($.) == 'string' and #($.) == 1]`|not applicable|
-|`$result` / `$^`<br/>a result of the current Sequence|available only if there is [result binding](#result-binding), e.g.:<br>`$^:. [? type($^) == 'string' and #($^) == 1]`|[result binding](#result-binding) - arbitrary change of the result value|
-|`$index`<br/>a position (index) of the input stream|integer index or name of the property (inside [complex data](#parsing-complex-data))|not applicable|
-|`$input`<br/>the input - whole state|[*OMeta*](#ometa-api) class instance.<br>Stores not only the input stream but current Grammar, etc., too|not applicable|
-|`$state`<br/>a state of the input stream|can be used to "rollback" - to get (store):<br/>`state:[$state]`<br/>and...|...then to restore state of the stream:<br/>`$state:[state]`|
-|`$source`<br/>an underlying input stream source|string, file content, table, etc. provided to the Rule|not applicable|
+|`$head` / `$.`<br/>a head of the input stream|is useful for testing without input consuming, e.g:<br>`[? type($.) == 'string' and #($.) == 1]`|*not applicable*|
+|`$result` / `$^`<br/>a result of the current Sequence|is available only if there is [result binding](#result-binding), e.g.:<br>`$^:. [? type($^) == 'string' and #($^) == 1]`|the [result binding](#result-binding) - the arbitrary change of the result value|
+|`$index`<br/>a position (index) of the input stream|an integer index or a name of the property (inside [complex data](#parsing-complex-data))|*not applicable*|
+|`$input`<br/>the input - whole state|[*OMeta*](#ometa-api) class instance<br>stores not only the input stream but also the current Grammar, etc.|*not applicable*|
+|`$state`<br/>a state of the input stream|can be used to "rollback" - to get (to store):<br/>`state:[$state]`<br/>and...|...then to restore the state of the stream:<br/>`$state:[state]`|
+|`$source`<br/>an underlying input stream source|a string, a file content, a table, etc. provided to the Rule|*not applicable*|
 
 ### Binding
 In OMeta you can bind a return value of any Node to a chosen name:
