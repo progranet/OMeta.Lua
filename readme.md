@@ -109,8 +109,7 @@ rule Grammar:rule3() -- Lua method syntax is reused
   ...
 end
 ```
-The Rule in OMeta is build as an ordered Choice where every alternative is a Sequence of Nodes. An important thing about the Rule application is that, it gives a dual result - a boolean indicator of success and a value returned by the Rule behavior (implemented as a Lua function).
-The boolean result, pass or fail, indicates a success of the application as a whole, but the value of the result depends on a specific alternative of the Rule that succeeded.
+The Rule body in OMeta (and in PEG in general) is an *ordered Choice* where every alternative is a *Sequence of Nodes*. Every Node has a dual result - a boolean indicator of success (pass or fail) and some value (it is similar to *protected call* interface in Lua). If the Node fails (first result is falsy) then whole alternative fails - a value (second result) does not matter. If all Nodes in the Sequence pass, the value (second result) of the last Node becomes the value of current alternative and the whole Choice (subsequent alternatives are not checked).
 
 ### Hello World Grammar
 A basic information on defining Rules can be summarized by the "Hello World" example - an elemental algebraic operations parser. 
@@ -138,14 +137,14 @@ Below, there is an overview of the basic means used to build a Rule.
 
 |Construct|Syntax|Notes|
 |:-------:|-----:|-----|
-|Rule structure|`a \| b \| c`<br>`a b c`<br>`a ( b \| d ) c`|an ordered Choice - a sequence of alternatives<br>a Sequence of Nodes<br>a Node can be an ordered Choice again|
+|Rule structure|`a \| b \| c`<br>`a b c`<br>`a ( b \| d ) c`|an ordered Choice - a sequence of alternatives<br>a Sequence of Nodes (no alternatives)<br>an ordered Choice embedded as a Node|
 |Lookahead|<br>`&a`<br>`~a`|to parse without consuming input:<br>- And Predicate<br>- Not Predicate|
-|Quantifiers|`a?`<br>`a*`<br>`a+`<br>`a**min`, `a**min..max`<br>`a/num`|optional<br>zero to many<br>one to many<br>*min* to *max* (or many)<br>repeat *num* times|
-|Grouping|`( a \| b c )`<br>`< a b c >`<br>`{ a b ; prop=c }`|to group nodes and create scope<br>consumed input stream<br>an object - [matches complex structures](#parsing-complex-data)|
+|Quantifiers|`a?`<br>`a*`<br>`a+`<br>`a**min`<br>`a**min..max`<br>`a/num`|optional (zero or one)<br>zero to many<br>one to many<br>*min* to many<br>*min* to *max*<br>repeat *num* times|
+|Grouping|`( a \| b c )`<br>`< a b c >`<br>`{ a b ; prop=c }`|to group nodes and to create scope<br>returns consumed input stream<br>an object - [matches complex structures](#parsing-complex-data)|
 |Literals|`"keyword"`, `"("`, `")"`<br>`[[abc]]`<br>`'abc'`<br>`5`, `0xFF`, `-1.2e3`<br>`false`, `true`<br>`nil`<br>|[tokens](#tokens)<br>a sequence of characters (`'a' 'b' 'c'`)<br>a string literal<br>number literals<br>boolean literals<br>a nil literal|
 |Rule application|`.`<br>`number`<br>`list(exp, ",")`<br>`Auxiliary.apply('rname')`<br>`LuaGrammar.stat@LuaGrammar`|Anything - a single element of any kind<br>matches a named Rule *number*<br>an [application with arguments](#parametrized-rules)<br>a [foreign application](#foreign-rules)<br>a foreign application with a context switch|
 |[Host Nodes](#semantic-actions)|`[string.rep('.', n)]`<br>`[! print('hello')]`<br>`[? #str == 5]`|[Host Expression](#host-expression) - pass and return a value<br>[Host Statement](#host-statement) - pass without a value<br>[Host Predicate](#host-predicate) - no value but can fail|
-|[Binding](#binding)|`variable:a`<br>`num:[10]`<br>`{; prop:=string }`<br>`$^:exp`|to bind a result of *a* to the *variable*<br>to bind `10` (Host Expression) to the *num*<br>a binding combined with parsing property<br>[result binding](#result-binding)|
+|[Binding](#binding)|`variable:a`<br>`num:[10]`<br>`{; prop:=string }`<br>`$^:exp`|to bind a result of *a* to the *variable*<br>to bind `10` (Host Expression) to the *num*<br>a binding combined with parsing property<br>a [result binding](#result-binding)|
 
 ### Semantic Actions
 The PEG's *semantic actions* in OMeta/Lua are generalized to the **Host Nodes**.
