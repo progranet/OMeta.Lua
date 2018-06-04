@@ -137,13 +137,13 @@ Below, there is an overview of the basic means used to build a Rule.
 
 |Syntax|Notes|
 |-----:|-----|
-|<p align="left">**Rule structure**:</p>`a \| b \| c`<br>`a b c`<br>`a ( b \| d ) c`|<p align="center">&nbsp;</p>an ordered Choice - a sequence of alternatives<br>a Sequence of Nodes (no alternatives)<br>an ordered Choice embedded as a Node|
-|<p align="left">**Lookahead**:</p><br>`&a`<br>`~a`|<p align="center">&nbsp;</p>to parse without consuming input:<br>- And Predicate<br>- Not Predicate|
+|<p align="left">**Rule structure**:</p>`a \| b \| c`<br>`a b c`<br>`a ( b \| d ) c`|<p align="center">&nbsp;</p>an ordered Choice - a sequence of alternatives<br>a Sequence of Nodes (single alternative)<br>an ordered Choice embedded as a Node in another Sequence|
+|<p align="left">**Lookahead**:</p>`&a`<br>`~a`|<p align="center">&nbsp;</p>And Predicate - to parse, without input stream consuming<br>Not Predicate|
 |<p align="left">**Quantifiers**:</p>`a?`<br>`a*`<br>`a+`<br>`a**min`<br>`a**min..max`<br>`a/num`|<p align="center">&nbsp;</p>optional (zero or one)<br>zero to many<br>one to many<br>*min* to many<br>*min* to *max*<br>repeat *num* times|
-|<p align="left">**Grouping**:</p>`( a \| b c )`<br>`< a b c >`<br>`{ a b ; prop=c }`|<p align="center">&nbsp;</p>to group nodes and to create scope<br>returns consumed input stream<br>an object - [matches complex structures](#parsing-complex-data)|
-|<p align="left">**Literals**:</p>`"keyword"`, `"("`, `")"`<br>`[[abc]]`<br>`'abc'`<br>`5`, `0xFF`, `-1.2e3`<br>`false`, `true`<br>`nil`<br>|<p align="center">&nbsp;</p>[tokens](#tokens)<br>a sequence of characters (`'a' 'b' 'c'`)<br>a string literal<br>number literals<br>boolean literals<br>a nil literal|
+|<p align="left">**Grouping**:</p>`( a \| b c )`<br>`< a b c >`<br>`{ a b ; prop=c }`|<p align="center">&nbsp;</p>to group nodes and to create scope<br>returns an input stream slice consumed<br>an object - [matches complex structures](#parsing-complex-data)|
+|<p align="left">**Literals**:</p>`"keyword"`, `"("`, `")"`<br>`[[abc]]`<br>`'abc'`<br>`5`, `0xFF`, `-1.2e3`<br>`false`, `true`<br>`nil`<br>|<p align="center">&nbsp;</p>[tokens](#tokens)<br>a sequence of characters (short form of `'a' 'b' 'c'`)<br>a string literal<br>number literals<br>boolean literals<br>a nil literal|
 |<p align="left">**Rule application**:</p>`.`<br>`number`<br>`list(exp, ",")`<br>`Auxiliary.apply('rname')`<br>`LuaGrammar.stat@LuaGrammar`|<p align="center">&nbsp;</p>Anything - a single element of any kind<br>matches a named Rule *number*<br>an [application with arguments](#parametrized-rules)<br>a [foreign application](#foreign-rules)<br>a foreign application with a context switch|
-|<p align="left">**[Host Nodes](#semantic-actions)**:</p>`[string.rep('.', n)]`<br>`[! print('hello')]`<br>`[? #str == 5]`|<p align="center">&nbsp;</p>[Host Expression](#host-expression) - pass and return a value<br>[Host Statement](#host-statement) - pass without a value<br>[Host Predicate](#host-predicate) - no value but can fail|
+|<p align="left">**[Host Nodes](#semantic-actions)**:</p>`[string.rep('.', n)]`<br>`[! print('hello')]`<br>`[? #str == 5]`|<p align="center">&nbsp;</p>[Host Expression](#host-expression) - always pass and return a value<br>[Host Statement](#host-statement) - always pass without value (`nil`)<br>[Host Predicate](#host-predicate) - returns no value but can fail|
 |<p align="left">**[Binding](#binding)**:</p>`variable:a`<br>`num:[10]`<br>`{; prop:=string }`<br>`$^:exp`|<p align="center">&nbsp;</p>to bind a result of *a* to the *variable*<br>to bind `10` (Host Expression) to the *num*<br>a binding combined with parsing property<br>a [result binding](#result-binding)|
 
 ### Semantic Actions
