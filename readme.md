@@ -204,12 +204,12 @@ concatenate = "(" left:digit+ "," right:<digit+> ")" [left:concat() .. '/' .. ri
 innerResult = "[" inner:(~"]" .)* "]"
 ```
 #### Result binding
-In OMeta a value of the last Node in the current Sequence becomes a value of the result of this Sequence. In OMeta/Lua this behavior can be changed by the *result binding* - binding to the *result* [pseudo-variable](#pseudo-variables) (`$^` or `$result`):
+Traditionally, in OMeta a value of the last Node in a current Sequence becomes a value of the result of this Sequence. In OMeta/Lua this behavior can be changed by the *result binding* - binding to the *result* [pseudo-variable](#pseudo-variables) (`$^` or `$result`):
 ```lua
-expInParens  = "(" $^:exp ")",
+expInParens  = "(" $^:exp ")", -- instead of "(" res:exp ")" [res]
 expsWithSemi = exps:($^:exp ";")* last:exp ";"? [exps:append(last)]
 ```
-The result binding allows to arbitrary choose a value of the result.
+The result binding allows to arbitrary indicate which Node gives a result of the current Sequence.
 
 #### Scoping
 The scope of a variable is lexical. For the Rule parameters this is a whole Rule body, but for the user defined variables the scope begins from a point of name binding and it lasts until (first of the below):
