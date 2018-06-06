@@ -72,7 +72,7 @@ local LuaGrammar = require 'lua52_grammar'
 local luaAst = LuaGrammar.block:matchFile('some_lua_source.lua')
 print(luaAst) -- prints text representation of abstract syntax tree
 ```
-Following chapters bring subject of writing Grammars closer. If you need firstly to find out how to use predefined Grammars by means of provided API, jump to chapter [API](#api).
+Following chapters bring subject of writing Grammars closer. If you need firstly to find out how to use predefined Grammars by means of provided API, jump to the chapter [API](#api).
 
 ## Writing Grammars
 OMeta/Lua extends Lua syntax with some new statements for defining Grammars and Rules and a new expression kind to interpolate strings which helps to translate abstract syntax trees and sources.
