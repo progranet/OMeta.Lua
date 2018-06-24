@@ -143,7 +143,7 @@ Below, there is an overview of the basic means used to build a Rule.
 |<p align="left">**Quantifiers**:</p>`a?`<br>`a*`<br>`a+`<br>`a**min`<br>`a**min..max`<br>`a/num`|<p align="center">&nbsp;</p>optional (zero or one)<br>zero to many<br>one to many<br>*min* to many<br>*min* to *max*<br>repeat *num* times|
 |<p align="left">**Grouping**:</p>`( a \| b c )`<br>`< a b c >`<br>`{ a b ; prop=c }`|<p align="center">&nbsp;</p>to group nodes and to create scope<br>returns an input stream consumed<br>an object - [matches complex structures](#parsing-complex-data)|
 |<p align="left">**Literals**:</p>`"keyword"`, `"("`, `")"`<br>`[[abc]]`<br>`'abc'`<br>`5`, `0xFF`, `-1.2e3`<br>`false`, `true`<br>`nil`<br>|<p align="center">&nbsp;</p>[tokens](#tokens)<br>a sequence of characters (short form of `'a' 'b' 'c'`)<br>a string literal<br>number literals<br>boolean literals<br>a nil literal|
-|<p align="left">**Rule application**:</p>`.`<br>`number`<br>`list(exp, ",")`<br>`Auxiliary.apply('rname')`<br>`LuaGrammar.stat@LuaGrammar`|<p align="center">&nbsp;</p>Anything - a single element of any kind<br>matches a named Rule *number*<br>an [application with arguments](#parametrized-rules)<br>a [foreign application](#foreign-rules)<br>a foreign application with a context switch|
+|<p align="left">**Rule application**:</p>`.`<br>`number`<br>`list(exp, ",")`<br>`SomeGrammar.standaloneRule`<br>`@LuaGrammar.stat`<br>`SomeGrammar.someRule@OtherGrammar`|<p align="center">&nbsp;</p>Anything - a single element of any kind<br>matches a named Rule *number*<br>an [application with arguments](#parametrized-rules)<br>a [foreign application](#foreign-rules) (a foreign Rule in the current context)<br>an application with the transfer of the parsing context...<br>...to specified Grammar|
 |<p align="left">**[Host Nodes](#semantic-actions)**:</p>`[string.rep('.', n)]`<br>`[! print('hello')]`<br>`[? #str == 5]`|<p align="center">&nbsp;</p>[Host Expression](#host-expression) - always pass and returns a value<br>[Host Statement](#host-statement) - always pass without any value (`nil`)<br>[Host Predicate](#host-predicate) - returns no value but can fail|
 |<p align="left">**[Binding](#binding)**:</p>`variable:a`<br>`num:[10]`<br>`{; prop:=string }`<br>`$^:exp`|<p align="center">&nbsp;</p>to bind a result of *a* to the *variable*<br>to bind `10` (Host Expression) to the *num*<br>a binding combined with parsing property<br>a [result binding](#result-binding)|
 
@@ -332,11 +332,13 @@ Such an application allows to use a single foreign Rule without merging it direc
 ```lua
 ometa LuaInOmetaGrammar {
   ...
-  primexp       = "[" OMetaInLuaGrammar.exp@OMetaInLuaGrammar "]"
+  primexp       = "[" @OMetaInLuaGrammar.exp "]"
   ...
 }
 ```
 In this case, there is a context switch and everything between square brackets is parsed in context of other Grammar than outside brackets (*LuaInOmetaGrammar* <--> *OMetaInLuaGrammar*).
+
+There is an [example Grammar](grammars/foreigns.lpp) which illustrates all possible cases of the context setting.
 
 ### Parsing complex data
 The important OMeta feature is an ability to parse any kind of input.
