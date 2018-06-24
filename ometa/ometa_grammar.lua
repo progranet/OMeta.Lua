@@ -303,7 +303,7 @@ return false
 end
 __pass__, target = input:applyWithArgs(input.grammar.optional, function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
-if not (input:applyWithArgs(input.grammar.token, "@")) then
+if not (input:applyWithArgs(input.grammar.exactly, '@')) then
 return false
 end
 return input:apply(input.grammar.path)

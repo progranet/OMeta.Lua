@@ -1,0 +1,39 @@
+
+local OMeta = require 'ometa' 
+local Commons = require 'commons'
+
+local Foreign, Interrupter -- forward declarations
+
+local ometa Main merges Commons {
+  
+  dispatch  = Foreign.apply             -- 'apply' from Foreign but in current context (Main)
+              @Foreign.apply            -- 'apply' from Foreign with context transfer to Foreign
+              Foreign.apply@Foreign     -- same as above without sugar
+              Foreign.apply@Interrupter -- 'apply' from Foreign but with context transfer to Interrupter
+              ,
+              
+  target    = [! print('hello from Main')] .
+}
+
+ometa Foreign merges Commons {
+  
+  apply     = target, -- which 'target' rule will be applied depends on the current context (forwarded from the "caller" - see Main.dispatch above)
+  
+  target    = [! print('hello from Foreign')] .
+}
+
+ometa Interrupter merges Commons {
+  
+  target    = [! print('hello from Interrupter')] .
+}
+
+Main.dispatch:matchString 'abcd'
+
+--[[output:
+  hello from Main
+  hello from Foreign
+  hello from Foreign
+  hello from Interrupter
+]]
+
+return Main

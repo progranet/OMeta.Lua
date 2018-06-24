@@ -61,7 +61,7 @@ local ometa OMetaGrammar merges Commons {
                 | "."                                               [Anything         {}]
                 | "@" name:path args:args?                          [RuleApplication  {name = name, target = name:sub(1, #name - 1), 
                                                                                        arguments = args or Array {}}]
-                | name:path target:("@" path)? args:args?           [RuleApplication  {name = name, target = target, 
+                | name:path target:('@' path)? args:args?           [RuleApplication  {name = name, target = target, 
                                                                                        arguments = args or Array {}}]
                 ,--------------------------------- building blocks -------------------------------------------------------------------------
   path          = list(name, '.', 1)

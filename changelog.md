@@ -2,7 +2,10 @@
 **1.3.1-beta 2018-06-24**
 
 Syntax sugar:
-A foreign application in which the target namespace is the same as the application context can be written as `@SomeTarget.someRule` (instead of `SomeTarget.someRule@SomeTarget`)
+- A foreign application in which the target namespace is the same as the application context can be written as `@SomeTarget.someRule` (instead of `SomeTarget.someRule@SomeTarget`)
+
+Examples:
+- new Foreigns Grammar. An example of applying Rules from "foreign" Grammars with or without of the change of the parse context;
 ___
 
 **1.3.0-beta 2018-06-03**
