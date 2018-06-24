@@ -106,7 +106,11 @@ return input:applyWithArgs(input.grammar.exactly, 'return')
 end, function (input)
 return input:applyWithArgs(input.grammar.exactly, 'local')
 end)
-end, arity = 0, name = 'keyword'}), chunk = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'keyword'}), block = OMeta.Rule({behavior = function (input)
+return input:applyWithArgs(input.grammar.choice, function (input)
+return input:apply(input.grammar.chunk)
+end)
+end, arity = 0, name = 'block'}), chunk = OMeta.Rule({behavior = function (input)
 local __pass__, last, stats
 return input:applyWithArgs(input.grammar.choice, function (input)
 __pass__, stats = input:applyWithArgs(input.grammar.many, function (input)
@@ -147,11 +151,7 @@ return false
 end
 return true, Chunk({statements = stats:append(last)})
 end)
-end, arity = 0, name = 'chunk'}), block = OMeta.Rule({behavior = function (input)
-return input:applyWithArgs(input.grammar.choice, function (input)
-return input:apply(input.grammar.chunk)
-end)
-end, arity = 0, name = 'block'}), stat = OMeta.Rule({behavior = function (input)
+end, arity = 0, name = 'chunk'}), stat = OMeta.Rule({behavior = function (input)
 return input:applyWithArgs(input.grammar.choice, function (input)
 local body, __pass__
 if not (input:applyWithArgs(input.grammar.token, "do")) then

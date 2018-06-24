@@ -45,14 +45,14 @@ local ometa LuaInOMeta merges OMetaGrammar {
   keyword       = 'end'
                 ,
   node          = OMetaGrammar.node
-                | "[?" exp:OMetaInLuaExt.exp@OMetaInLuaExt "]"                          [HostPredicate {value = exp}]
-                | "[!" exp:OMetaInLuaExt.stat@OMetaInLuaExt* "]"                        [HostStatement {value = exp}]
+                | "[?" exp:@OMetaInLuaExt.exp "]"                          [HostPredicate {value = exp}]
+                | "[!" exp:@OMetaInLuaExt.stat* "]"                        [HostStatement {value = exp}]
                 ,
   primexp       = OMetaGrammar.primexp
-                | "[" exp:OMetaInLuaExt.exp@OMetaInLuaExt "]"                           [HostExpression {value = exp}]
+                | "[" exp:@OMetaInLuaExt.exp "]"                           [HostExpression {value = exp}]
                 ,
   prop          = OMetaGrammar.prop
-                | "[" index:OMetaInLuaExt.exp@OMetaInLuaExt "]" "=" exp:choiceDef       [Property       {expression = exp, index = index}]
+                | "[" index:@OMetaInLuaExt.exp "]" "=" exp:choiceDef       [Property       {expression = exp, index = index}]
 }
 
 --------------------------------------------------------------------------------------------------------------------------------------
@@ -73,10 +73,10 @@ ometa OMetaInLua merges LuaGrammar {
                 ,
   stat          = "local" "ometa" n:name 
                   ms:("merges" list(exp, ",", 1))? 
-                  body:grammarBody                                                      [GrammarStatement {isLocal = true, name = Array {n}, merge = ms or Array {}, rules = body}]
+                  body:grammarBody                                                      [GrammarStatement {isLocal = true, name = Array {n}, merged = ms or Array {}, rules = body}]
                 | "ometa" ns:list(name, ".", 1) 
                   ms:("merges" list(exp, ",", 1))? 
-                  body:grammarBody                                                      [GrammarStatement {isLocal = false, name = ns, merge = ms or Array {}, rules = body}]
+                  body:grammarBody                                                      [GrammarStatement {isLocal = false, name = ns, merged = ms or Array {}, rules = body}]
                 | "rule" ns:list(name, ".", 1) ":" n:name body:ruleBody                 [RuleStatement {
                                                                                           namespace = ns, name = n, 
                                                                                           arguments = body[1][1], variableArguments = body[1][2], 
@@ -90,14 +90,14 @@ ometa OMetaInLua merges LuaGrammar {
                 | ws* strlitB
                 ,
   ruleBody      = "(" params:parlist ")" 
-                    body:LuaInOMeta.choiceDef@LuaInOMeta
+                    body:@LuaInOMeta.choiceDef
                   "end"                                                                 [{params, body}]
                 ,
   grammarBody   = "{" $^:list(innerRuleBody, "," | ";") ("," | ";")? "}"
                 ,
   innerRuleBody = index:(name | "[" $^:exp "]") 
                   params:( "(" $^:parlist ")" | empty [{Array {}, false}] ) 
-                  "=" body:LuaInOMeta.choiceDef@LuaInOMeta                              [RuleExpression {
+                  "=" body:@LuaInOMeta.choiceDef                                        [RuleExpression {
                                                                                           name = index, 
                                                                                           arguments = params[1], variableArguments = params[2], 
                                                                                           block = body}]

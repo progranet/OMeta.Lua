@@ -7,3 +7,5 @@ ometa_d.lua
 ometa/ometa_ast2lua_ast_ref2.lpp
 lib/types.c.lua
 ometa/lua_grammar_n.lpp
+lib/ctypes.lua
+test.lua

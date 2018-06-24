@@ -8,7 +8,7 @@ local Commons = require'grammar_commons'
   | Example 1: Simple text parser |
 --]===============================]--
 
-local ometa Calc merges require 'grammar_commons' {
+local ometa Calc merges Commons {
   exp     = addexp,
   addexp  = addexp '+' mulexp
           | addexp '-' mulexp
@@ -101,15 +101,17 @@ local ometa OpTreeCalc merges Commons {
             | '(' | ')' 
 } 
 
-local Aux = require 'auxiliary'
-
 local ometa MixedOTCalc merges OpTreeCalc {
   primexp   = BinOp
             | OpTreeCalc.primexp  -- "super" apply
             ,
   numstr    = number 
             | OpTreeCalc.numstr  -- "super" apply
-            ,
+}
+
+local Aux = require 'auxiliary'
+
+local ometa EvalOTCalc merges MixedOTCalc {
   eval      = opr:&BinOp                  Aux.apply([opr.operator], unknown)
             | number
             | [? error('unexpected expression: ' .. tostring($.))]
@@ -123,7 +125,7 @@ local ometa MixedOTCalc merges OpTreeCalc {
 
 -- example of the standalone Rule definition
 -- overriding of the existing Rule 'primexp'
-rule MixedOTCalc:primexp()
+rule EvalOTCalc:primexp()
       &BinOp {; operator = 'add' | 'sub' | 'mul' | 'div' }
   | opr:BinOp [? opr.operator and error('unexpected operator: ' .. opr.operator) or error('operator expected')]
   | OpTreeCalc.primexp
@@ -135,9 +137,24 @@ local ast = MixedOTCalc.exp:matchMixed('2 * (', exp, ' - 1)')
 
 -- we can print string representation of AST - feature of OMeta types
 print(ast)
+--[[
+    ╦ <self> : BinOp@1 (#0:3)
+    ├─╦ right : BinOp@2 (#0:3)
+    │ ├─═ right : number = 1
+    │ ├─╦ left : BinOp@3 (#0:3)
+    │ │ ├─╦ right : BinOp@4 (#0:3)
+    │ │ │ ├─═ right : number = 6
+    │ │ │ ├─═ left : number = 5
+    │ │ │ └─═ operator : string = add
+    │ │ ├─═ left : number = 2
+    │ │ └─═ operator : string = mul
+    │ └─═ operator : string = sub
+    ├─═ left : number = 2
+    └─═ operator : string = mul
+]]
 
 -- let's evaluate parsed tree
-print(MixedOTCalc.eval:matchMixed(ast)) -- 42
+print(EvalOTCalc.eval:matchMixed(ast)) -- 42
 
 
 
@@ -175,7 +192,9 @@ local ometa MixedAstCalc merges AstCalc {
             ,
   numstr    = number 
             | AstCalc.numstr  -- "super" apply
-            ,
+}
+
+local ometa EvalAstCalc merges MixedAstCalc {
   eval      = opr:&BinOp                  Aux.apply([getType(opr)], unknown)
             | number
             | any:.                       [? error('unexpected expression: ' .. tostring(any))]
@@ -189,7 +208,7 @@ local ometa MixedAstCalc merges AstCalc {
 
 -- helper functions
 local calc = function(...) return MixedAstCalc.exp:matchMixed(...) end
-local eval = function(...) return MixedAstCalc.eval:matchMixed(...) end
+local eval = function(...) return EvalAstCalc.eval:matchMixed(...) end
 
 
 -- intermediate value
@@ -198,6 +217,17 @@ local exp = calc `2 * (5 + 6)`
 -- the abstract syntax tree from mixed content stream
 local ast = calc `2 * (${exp} - 1)`
 print(ast)
+--[[
+    ╦ <self> : MulOp@1 (#0:2)
+    ├─╦ right : SubOp@2 (#0:2)
+    │ ├─═ right : number = 1
+    │ └─╦ left : MulOp@3 (#0:2)
+    │   ├─╦ right : AddOp@4 (#0:2)
+    │   │ ├─═ right : number = 6
+    │   │ └─═ left : number = 5
+    │   └─═ left : number = 2
+    └─═ left : number = 2
+]]
 
 -- evaluate expression in AST
 print('result before:', eval(ast)) -- 42
@@ -205,22 +235,42 @@ print('result before:', eval(ast)) -- 42
 -- dynamic source (not resulting ast) modification
 exp.left = calc `20 / 5` -- 2 : number --> 20/5 : DivOp
 print(ast)
+--[[
+    ╦ <self> : MulOp@1 (#0:2)
+    ├─╦ right : SubOp@2 (#0:2)
+    │ ├─═ right : number = 1
+    │ └─╦ left : MulOp@3 (#0:2)
+    │   ├─╦ right : AddOp@4 (#0:2)
+    │   │ ├─═ right : number = 6
+    │   │ └─═ left : number = 5
+    │   └─╦ left : DivOp@5 (#0:2)
+    │     ├─═ right : number = 5
+    │     └─═ left : number = 20
+    └─═ left : number = 2
+]]
 
 -- evaluation again
 print('result after:', eval(ast)) -- 86
 
 
 return {
+  
   Calc          = Calc;
+  
   EvalCalc      = EvalCalc;
-  TableTreeCalc = TableTreeCalc,
-  BinOp         = BinOp,
+  
+  TableTreeCalc = TableTreeCalc;
+  
+  BinOp         = BinOp;
   OpTreeCalc    = OpTreeCalc,
-  MixedOTCalc   = MixedOTCalc;
+  MixedOTCalc   = MixedOTCalc,
+  EvalOTCalc    = EvalOTCalc;
+  
   AddOp         = AddOp,
   SubOp         = SubOp,
   MulOp         = MulOp,
-  DivOp         = DivOp,
+  DivOp         = DivOp;
   AstCalc       = AstCalc,
-  MixedAstCalc  = MixedAstCalc;
+  MixedAstCalc  = MixedAstCalc,
+  EvalAstCalc   = EvalAstCalc;
 }

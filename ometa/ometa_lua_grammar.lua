@@ -147,7 +147,7 @@ __pass__, body = input:apply(input.grammar.grammarBody)
 if not (__pass__) then
 return false
 end
-return true, GrammarStatement({isLocal = true, name = Array({n}), merge = ms or Array({}), rules = body})
+return true, GrammarStatement({isLocal = true, name = Array({n}), merged = ms or Array({}), rules = body})
 end, function (input)
 local body, ns, ms, __pass__
 if not (input:applyWithArgs(input.grammar.token, "ometa")) then
@@ -176,7 +176,7 @@ __pass__, body = input:apply(input.grammar.grammarBody)
 if not (__pass__) then
 return false
 end
-return true, GrammarStatement({isLocal = false, name = ns, merge = ms or Array({}), rules = body})
+return true, GrammarStatement({isLocal = false, name = ns, merged = ms or Array({}), rules = body})
 end, function (input)
 local body, ns, __pass__, n
 if not (input:applyWithArgs(input.grammar.token, "rule")) then

@@ -1,4 +1,10 @@
 
+**1.3.1-beta 2018-06-24**
+
+Syntax sugar:
+A foreign application in which the target namespace is the same as the application context can be written as `@SomeTarget.someRule` (instead of `SomeTarget.someRule@SomeTarget`)
+___
+
 **1.3.0-beta 2018-06-03**
 
 Features:

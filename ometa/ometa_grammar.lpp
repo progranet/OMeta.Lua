@@ -34,20 +34,20 @@ local ometa OMetaGrammar merges Commons {
                 ,------------------------------------ cut points ---------------------------------------------------------------------------
   cutNode       = $^:node ("\\" "\\")?
                 ,------------------------------------- binding -----------------------------------------------------------------------------
-  node          =     name:name   ":" exp:prefixexp                 [Binding          {expression = exp, name = name}]
-                | "$" name:vname  ":" exp:prefixexp                 [Binding          {expression = exp, name = name, pseudo = true}]
-                |                         prefixexp
+  node          =     name:name ":" exp:prefixexp                   [Binding          {expression = exp, name = name}]
+                | "$" name:var  ":" exp:prefixexp                   [Binding          {expression = exp, name = name, pseudo = true}]
+                |                       prefixexp
                 ,------------------------------------ lookahead ----------------------------------------------------------------------------
-  prefixexp     =             "~" exp:suffixexp                     [NotPredicate     {expression = exp}]
-                |             "&" exp:suffixexp                     [AndPredicate     {expression = exp}]
-                |                     suffixexp
+  prefixexp     =               "~" exp:suffixexp                   [NotPredicate     {expression = exp}]
+                |               "&" exp:suffixexp                   [AndPredicate     {expression = exp}]
+                |                       suffixexp
                 ,----------------------------------- quantifiers ---------------------------------------------------------------------------
-  suffixexp     = exp:primexp "/" name:($^:name ":")? num:primexp   [Loop             {expression = exp, times = num, name = name}]
-                | exp:primexp "**" min:intlit max:(".." intlit)?    [Many             {expression = exp, minimum = min, maximum = max}]
-                | exp:primexp "*"                                   [Many             {expression = exp}]
-                | exp:primexp "+"                                   [Many             {expression = exp, minimum = RealLiteral {1}}]
-                | exp:primexp "?"                                   [Optional         {expression = exp}]
-                |     primexp
+  suffixexp     =   exp:primexp "/" name:($^:name ":")? num:primexp [Loop             {expression = exp, times = num, name = name}]
+                |   exp:primexp "**" min:intlit max:(".." intlit)?  [Many             {expression = exp, minimum = min, maximum = max}]
+                |   exp:primexp "*"                                 [Many             {expression = exp}]
+                |   exp:primexp "+"                                 [Many             {expression = exp, minimum = RealLiteral {1}}]
+                |   exp:primexp "?"                                 [Optional         {expression = exp}]
+                |       primexp
                 ,------------------------------------ grouping -----------------------------------------------------------------------------
   primexp       = "(" $^:choiceDef ")" [! ($^).scope = true]
                 | "<" exp:choiceDef ">"                             [Consumed         {expression = exp}]
@@ -59,14 +59,16 @@ local ometa OMetaGrammar merges Commons {
                               | boollit | nillit )                  [Exactly          {expression = literal}]
                 ------------------------------------ application ---------------------------------------------------------------------------
                 | "."                                               [Anything         {}]
+                | "@" name:path args:args?                          [RuleApplication  {name = name, target = name:sub(1, #name - 1), 
+                                                                                       arguments = args or Array {}}]
                 | name:path target:("@" path)? args:args?           [RuleApplication  {name = name, target = target, 
                                                                                        arguments = args or Array {}}]
                 ,--------------------------------- building blocks -------------------------------------------------------------------------
   path          = list(name, '.', 1)
                 ,
-  vname         = name  
-                | "^"                                               [Name {'result'}]
-                | "."                                               [Name {'head'}]
+  var           = name  
+                | "^"                                               [Name             {'result'}]
+                | "."                                               [Name             {'head'}]
                 ,
   args          = '(' $^:list($^:choiceDef [! ($^).scope = true], ",") ")"
                 ,

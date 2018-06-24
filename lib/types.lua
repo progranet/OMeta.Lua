@@ -1,6 +1,8 @@
 
-local tostring, tonumber, select, type, getmetatable, setmetatable, rawget
-    = tostring, tonumber, select, type, getmetatable, setmetatable, rawget
+local tostring, tonumber, select, type, getmetatable, setmetatable, rawget,
+      concat
+    = tostring, tonumber, select, type, getmetatable, setmetatable, rawget,
+      table.concat
 
 local Any, Array
 local __instances = {}
@@ -152,65 +154,20 @@ Array = newtype {
     return self[i]
   end,
   
-  --append = function(self, e)
-    --self[#self + 1] = e
   append = function(self, ...)
-    local len = #self
-    for i = 1, select('#', ...) do
-      len = len + 1
-      self[len] = select(i, ...)
-    end
-    return self
-  end,
-  
-  --prepend = function(self, e)
-    --table.insert(self, 1, e)
-  prepend = function(self, ...)
-    for i = 1, select('#', ...) do
-      table.insert(self, i, (select(i, ...)))
-    end
-    return self
-  end,
-  
-  including = function(self, e)
-    local clone = Array {}
-    for i = 1, #self do clone[i] = self[i] end
-    clone[#clone + 1] = e
-    return clone
-  end,
-  
-  concat = function(self, sep)
-    local r = ''
-    for i = 1, #self do
-      local v = self[i]
-      if sep and i ~= 1 then r = r .. sep end
-      r = r .. tostring(v)
-    end
-    return r
-  end,
-  
-  sub = function(self, from, to, chars)
-    chars = true --TODO: remove
-    from = from or 1
-    if from < 0 then from = #self + from + 1 end
-    to = to or #self
-    if to < 0 then to = #self + to + 1 end
-    local sub, len = Array {}, 0
-    for i = from, to do
-      local e = self[i]
-      if chars and (type(e) ~= 'string' or #e ~= 1) then chars = false end
-      len = len + 1
-      sub[len] = e
-    end
-    return chars and sub:concat() or sub
+    return self:appendAll({...})
   end,
   
   appendAll = function(self, array)
+    local l = #self
     for i = 1, #array do
-      --self:append(array[i])
-      self[#self + 1] = array[i]
+      self[l + i] = array[i]
     end
     return self
+  end,
+  
+  prepend = function(self, ...)
+    return self:prependAll({...})
   end,
   
   prependAll = function(self, array)
@@ -224,6 +181,26 @@ Array = newtype {
       end
     end
     return self
+  end,
+  
+  concat = function(self, sep)
+    return concat(self, sep)
+  end,
+  
+  sub = function(self, from, to, chars)
+    if chars == nil then chars = true end
+    from = from or 1
+    if from < 0 then from = #self + from + 1 end
+    to = to or #self
+    if to < 0 then to = #self + to + 1 end
+    local sub, len = Array {}, 0
+    for i = from, to do
+      local e = self[i]
+      if chars and (type(e) ~= 'string' or #e ~= 1) then chars = false end
+      len = len + 1
+      sub[len] = e
+    end
+    return chars and sub:concat() or sub
   end,
   
   flatten = function(self)

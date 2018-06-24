@@ -125,8 +125,8 @@ end
 local grammar = TableConstructor({properties = props})
 local gname = name2ast(self.name)
 local result = Array({Set({isLocal = self.isLocal, names = Array({gname}), expressions = Array({exp([[OMeta.Grammar(]], grammar, [[)]])})})})
-for mi = 1, #self.merge do
-result[mi + 1] = Send({context = gname, name = Name({'merge'}), arguments = Array({toLuaAst(self.merge[mi])})})
+for mi = 1, #self.merged do
+result[mi + 1] = Send({context = gname, name = Name({'merge'}), arguments = Array({toLuaAst(self.merged[mi])})})
 end
 return result
 end

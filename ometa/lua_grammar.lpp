@@ -47,9 +47,9 @@ local ometa LuaGrammar merges Commons {
                 | 'for'     | 'in'
                 | 'function'| 'return'  | 'local'
                 ,
-  chunk         = stats:($^:stat ";"?)* last:($^:laststat ";"?)?                    [Chunk {statements = stats:append(last)}]
-                ,
   block         = chunk
+                ,
+  chunk         = stats:($^:stat ";"?)* last:($^:laststat ";"?)?                    [Chunk {statements = stats:append(last)}]
                 ,
   stat          = "do" body:block "end"                                             [Do {block = body}]
                 | "while" cond:exp "do" body:block "end"                            [While {condition = cond, block = body}]
@@ -61,10 +61,10 @@ local ometa LuaGrammar merges Commons {
                              ) 
                   "end"                                                             [If {condition = ifCond, block = thenBody, elseIfs = elseIfs, elseBlock = elseBody}]
                 | "for" var:name "=" startExp:exp 
-                                 ","    stopExp:exp 
-                                        stepExp:( "," exp 
-                                                | empty [RealLiteral {1}]
-                                                )
+                                 "," stopExp:exp 
+                                     stepExp:( "," exp 
+                                             | empty [RealLiteral {1}]
+                                             )
                   "do" body:block "end"                                             [For {name = var, startExpression = startExp, stopExpression = stopExp, stepExpression = stepExp, block = body}]
                 | "for" vars:namelist "in" exps:explist 
                   "do" body:block "end"                                             [ForIn {names = vars, expressions = exps, block = body}]
@@ -141,9 +141,9 @@ local ometa LuaGrammar merges Commons {
   fieldlist     = $^:list(field, "," | ";", 1) ("," | ";")?
                 | empty                                                             [Array {}]
                 ,
-  field         = "[" i:exp "]" "="    v:exp                                        [SetProperty {index = i, expression = v}]
-                |        i:name    "=" v:exp                                        [SetProperty {index = i, expression = v}]
-                |                         v:exp                                     [SetProperty {           expression = v}]
+  field         = "[" i:exp "]" "=" v:exp                                           [SetProperty {index = i, expression = v}]
+                |     i:name    "=" v:exp                                           [SetProperty {index = i, expression = v}]
+                |                   v:exp                                           [SetProperty {           expression = v}]
 }
 
 return LuaGrammar

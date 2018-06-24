@@ -197,12 +197,12 @@ function GrammarStatement:toLuaAst(context)
       expressions = Array {exp`OMeta.Grammar(${grammar})`}
     }
   }
-  for mi = 1, #self.merge do
+  for mi = 1, #self.merged do
     result[mi + 1] = Send {
       context = gname,
       name = Name {'merge'},
       arguments = Array {
-        toLuaAst(self.merge[mi])
+        toLuaAst(self.merged[mi])
       }
     }
   end
