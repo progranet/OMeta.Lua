@@ -6,8 +6,10 @@ local Foreign, Interrupter -- forward declarations
 
 local ometa Main merges Commons {
   
+  -- the Rule 'apply' from Foreign Grammar is applied four times... 
+  
   dispatch  = Foreign.apply             -- 'apply' from Foreign but in current context (Main)
-              @Foreign.apply            -- 'apply' from Foreign with context transfer to Foreign
+             @Foreign.apply             -- 'apply' from Foreign with context transfer to Foreign
               Foreign.apply@Foreign     -- same as above without sugar
               Foreign.apply@Interrupter -- 'apply' from Foreign but with context transfer to Interrupter
               ,
@@ -27,7 +29,7 @@ ometa Interrupter merges Commons {
   target    = [! print('hello from Interrupter')] .
 }
 
-Main.dispatch:matchString 'abcd'
+Main.dispatch:matchString 'nevermind'
 
 --[[output:
   hello from Main
